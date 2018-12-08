@@ -2,9 +2,9 @@
 <package format="2">
 
   <!-- basic data -->
-  <name>mission_control</name>
+  <name>dig_system</name>
   <version>0.1.0</version>
-  <description>mission_control</description>
+  <description>The dig_system package</description>
 
   <!-- maintainers -->
   <maintainer email="jacob.gloudemans@vanderbilt.edu">Jacob Gloudemans</maintainer>

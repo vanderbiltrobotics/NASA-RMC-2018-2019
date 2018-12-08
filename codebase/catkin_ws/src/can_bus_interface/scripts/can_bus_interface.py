@@ -1,15 +1,28 @@
 #!/usr/bin/env python
+
+# ----------------------------- #
+# DESCRIPTION OF THIS NODE HERE #
+# ----------------------------- #
+
+# import required packages
 import rospy
-from [MESSAGE_TYPE_PACKAGE] import [MESSAGE_TYPE]
+from std_msgs.msg import UInt8
 
-class Handler:
-    def __init__(self):
-        #CAN bus
-    def callback(data):
-        pass
+# NOT SURE HOW THIS NODE SHOULD BE IMPLEMENTED YET
 
-def communicate():
-    rospy.init_node('can_bus_interface', anonymous=True)
-    h = Handler()
-    rospy.Subscriber('dig_motor_speeds', [MESSAGE_TYPE], h.callback)
-    rospy.Subscriber('drive_motor_speeds', [MESSAGE_TYPE], h.callback)
+def callback(msg):
+	pass
+
+
+# Run the node
+if __name__ == '__main__':
+
+	# Initialize as ROS node
+	rospy.init_node('can_bus_interface')
+    
+    # Create subscribers to the relevant topics
+    rospy.Subscriber('dig_motor_speeds', UInt8, callback)
+    rospy.Subscriber('drive_motor_speeds', UInt8, callback)
+
+    # Ready to go
+    rospy.loginfo("CAN Bus Interface initialized...")

@@ -2,9 +2,9 @@
 <package format="2">
 
   <!-- basic data -->
-  <name>mission_control</name>
+  <name>drive_system</name>
   <version>0.1.0</version>
-  <description>mission_control</description>
+  <description>The drive_system package</description>
 
   <!-- maintainers -->
   <maintainer email="jacob.gloudemans@vanderbilt.edu">Jacob Gloudemans</maintainer>
@@ -24,5 +24,6 @@
   <depend>roscpp</depend>
   <depend>rospy</depend>
   <depend>std_msgs</depend>
+  <depend>geometry_msgs</depend>
 
 </package>
