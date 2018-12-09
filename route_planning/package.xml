@@ -7,7 +7,7 @@
   <description>The route_planning package</description>
 
   <!-- maintainers -->
-  <maintainer email="jacob.gloudemans@vanderbilt.edu">Jacob Gloudemans</maintainer>
+  <maintainer email="vanderbiltrobotics@gmail.com">Vanderbilt Robotics</maintainer>
 
   <!-- license information -->
   <license>MIT</license>
