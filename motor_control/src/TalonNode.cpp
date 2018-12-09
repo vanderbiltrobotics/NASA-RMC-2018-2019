@@ -11,7 +11,7 @@
 #include <ros/ros.h>
 #include <dynamic_reconfigure/server.h>
 
-#include "can_bus_interface/TalonConfig.h"
+#include "motor_control/TalonConfig.h"
 
 
 TalonSRX* talon = nullptr;

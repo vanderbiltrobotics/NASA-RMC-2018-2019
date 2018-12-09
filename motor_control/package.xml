@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>can_bus_interface</name>
+  <name>motor_control</name>
   <version>0.0.0</version>
-  <description>Implementation of motor control using CTRE Phoenix</description>
+  <description>Implementation of motor_control using CTRE Phoenix</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->
