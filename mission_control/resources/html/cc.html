@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+
+    <script type="text/javascript" src="http://static.robotwebtools.org/EventEmitter2/current/eventemitter2.min.js"></script>
+    <script type="text/javascript" src="http://static.robotwebtools.org/roslibjs/current/roslib.min.js"></script>
+
+    <script type="text/javascript">
+
+        // // CONNECT TO ROS // //
+
+        // Connect to rosbridge WebSocket server
+        var ros = new ROSLIB.Ros({
+            url: 'ws://localhost:9090'
+        });
+
+        // Log messages on connection, error, and close
+        ros.on('connection', function () {
+            console.log('Connected to websocket server.');
+        });
+
+        ros.on('error', function (error) {
+            console.log('Error connecting to websocket server: ', error);
+        });
+
+        ros.on('close', function () {
+            console.log('Connection to websocket server closed.');
+        });
+
+
+        // // DEFINE RELEVANT ROS TOPICS // //
+
+        // General
+
+        var elapsedTime = new ROSLIB.Topic({
+            ros: ros,
+            name: '/updates/elapsed_time',
+            messageType: 'std_msgs/Float64'
+        });
+
+        var fsmState = new ROSLIB.Topic({
+            ros: ros,
+            name: '/updates/fsm_state',
+            messageType: 'std_msgs/String'
+        });
+
+        var batteryLevel = new ROSLIB.Topic({
+            ros: ros,
+            name: '/updates/battery_level',
+            messageType: 'std_msgs/Float32'
+        });
+
+
+        // Driving & Navigation Info
+
+        var robotPose = new ROSLIB.Topic({
+            ros: ros,
+            name: '/updates/robot_pose',
+            messageType: 'geometry_msgs/Pose'
+        });
+
+        var goalPose = new ROSLIB.Topic({
+            ros: ros,
+            name: '/updates/goal_pose',
+            messageType: 'geometry_msgs/Pose'
+        });
+
+        var robotTwist = new ROSLIB.Topic({
+            ros: ros,
+            name: '/updates/robot_twist',
+            messageType: 'geometry_msgs/Twist'
+        });
+
+        var goalTwist = new ROSLIB.Topic({
+            ros: ros,
+            name: '/updates/goal_twist',
+            messageType: 'geometry_msgs/Twist'
+        });
+
+
+        // Digging Info
+
+        var digCmd = new ROSLIB.Topic({
+            ros: ros,
+            name: '/updates/dig_cmd_str',
+            messageType: 'std_msgs/String'
+        });
+
+        var fillLevel = new ROSLIB.Topic({
+            ros: ros,
+            name: '/updates/fill_level',
+            messageType: 'std_msgs/Float32'
+        });
+
+        var matCollected = new ROSLIB.Topic({
+            ros: ros,
+            name: '/updates/mat_collected',
+            messageType: 'std_msgs/Float32'
+        });
+
+
+        // Vision Info
+
+        var markerStatus = new ROSLIB.Topic({
+            ros: ros,
+            name: '/updates/marker_status',
+            messageType: 'std_msgs/Bool'
+        });
+
+
+        // // CALLBACK FUNCTIONS FOR SUBSCRIBERS // //
+
+        // General
+
+        function elapsedTimeCallback(message) {
+            var td_obj = document.getElementById("data_elapsed_time");
+            td_obj.textContent = message.data;
+        }
+
+        function fsmStateCallback(message) {
+            var td_obj = document.getElementById("data_fsm_state");
+            td_obj.textContent = message.data;
+        }
+
+        function batteryLevelCallback(message) {
+            var td_obj = document.getElementById("data_battery_level");
+            td_obj.textContent = message.data + " V";
+        }
+
+
+        // Driving & Navigation Info
+
+        function robotPoseCallback(message) {
+            var td_obj = document.getElementById("data_robot_pose");
+            var str = "Pos: [";
+            str = str + message.position.x + ", ";
+            str = str + message.position.y + ", ";
+            str = str + message.position.z + "]  Quat: [";
+            str = str + message.orientation.x + ", ";
+            str = str + message.orientation.y + ", ";
+            str = str + message.orientation.z + ", ";
+            str = str + message.orientation.w + "]";
+            td_obj.textContent = str;
+        }
+
+        function goalPoseCallback(message) {
+            var td_obj = document.getElementById("data_goal_pose");
+            var str = "Pos: [";
+            str = str + message.position.x + ", ";
+            str = str + message.position.y + ", ";
+            str = str + message.position.z + "]  Quat: [";
+            str = str + message.orientation.x + ", ";
+            str = str + message.orientation.y + ", ";
+            str = str + message.orientation.z + ", ";
+            str = str + message.orientation.w + "]";
+            td_obj.textContent = str;
+        }
+
+        function robotTwistCallback(message) {
+
+        }
+
+        function goalTWistCallback(message) {
+
+        }
+
+
+        // Digging Info
+
+        function digCmdCallback(message) {
+
+        }
+
+        function fillLevelCallback(message) {
+
+        }
+
+        function matCollectedCallback(message) {
+
+        }
+
+
+        // Vision info
+
+        function markerStatusCallback(message) {
+
+        }
+
+
+        // // INITIALIZE SUBSCRIBERS // //
+
+        // General
+        elapsedTime.subscribe(elapsedTimeCallback);
+        fsmState.subscribe(fsmStateCallback);
+        batteryLevel.subscribe(batteryLevelCallback);
+
+        // Driving & Navigation
+        robotPose.subscribe(robotPoseCallback);
+        goalPose.subscribe(goalPoseCallback);
+        robotTwist.subscribe(robotTwistCallback);
+        goalTwist.subscribe(goalTWistCallback);
+
+        // Digging
+        digCmd.subscribe(digCmdCallback);
+        fillLevel.subscribe(fillLevelCallback);
+        matCollected.subscribe(matCollectedCallback);
+
+        // Vision
+        markerStatus.subscribe(markerStatusCallback);
+
+
+    </script>
+
+    <link rel="stylesheet" type="text/css" href="../css/cc.css" />
+
+</head>
+
+<body>
+
+    <div id="header_bar">
+    </div>
+
+    <div id="page_body">
+
+        <div id="body_content">
+
+            <div id="left_region">
+                <p>Left region of page</p>
+            </div>
+
+            <div id="middle_region">
+                <div class="table_container">
+                    <h3>General</h3>
+                    <table id="table_general">
+                        <tr>
+                            <td>Elapsed Time:</td>
+                            <td id="data_elapsed_time">(No messages receieved)</td>
+                        </tr>
+                        <tr>
+                            <td>Battery Level:</td>
+                            <td id="data_battery_level">(No messages receieved)</td>
+                        </tr>
+                        <tr>
+                            <td>FSM State:</td>
+                            <td id="data_fms_state">(No messages receieved)</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="table_container">
+                    <h3>Driving & Navigation</h3>
+                    <table id="table_driving">
+                        <tr>
+                            <td>Estimated Pose:</td>
+                            <td id="data_robot_pose">(No messages receieved)</td>
+                        </tr>
+                        <tr>
+                            <td>Goal Pose:</td>
+                            <td id="data_goal_pose">(No messages receieved)</td>
+                        </tr>
+                        <tr>
+                            <td>Estimated Twist:</td>
+                            <td id="data_robot_twist">(No messages receieved)</td>
+                        </tr>
+                        <tr>
+                            <td>Goal Twist:</td>
+                            <td id="data_goal_twist">(No messages receieved)</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="table_container">
+                    <h3>Digging</h3>
+                    <table id="table_digging">
+                        <tr>
+                            <td>Current Dig Cmd:</td>
+                            <td id="data_dig_cmd">(No messages receieved)</td>
+                        </tr>
+                        <tr>
+                            <td>Fill Level:</td>
+                            <td id="data_fill_level">(No messages receieved)</td>
+                        </tr>
+                        <tr>
+                            <td>Material Deposited:</td>
+                            <td id="data_mat_collected">(No messages receieved)</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="table_container">
+                    <h3>Vision</h3>
+                    <table id="table_vision">
+                        <tr>
+                            <td>Marker Status:</td>
+                            <td id="data_marker_status">(No messages receieved)</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div id="right_region">
+                <p>Right region of page</p>
+            </div>
+
+        </div>
+
+    </div>
+
+
+</body>
+
+</html>
