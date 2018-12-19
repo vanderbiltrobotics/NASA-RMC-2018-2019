@@ -24,18 +24,31 @@ tr:nth-child(even) {
   
 #left_region {
     float: left;
-    width: 40%;
-
+    width: auto;
+    max-width: 40%;
+    margin-right: 30px;
 }
 
 #middle_region {
     float: left;
-    width: 30%;
+    width: 45%;
+    margin-right: 30px;
+}
+
+#middle_region_left {
+    float: left;
+    width: 48%;
+    margin-right: 4%;
+}
+
+#middle_region_right {
+    float: left;
+    width: 48%;
 }
 
 #right_region {
     float: left;
-    width: 30%;
+    width: 15%;
 }
 
 #body_content {
@@ -47,4 +60,9 @@ tr:nth-child(even) {
 #header_bar {
     background-color: #000000b7;
     height: 50px;
+    margin-bottom: 20px;
+}
+
+#state_image {
+    max-height: 800px;
 }

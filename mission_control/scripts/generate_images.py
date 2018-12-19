@@ -13,7 +13,7 @@
 # Import ROS packages
 import rospy
 from geometry_msgs.msg import Twist, Pose
-from sensor_msgs.msg import Image
+from sensor_msgs.msg import CompressedImage
 from std_msgs.msg import Bool
 from tf.transformations import euler_from_quaternion, rotation_matrix
 from cv_bridge import CvBridge
@@ -231,7 +231,7 @@ if __name__ == '__main__':
     marker_status_sub = rospy.Subscriber('updates/marker_status', Bool, data.update_marker_status, queue_size=1)
 
     # Initialize publisher for image frames
-    img_pub = rospy.Publisher('mc/data_vis_frames', Image, queue_size=1)
+    img_pub = rospy.Publisher('mc/data_vis_frames', CompressedImage, queue_size=1)
 
     # ROS stuff ready to go
     rospy.loginfo("Data Visualization Image Publisher initialized...")
@@ -259,7 +259,7 @@ if __name__ == '__main__':
             frame = draw_robot(frame, data.robot_goal, r_color=(200, 200, 100), p_color=(150, 150, 150), scale=img_scale)
 
         # Convert numpy array to ROS Image message
-        img_msg = bridge.cv2_to_imgmsg(frame, 'bgr8')
+        img_msg = bridge.cv2_to_compressed_imgmsg(frame, 'png')
 
         # Publish message
         img_pub.publish(img_msg)
