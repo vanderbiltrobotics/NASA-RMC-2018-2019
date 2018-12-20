@@ -48,25 +48,37 @@ object_points = []
 for fname in fnames:
 
     # Load image, convert to grayscale
-    img = cv2.imread(OPEN_PATH + fname, cv2.IMREAD_GRAYSCALE)
+    img = cv2.imread(OPEN_PATH + fname)
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
     # Find corners in the image
-    ret, corners = cv2.findChessboardCorners(img, (CB_ROWS, CB_COLS), None)
+    ret, corners = cv2.findChessboardCorners(gray, (CB_ROWS, CB_COLS), None)
 
     # If corners found, continue, else skip this image, print a warning
     if ret:
+
+        # improve corner accuracy
         object_points.append(op_single_img)
-        cv2.cornerSubPix(img, corners, (11, 11), (-1, -1), criteria)
-        image_points.append(corners)
+        better_corners = cv2.cornerSubPix(gray, corners, (11, 11), (-1, -1), criteria)
+        image_points.append(better_corners)
+
+        # View the corners to make sure it found them correctly
+        cv2.drawChessboardCorners(img, (CB_ROWS, CB_COLS), better_corners, ret)
+        cv2.imshow('img', img)
+        cv2.waitKey(0)
+
+        # Done with this frame
         print "-- processed " + fname + " --"
+
     else:
-        print "Unable to find corners in " + fname
+        print "WARNING: Unable to find corners in " + fname
+
+cv2.destroyAllWindows()
 
 # Calibrate using the corner data
 ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(object_points, image_points, IMG_SIZE, None, None)
 
-# Save calibration camera matrix and distortion coefficients to file for later use
-data = {"camera_matrix": mtx, "dist_coeffictients": dist}
+# Print results
 print "\n=========\n RESULTS\n=========\n"
 print "Dist. Coeffifients: "
 print dist
@@ -74,5 +86,7 @@ print "\nCamera Matrix"
 print mtx
 print "\nData saved to " + SAVE_PATH
 
+# Save calibration camera matrix and distortion coefficients to file for later use
+data = {"camera_matrix": mtx, "dist_coeffictients": dist, "image_points": image_points, "object_points": object_points}
 out = open(SAVE_PATH, 'w')
 yaml.dump(data, out)
