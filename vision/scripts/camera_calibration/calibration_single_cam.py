@@ -19,12 +19,12 @@ import yaml
 import numpy as np
 
 # PARAMETERS FOR OUR SETUP - MAKE SURE THESE ARE CORRECT
-CB_COLS = 6
+CB_COLS = 9
 CB_ROWS = 7
-CB_SQUARE_SIZE = 10
-IMG_SIZE = (1000, 700)
-OPEN_PATH = "./calibration_images/camera_a/"
-SAVE_PATH = "./calibration_data/camera_a.yaml"
+CB_SQUARE_SIZE = 19
+IMG_SIZE = (480, 640)
+OPEN_PATH = "./calibration_images/jake_desktop/"
+SAVE_PATH = "./calibration_data/jake_desktop.yaml"
 
 # termination criteria for finding sub-pixel corner positions
 criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
@@ -58,10 +58,21 @@ for fname in fnames:
         object_points.append(op_single_img)
         cv2.cornerSubPix(img, corners, (11, 11), (-1, -1), criteria)
         image_points.append(corners)
+        print "-- processed " + fname + " --"
+    else:
+        print "Unable to find corners in " + fname
 
 # Calibrate using the corner data
 ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(object_points, image_points, IMG_SIZE, None, None)
 
 # Save calibration camera matrix and distortion coefficients to file for later use
 data = {"camera_matrix": mtx, "dist_coeffictients": dist}
-yaml.dump(data, open(SAVE_PATH, 'w'))
+print "\n=========\n RESULTS\n=========\n"
+print "Dist. Coeffifients: "
+print dist
+print "\nCamera Matrix"
+print mtx
+print "\nData saved to " + SAVE_PATH
+
+out = open(SAVE_PATH, 'w')
+yaml.dump(data, out)
