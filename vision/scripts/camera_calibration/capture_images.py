@@ -7,6 +7,11 @@
 # Modified code from the OpenCV documentation found here:
 # https://docs.opencv.org/3.0-beta/doc/py_tutorials/py_gui/py_video_display/py_video_display.html
 #
+# Usage instructions:
+# Every [CAPTURE_RATE] seconds, the current frame will be captured - if chessboard corners are
+# found, they will be drawn on the image. If you wish to save the image, press 'y'. Otherwise,
+# press any other key or wait [PREVIEW_TIME] seconds and the frame will expire. Press 'q' to quit
+#
 # --------------------------------------------------------------------------------------------- #
 
 # Import required packages
@@ -14,9 +19,9 @@ import cv2
 import time
 
 # PARAMETERS TO SET
-DEVICE_NUM = 0
-SAVE_PATH = "./calibration_images/camera_a/"
-CAPTURE_RATE = 3
+DEVICE_NUM = 1
+SAVE_PATH = "./calibration_images/camera_b/"
+CAPTURE_RATE = 5
 PREVIEW_TIME = 10
 CB_COLS = 9
 CB_ROWS = 7
@@ -27,7 +32,7 @@ stream = cv2.VideoCapture(DEVICE_NUM)
 # Capture frames until we say to stop
 frame_count = 0
 start_time = time.time()
-while(True):
+while True:
 
     # Capture next frame
     ret, frame = stream.read()

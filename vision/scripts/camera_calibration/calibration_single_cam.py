@@ -10,6 +10,11 @@
 #
 # The code explained in these links was modified to create this script.
 #
+# Usage instructions:
+# Press 'y' for each frame if the marked corners seem accurate. Otherwise, press any other key
+# and that frame won't be used for calibration. Be sure to specify the correct paths for loading
+# the images and saving the results.
+#
 # --------------------------------------------------------------------------------------------- #
 
 # Import required packages
@@ -23,8 +28,8 @@ CB_COLS = 9
 CB_ROWS = 7
 CB_SQUARE_SIZE = 19
 IMG_SIZE = (480, 640)
-OPEN_PATH = "./calibration_images/jake_desktop/"
-SAVE_PATH = "./calibration_data/jake_desktop.yaml"
+OPEN_PATH = "./calibration_images/camera_b/"
+SAVE_PATH = "./calibration_data/camera_b.yaml"
 
 # termination criteria for finding sub-pixel corner positions
 criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
@@ -57,21 +62,29 @@ for fname in fnames:
     # If corners found, continue, else skip this image, print a warning
     if ret:
 
-        # improve corner accuracy
-        object_points.append(op_single_img)
+        # Improve corner accuracy
         better_corners = cv2.cornerSubPix(gray, corners, (11, 11), (-1, -1), criteria)
-        image_points.append(better_corners)
 
-        # View the corners to make sure it found them correctly
+        # Display to make sure corner points are correct
         cv2.drawChessboardCorners(img, (CB_ROWS, CB_COLS), better_corners, ret)
         cv2.imshow('img', img)
-        cv2.waitKey(0)
 
-        # Done with this frame
-        print "-- processed " + fname + " --"
+        # Wait for response
+        if cv2.waitKey(0) & 0xFF == ord('y'):
+
+            # Add points to the full list as well as another copy of object points
+            object_points.append(op_single_img)
+            image_points.append(better_corners)
+
+            # Done with this frame
+            print "-- processed " + fname + " --"
+
+        # Otherwise, skip the frame
+        else:
+            print "-- skipped frame " + fname + " --"
 
     else:
-        print "WARNING: Unable to find corners in " + fname
+        print "-- unable to find corners in " + fname + ", skipped frame --"
 
 cv2.destroyAllWindows()
 
