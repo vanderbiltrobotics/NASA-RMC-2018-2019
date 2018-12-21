@@ -92,13 +92,13 @@ cv2.destroyAllWindows()
 # Calibrate
 cmatx_a = np.asarray(cal_data_a["camera_matrix"])
 cmatx_b = np.asarray(cal_data_b["camera_matrix"])
-dist_a = np.asarray(cal_data_a["dist_coeffictients"])
-dist_b = np.asarray(cal_data_b["dist_coeffictients"])
+dist_a = np.asarray(cal_data_a["dist_coefficients"])
+dist_b = np.asarray(cal_data_b["dist_coefficients"])
 ret, _, _, _, _, R, T, E, F = cv2.stereoCalibrate(object_points, image_points_a, image_points_b, cmatx_a, dist_a,
-                                                  cmatx_b, dist_b, IMG_SIZE, flags=cv2.CALIB_FIX_INTRINSIC)
+                                                  cmatx_b, dist_b, IMG_SIZE, flags=cv2.CALIB_FIX_INTRINSIC + cv2.CALIB_ZERO_TANGENT_DIST)
 
 # Compute rectification matrices
-R1, R2, P1, P2, Q, roi1, roi2 = cv2.stereoRectify(cmatx_a, dist_a, cmatx_b, dist_b, IMG_SIZE, R, T)
+R1, R2, P1, P2, Q, roi1, roi2 = cv2.stereoRectify(cmatx_a, dist_a, cmatx_b, dist_b, IMG_SIZE, R, T, alpha=0)
 
 # Compute remapping matrices
 map_a_x, map_a_y = cv2.initUndistortRectifyMap(cmatx_a, dist_a, R1, P1, IMG_SIZE, cv2.CV_32FC1)

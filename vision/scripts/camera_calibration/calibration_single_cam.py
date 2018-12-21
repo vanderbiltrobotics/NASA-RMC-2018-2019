@@ -89,7 +89,8 @@ for fname in fnames:
 cv2.destroyAllWindows()
 
 # Calibrate using the corner data
-ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(object_points, image_points, IMG_SIZE, None, None)
+ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(object_points, image_points, IMG_SIZE,
+                                                   None, None, flags=cv2.CALIB_ZERO_TANGENT_DIST)
 
 # Print results
 print "\n=========\n RESULTS\n=========\n"
