@@ -101,7 +101,7 @@ print "\nData saved to " + SAVE_PATH
 
 # Save calibration camera matrix and distortion coefficients to file for later use
 data = {"camera_matrix": np.asarray(mtx).tolist(),
-        "dist_coeffictients": np.asarray(dist).tolist(),
+        "dist_coefficients": np.asarray(dist).tolist(),
         "image_points": np.asarray(image_points).tolist(),
         "object_points": np.asarray(object_points).tolist()}
 out = open(SAVE_PATH, 'w')

@@ -1,16 +1,17 @@
 # --------------------------------------------------------------------------------------------- #
 #
-# This is a script for capturing images at a regular interval. It is intended to be used to
-# capture images for camera calibration. The script shows the video stream for the specified
-# camera in a window and saves images from the camera at regular intervals.
+# This is a script for capturing stereo image pairs at a regular interval. It is intended to be
+# used to capture images for stereo camera calibration. The script shows the video stream for the
+# specified camera pair in two window and saves images from the cameras at regular intervals.
 #
 # Modified code from the OpenCV documentation found here:
 # https://docs.opencv.org/3.0-beta/doc/py_tutorials/py_gui/py_video_display/py_video_display.html
 #
 # Usage instructions:
-# Every [CAPTURE_RATE] seconds, the current frame will be captured - if chessboard corners are
-# found, they will be drawn on the image. If you wish to save the image, press 'y'. Otherwise,
-# press any other key or wait [PREVIEW_TIME] seconds and the frame will expire. Press 'q' to quit
+# Every [CAPTURE_RATE] seconds, the current frame will be captured from each camera - if
+# chessboard corners are found, they will be drawn on the images. If you wish to save the images,
+# press 'y'. Otherwise, press any other key or wait [PREVIEW_TIME] seconds and the frames will
+# expire. Press 'q' to quit
 #
 # --------------------------------------------------------------------------------------------- #
 
