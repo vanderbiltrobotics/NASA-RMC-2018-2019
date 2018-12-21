@@ -17,6 +17,9 @@ import time
 DEVICE_NUM = 0
 SAVE_PATH = "./calibration_images/camera_a/"
 CAPTURE_RATE = 3
+PREVIEW_TIME = 10
+CB_COLS = 9
+CB_ROWS = 7
 
 # Create an object for video capture
 stream = cv2.VideoCapture(DEVICE_NUM)
@@ -34,13 +37,25 @@ while(True):
 
     # If enough time has passed, save frame
     if time.time() - start_time > CAPTURE_RATE:
-        cv2.imwrite(SAVE_PATH + "calib_img" + str(frame_count) + ".png", gray)
-        print "Captured frame #" + str(frame_count)
-        frame_count += 1
+
+        # Try to find chessboard corners in the image, draw them on the image
+        ret, corners = cv2.findChessboardCorners(frame, (CB_ROWS, CB_COLS), None)
+        cv2.drawChessboardCorners(frame, (CB_ROWS, CB_COLS), corners, ret)
+
+        # Show the frame, wait for user to choose to keep the image or not
+        cv2.imshow("frame", frame)
+        if cv2.waitKey(PREVIEW_TIME * 1000) & 0xFF == ord('y'):
+
+            # Frame is good, save it, increment frame count
+            cv2.imwrite(SAVE_PATH + "calib_img" + str(frame_count) + ".png", gray)
+            print "Captured frame #" + str(frame_count)
+            frame_count += 1
+
+        # Reset timer
         start_time = time.time()
 
     # Display the frame
-    cv2.imshow('frame', gray)
+    cv2.imshow('frame', frame)
 
     # Check if we should quit
     if cv2.waitKey(1) & 0xFF == ord('q'):
