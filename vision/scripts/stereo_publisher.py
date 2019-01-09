@@ -49,17 +49,17 @@ class StereoBMConfig:
         self.disp12_max_diff = config["disp12_max_diff"]
         self.speckle_range = config["speckle_range"]
         self.speckle_window_size = config["speckle_window_size"]
-
-        # Check if we want to update the pre-filtering parameters
-        self.use_prefilter = config["use_prefilter"]
-
-        if self.use_prefilter:
-            self.prefilter_cap = config["prefilter_cap"]
-            self.prefilter_size = config["prefilter_size"]
-            self.prefilter_type = config["prefilter_type"]
-            self.uniqueness_ratio = config["uniqueness_ratio"]
-            self.texture_threshold = config["texture_threshold"]
-            self.smaller_block_size = config["smaller_block_size"]
+        #
+        # # Check if we want to update the pre-filtering parameters
+        # self.use_prefilter = config["use_prefilter"]
+        #
+        # if self.use_prefilter:
+        #     self.prefilter_cap = config["prefilter_cap"]
+        #     self.prefilter_size = config["prefilter_size"]
+        #     self.prefilter_type = config["prefilter_type"]
+        #     self.uniqueness_ratio = config["uniqueness_ratio"]
+        #     self.texture_threshold = config["texture_threshold"]
+        #     self.smaller_block_size = config["smaller_block_size"]
 
         return config
 
@@ -72,12 +72,12 @@ class StereoBMConfig:
         matcher.setDisp12MaxDiff(self.disp12_max_diff)
         matcher.setSpeckleRange(self.speckle_range)
         matcher.setSpeckleWindowSize(self.speckle_window_size)
-        matcher.setPreFilterCap(self.prefilter_cap)
-        matcher.setPreFilterSize(self.prefilter_size)
-        matcher.setPreFilterType(self.prefilter_type)
-        matcher.setUniquenessRatio(self.uniqueness_ratio)
-        matcher.setTextureThreshold(self.texture_threshold)
-        matcher.setSmallerBlockSize(self.smaller_block_size)
+        # matcher.setPreFilterCap(self.prefilter_cap)
+        # matcher.setPreFilterSize(self.prefilter_size)
+        # matcher.setPreFilterType(self.prefilter_type)
+        # matcher.setUniquenessRatio(self.uniqueness_ratio)
+        # matcher.setTextureThreshold(self.texture_threshold)
+        # matcher.setSmallerBlockSize(self.smaller_block_size)
 
         return matcher
 
@@ -133,6 +133,12 @@ if __name__ == '__main__':
     # Server for dynamic config params
     srv = Server(DisparityConfig, config.config_callback)
 
+    matcher_b = ximgproc.createRightMatcher(matcher_a)
+    visual_multiplier = 1.0
+    filter = ximgproc.createDisparityWLSFilter(matcher_a)
+    filter.setLambda(8000)
+    filter.setSigmaColor(1.5)
+
     # Loop indefinitely
     rate = rospy.Rate(10)
     while not rospy.is_shutdown():
@@ -154,12 +160,16 @@ if __name__ == '__main__':
 
         # Compute disparity image
         disp_a = matcher_a.compute(img_b_gray, img_a_gray)
+        disp_b = matcher_b.compute(img_a_gray, img_b_gray)
 
         # Scale appropriately
-        disp_a = np.fmax(disp_a / 16, 0.0) / config.num_disparities
+        # disp_a = np.fmax(disp_a / 16, 0.0) / config.num_disparities
+
+        filtered_img = filter.filter(disp_a, img_a_gray, None, disp_b)
+        filtered_img = np.fmax(filtered_img / 16, 0.0) / config.num_disparities
 
         # Display image
-        cv2.imshow('Disparity A', disp_a.T)
+        cv2.imshow('Disparity A', filtered_img.T)
         cv2.waitKey(1)
 
         # # Prepare messages
