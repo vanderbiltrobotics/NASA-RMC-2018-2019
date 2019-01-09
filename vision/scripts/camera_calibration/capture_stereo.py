@@ -20,8 +20,8 @@ import cv2
 import time
 
 # PARAMETERS TO SET
-DEVICE_NUM_A = 2
-DEVICE_NUM_B = 1
+DEVICE_NUM_A = 1
+DEVICE_NUM_B = 2
 SAVE_PATH_A = "./calibration_images/stereo/stereo_a/"
 SAVE_PATH_B = "./calibration_images/stereo/stereo_b/"
 CAPTURE_RATE = 5
