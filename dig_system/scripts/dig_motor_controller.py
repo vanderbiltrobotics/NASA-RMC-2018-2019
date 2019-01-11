@@ -30,6 +30,8 @@ class DigController:
 
     	# Update the current mode
     	self.current_mode = msg.data
+        #this is a random comment
+        #TODO: delete comment
         
 
 
