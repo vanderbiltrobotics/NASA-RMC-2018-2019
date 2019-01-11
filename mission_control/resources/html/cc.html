@@ -103,7 +103,7 @@
         this.addEventListener("keydown", keydown,false);
         this.addEventListener("keyup", keyup,false);
 
-        var twist = new ROSLIB.message({
+        var twist = new ROSLIB.Message({
             linear : {
                 x : lin_vel_x,
                 y : lin_vel_y,
@@ -117,11 +117,11 @@
         });
 
         setInterval(function(){
-            if(isDownKeyPressed){
+            if(isUpKeyPressed){
                 ++lin_vel_x;
                 ++lin_vel_y;
                 ++lin_vel_z;
-            } else if (!isDownKeyPressed) {
+            } else if (!isUpKeyPressed) {
                 if (lin_vel_x > 0)
                     --lin_vel_x;
                 if (lin_vel_y > 0)
