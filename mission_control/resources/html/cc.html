@@ -85,6 +85,53 @@
             messageType: 'geometry_msgs/Twist'
         });
 
+        //TODO In progress
+        var lin_vel_x = 0;
+        var lin_vel_y = 0;
+        var lin_vel_z = 0;
+
+        var isUpKeyPressed = false;
+        var keydown = function(e){ 
+            if(e.keyCode == 38){
+                isUpKeyPressed = true;
+            }
+        }
+        var keyup = function(e){
+            isUpKeyPressed = false;
+        }
+
+        this.addEventListener("keydown", keydown,false);
+        this.addEventListener("keyup", keyup,false);
+
+        var twist = new ROSLIB.message({
+            linear : {
+                x : lin_vel_x,
+                y : lin_vel_y,
+                z : lin_vel_z
+            },
+            angular : {
+                x : 0,
+                y : 0,
+                z : 0
+            }
+        });
+
+        setInterval(function(){
+            if(isDownKeyPressed){
+                ++lin_vel_x;
+                ++lin_vel_y;
+                ++lin_vel_z;
+            } else if (!isDownKeyPressed) {
+                if (lin_vel_x > 0)
+                    --lin_vel_x;
+                if (lin_vel_y > 0)
+                    --lin_vel_y;
+                if (lin_vel_z > 0)
+                    --lin_vel_z;
+            }
+            goalTwist.publish(twist);
+        },100)
+
 
         // Digging Info
 
