@@ -20,9 +20,10 @@
   <!-- dependencies -->
   <buildtool_depend>catkin</buildtool_depend>
   <depend>roscpp</depend>
+  <depend>rospy</depend>
+  <depend>std_msgs></depend>
   <depend>geometry_msgs</depend>
   <depend>dynamic_reconfigure</depend>
-  <depend>roslaunch</depend>
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>
@@ -30,3 +31,4 @@
 
   </export>
 </package>
+
