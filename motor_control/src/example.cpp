@@ -9,10 +9,10 @@
 #include <chrono>
 #include <thread>
 #include <unistd.h>
-#include "Platform-linux-socket-can.h"
 
 // Include ROS libraries
 #include "ros/ros.h"
+#include <custom_msgs/DriveMotorSpeeds.h>
 
 using namespace ctre::phoenix;
 using namespace ctre::phoenix::platform;

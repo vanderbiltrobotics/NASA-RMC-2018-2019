@@ -16,6 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
   geometry_msgs
+  custom_msgs
 )
 
 find_package (Threads REQUIRED)
