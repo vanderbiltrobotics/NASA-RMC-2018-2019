@@ -30,6 +30,14 @@ int main(int argc, char **argv) {
     // Create a Talon object
     ctre::phoenix::motorcontrol::can::TalonSRX fl(1);
 
+    // Wait for CAN bus set up to complete
+    ros::Duration setup_time(2);
+    setup_time.sleep();
+
+    // Drive wheel
+    fl.Set(ctre::phoenix::motorcontrol::ControlMode::PercentOutput, 20);
+
+    // Rate to loop at (in Hz)
     ros::Rate loop_rate(1);
 
     // Loop
