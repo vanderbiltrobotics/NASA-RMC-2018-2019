@@ -1,39 +1,51 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 2.8.3)
 project(motor_control)
-
-## Compile as C++11, supported in ROS Kinetic and newer
-add_compile_options(-std=c++11)
 
 ## Detect system architecture and save it to $arch
 EXECUTE_PROCESS( COMMAND uname -m COMMAND tr -d '\n' OUTPUT_VARIABLE arch )
 
+## Compile as C++11, supported in ROS Kinetic and newer
+add_compile_options(-std=c++11)
+
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS
-  dynamic_reconfigure
-  roscpp
-  rospy
-  std_msgs
-  geometry_msgs
-  custom_msgs
+find_package(catkin REQUIRED
+        COMPONENTS
+        roscpp
+        geometry_msgs
 )
 
+## System dependencies are found with CMake's conventions
+# find_package(Boost REQUIRED COMPONENTS system)
 find_package (Threads REQUIRED)
 
+###################################
+## catkin specific configuration ##
+###################################
+## The catkin_package macro generates cmake config files for your package
+## Declare things to be passed to dependent projects
+## INCLUDE_DIRS: uncomment this if your package contains header files
+## LIBRARIES: libraries you create in this project that dependent projects also need
+## CATKIN_DEPENDS: catkin_packages dependent projects also need
+## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
         INCLUDE_DIRS include
         LIBRARIES CTRE_Phoenix CTRE_PhoenixCCI CTRE_PhoenixPlatformLinuxSocketCan CTRE_PhoenixCanutils
+#  CATKIN_DEPENDS other_catkin_pkg
+#  DEPENDS system_lib
 )
 
+###########
+## Build ##
+###########
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-  include
-  ${catkin_INCLUDE_DIRS}
+        include
+        ${catkin_INCLUDE_DIRS}
 )
-
 
 ## Declare libraries to be imported
 ADD_LIBRARY(CTRE_Phoenix STATIC IMPORTED)
@@ -64,23 +76,31 @@ else()
     message( FATAL_ERROR "Unrecognized architecture: ${arch}" )
 endif()
 
-
+## Declare a C++ executable
+## With catkin_make all packages are built within a single CMake context
+## The recommended prefix ensures that target names across packages don't collide
+# add_executable(${PROJECT_NAME}_node src/phoenix_node.cpp)
+#add_executable(phoenix_node ${PROJECT_SOURCE_DIR}/example.cpp)
 add_executable(example ${PROJECT_SOURCE_DIR}/src/example.cpp)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(example
-        ${catkin_LIBRARIES}
-        Threads::Threads
-        CTRE_Phoenix CTRE_PhoenixCCI CTRE_PhoenixPlatformLinuxSocketCan CTRE_PhoenixCanutils)
+    ${catkin_LIBRARIES}
+    Threads::Threads
+    CTRE_Phoenix CTRE_PhoenixCCI CTRE_PhoenixPlatformLinuxSocketCan CTRE_PhoenixCanutils
+)
 
+#############
+## Install ##
+#############
 
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/${arch}/*
-        DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-        )
+    DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+)
 
 ## Mark cpp header files for installation
 install(DIRECTORY include/
-        DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
-        FILES_MATCHING PATTERN "*.h"
-        PATTERN ".svn" EXCLUDE
-        )
+    DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+    FILES_MATCHING PATTERN "*.h"
+    PATTERN ".svn" EXCLUDE
+)

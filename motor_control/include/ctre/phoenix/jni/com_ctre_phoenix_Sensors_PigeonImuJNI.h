@@ -25,22 +25,6 @@ JNIEXPORT jlong JNICALL Java_com_ctre_phoenix_sensors_PigeonImuJNI_JNI_1new_1Pig
 
 /*
  * Class:     com_ctre_phoenix_sensors_PigeonImuJNI
- * Method:    JNI_destroy_PigeonImu
- * Signature: (J)I
- */
-JNIEXPORT jint JNICALL Java_com_ctre_phoenix_sensors_PigeonImuJNI_JNI_1destroy_1PigeonImu
-  (JNIEnv *, jclass, jlong);
-
-/*
- * Class:     com_ctre_phoenix_sensors_PigeonImuJNI
- * Method:    JNI_destroy_AllPigeonImus
- * Signature: ()V
- */
-//JNIEXPORT void JNICALL Java_com_ctre_phoenix_sensors_PigeonImuJNI_JNI_1destroy_1AllPigeonImus
-//  (JNIEnv *, jclass);
-
-/*
- * Class:     com_ctre_phoenix_sensors_PigeonImuJNI
  * Method:    JNI_ConfigSetCustomParam
  * Signature: (JIII)I
  */
@@ -70,14 +54,6 @@ JNIEXPORT jint JNICALL Java_com_ctre_phoenix_sensors_PigeonImuJNI_JNI_1ConfigSet
  */
 JNIEXPORT jdouble JNICALL Java_com_ctre_phoenix_sensors_PigeonImuJNI_JNI_1ConfigGetParameter
   (JNIEnv *, jclass, jlong, jint, jint, jint);
-
-/*
- * Class:     com_ctre_phoenix_sensors_PigeonImuJNI
- * Method:    JNI_ConfigFactoryDefault
- * Signature: (JI)I
- */
-JNIEXPORT jint JNICALL Java_com_ctre_phoenix_sensors_PigeonImuJNI_JNI_1ConfigFactoryDefault
-  (JNIEnv *, jclass, jlong, jint);
 
 /*
  * Class:     com_ctre_phoenix_sensors_PigeonImuJNI
@@ -145,10 +121,10 @@ JNIEXPORT jint JNICALL Java_com_ctre_phoenix_sensors_PigeonImuJNI_JNI_1SetAccumZ
 
 /*
  * Class:     com_ctre_phoenix_sensors_PigeonImuJNI
- * Method:    JNI_SetTemperatureCompensationDisable
+ * Method:    JNI_SetTemperatureCompensationEnable
  * Signature: (JII)I
  */
-JNIEXPORT jint JNICALL Java_com_ctre_phoenix_sensors_PigeonImuJNI_JNI_1SetTemperatureCompensationDisable
+JNIEXPORT jint JNICALL Java_com_ctre_phoenix_sensors_PigeonImuJNI_JNI_1SetTemperatureCompensationEnable
   (JNIEnv *, jclass, jlong, jint, jint);
 
 /*

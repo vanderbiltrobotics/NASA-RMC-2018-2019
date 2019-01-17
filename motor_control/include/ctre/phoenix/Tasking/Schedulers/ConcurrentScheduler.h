@@ -1,8 +1,8 @@
 #pragma once
 
 #include <vector>
-#include "ctre/phoenix/tasking/ILoopable.h"
-#include "ctre/phoenix/tasking/IProcessable.h"
+#include "ctre/phoenix/Tasking/ILoopable.h"
+#include "ctre/phoenix/Tasking/IProcessable.h"
 
 namespace ctre {
 namespace phoenix {

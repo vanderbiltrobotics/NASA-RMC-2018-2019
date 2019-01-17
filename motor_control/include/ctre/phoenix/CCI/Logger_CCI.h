@@ -1,8 +1,11 @@
 #pragma once
 
-#include "ctre/phoenix/cci/CCI.h"
 #include "ctre/phoenix/ErrorCode.h"
 #include <string>
+
+#ifndef CCIEXPORT
+	#define CCIEXPORT     __attribute__((visibility("default")))
+#endif
 
 extern "C" {
 	CCIEXPORT void c_Logger_Close();

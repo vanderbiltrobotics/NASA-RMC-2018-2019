@@ -15,7 +15,6 @@ struct StickyFaults {
 	bool SensorOutOfPhase;
 	bool HardwareESDReset;
 	bool RemoteLossOfSignal;
-	bool APIError;
 
 	//!< True iff any of the above flags are true.
 	bool HasAnyFault() const {
@@ -28,8 +27,7 @@ struct StickyFaults {
 				SensorOverflow |
 				SensorOutOfPhase |
 				HardwareESDReset |
-				RemoteLossOfSignal |
-				APIError;
+				RemoteLossOfSignal;
 	}
 	int ToBitfield() const {
 		int retval = 0;
@@ -44,7 +42,6 @@ struct StickyFaults {
 		retval |= SensorOutOfPhase ? mask : 0; mask <<= 1;
 		retval |= HardwareESDReset ? mask : 0; mask <<= 1;
 		retval |= RemoteLossOfSignal ? mask : 0; mask <<= 1;
-		retval |= APIError ? mask : 0; mask <<= 1;
 		return retval;
 	}
 	StickyFaults(int bits) {
@@ -59,7 +56,6 @@ struct StickyFaults {
 		SensorOutOfPhase = (bits & mask) ? true : false; mask <<= 1;
 		HardwareESDReset = (bits & mask) ? true : false; mask <<= 1;
 		RemoteLossOfSignal = (bits & mask) ? true : false; mask <<= 1;
-		APIError = (bits & mask) ? true : false; mask <<= 1;
 	}
 	StickyFaults() {
 		UnderVoltage = false;
@@ -72,7 +68,6 @@ struct StickyFaults {
 		SensorOutOfPhase = false;
 		HardwareESDReset = false;
 		RemoteLossOfSignal = false;
-		APIError = false;
 	}
 	std::string ToString() {
 		std::stringstream work;
@@ -86,11 +81,10 @@ struct StickyFaults {
 		work << " SensorOutOfPhase:" << (SensorOutOfPhase ? "1" : "0");
 		work << " HardwareESDReset:" << (HardwareESDReset ? "1" : "0");
 		work << " RemoteLossOfSignal:" << (RemoteLossOfSignal ? "1" : "0");
-		work << " APIError:" << (APIError ? "1" : "0");
 		return work.str();
 	}
 };
 
 } // namespace motorcontrol
-} // namespace phoenix
+} // namespace ctre_phoenix
 } // namespace ctre

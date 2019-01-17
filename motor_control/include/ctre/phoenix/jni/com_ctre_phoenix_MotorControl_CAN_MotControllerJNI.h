@@ -17,22 +17,6 @@ JNIEXPORT jlong JNICALL Java_com_ctre_phoenix_motorcontrol_can_MotControllerJNI_
 
 /*
  * Class:     com_ctre_phoenix_motorcontrol_can_MotControllerJNI
- * Method:    JNI_destroy_MotController
- * Signature: (J)I
- */
-JNIEXPORT jint JNICALL Java_com_ctre_phoenix_motorcontrol_can_MotControllerJNI_JNI_1destroy_1MotController
-  (JNIEnv *, jclass, jlong);
-
-/*
- * Class:     com_ctre_phoenix_motorcontrol_can_MotControllerJNI
- * Method:    JNI_destroy_AllMotControllers
- * Signature: ()V
- */
-//JNIEXPORT void JNICALL Java_com_ctre_phoenix_motorcontrol_can_MotControllerJNI_JNI_1destroy_1AllMotControllers
-//  (JNIEnv *, jclass);
-
-/*
- * Class:     com_ctre_phoenix_motorcontrol_can_MotControllerJNI
  * Method:    GetDeviceNumber
  * Signature: (J)I
  */
@@ -81,16 +65,8 @@ JNIEXPORT void JNICALL Java_com_ctre_phoenix_motorcontrol_can_MotControllerJNI_S
 
 /*
  * Class:     com_ctre_phoenix_motorcontrol_can_MotControllerJNI
- * Method:    SetInverted_2
- * Signature: (JI)V
- */
-JNIEXPORT void JNICALL Java_com_ctre_phoenix_motorcontrol_can_MotControllerJNI_SetInverted_12
-  (JNIEnv *, jclass, jlong, jint);
-
-/*
- * Class:     com_ctre_phoenix_motorcontrol_can_MotControllerJNI
  * Method:    ConfigFactoryDefault
- * Signature: (JI)I
+ * Signature: (JDI)I
  */
 JNIEXPORT jint JNICALL Java_com_ctre_phoenix_motorcontrol_can_MotControllerJNI_ConfigFactoryDefault
   (JNIEnv *, jclass, jlong, jint);
@@ -177,14 +153,6 @@ JNIEXPORT void JNICALL Java_com_ctre_phoenix_motorcontrol_can_MotControllerJNI_E
 
 /*
  * Class:     com_ctre_phoenix_motorcontrol_can_MotControllerJNI
- * Method:    GetInverted
- * Signature: (J)B
- */
-JNIEXPORT jboolean JNICALL Java_com_ctre_phoenix_motorcontrol_can_MotControllerJNI_GetInverted
-  (JNIEnv *, jclass, jlong);
-
-/*
- * Class:     com_ctre_phoenix_motorcontrol_can_MotControllerJNI
  * Method:    GetBusVoltage
  * Signature: (J)D
  */
@@ -233,11 +201,11 @@ JNIEXPORT jint JNICALL Java_com_ctre_phoenix_motorcontrol_can_MotControllerJNI_C
 
 /*
  * Class:     com_ctre_phoenix_motorcontrol_can_MotControllerJNI
- * Method:    ConfigSensorTerm
- * Signature: (JIII)I
+ * Method:    ConfigSelectedFeedbackCoefficient
+ * Signature: (JDII)I
  */
-JNIEXPORT jint JNICALL Java_com_ctre_phoenix_motorcontrol_can_MotControllerJNI_ConfigSensorTerm
-  (JNIEnv *, jclass, jlong, jint, jint, jint);
+JNIEXPORT jint JNICALL Java_com_ctre_phoenix_motorcontrol_can_MotControllerJNI_ConfigSelectedFeedbackCoefficient
+  (JNIEnv *, jclass, jlong, jdouble, jint, jint);
 
 /*
  * Class:     com_ctre_phoenix_motorcontrol_can_MotControllerJNI
@@ -321,7 +289,7 @@ JNIEXPORT jint JNICALL Java_com_ctre_phoenix_motorcontrol_can_MotControllerJNI_C
 
 /*
  * Class:     com_ctre_phoenix_motorcontrol_can_MotControllerJNI
- * Method:    OverrideLimitSwitchesEnable
+ * Method:    EnableLimitSwitches
  * Signature: (JZ)V
  */
 JNIEXPORT void JNICALL Java_com_ctre_phoenix_motorcontrol_can_MotControllerJNI_OverrideLimitSwitchesEnable
@@ -329,7 +297,7 @@ JNIEXPORT void JNICALL Java_com_ctre_phoenix_motorcontrol_can_MotControllerJNI_O
 
 /*
  * Class:     com_ctre_phoenix_motorcontrol_can_MotControllerJNI
- * Method:    ConfigForwardSoftLimitThreshold
+ * Method:    ConfigForwardSoftLimit
  * Signature: (JII)I
  */
 JNIEXPORT jint JNICALL Java_com_ctre_phoenix_motorcontrol_can_MotControllerJNI_ConfigForwardSoftLimitThreshold
@@ -337,31 +305,22 @@ JNIEXPORT jint JNICALL Java_com_ctre_phoenix_motorcontrol_can_MotControllerJNI_C
 
 /*
  * Class:     com_ctre_phoenix_motorcontrol_can_MotControllerJNI
- * Method:    ConfigReverseSoftLimitThreshold
+ * Method:    ConfigReverseSoftLimit
  * Signature: (JII)I
  */
 JNIEXPORT jint JNICALL Java_com_ctre_phoenix_motorcontrol_can_MotControllerJNI_ConfigReverseSoftLimitThreshold
   (JNIEnv *, jclass, jlong, jint, jint);
 
-/*
- * Class:     com_ctre_phoenix_motorcontrol_can_MotControllerJNI
- * Method:    ConfigForwardSoftLimitEnable
- * Signature: (JZI)I
- */
+
 JNIEXPORT jint JNICALL Java_com_ctre_phoenix_motorcontrol_can_MotControllerJNI_ConfigForwardSoftLimitEnable
   (JNIEnv *, jclass, jlong, jboolean, jint);
 
-/*
- * Class:     com_ctre_phoenix_motorcontrol_can_MotControllerJNI
- * Method:    ConfigReverseSoftLimitEnable
- * Signature: (JZI)I
- */
+
 JNIEXPORT jint JNICALL Java_com_ctre_phoenix_motorcontrol_can_MotControllerJNI_ConfigReverseSoftLimitEnable
   (JNIEnv *, jclass, jlong, jboolean, jint);
-
 /*
  * Class:     com_ctre_phoenix_motorcontrol_can_MotControllerJNI
- * Method:    OverrideSoftLimitsEnable
+ * Method:    EnableSoftLimits
  * Signature: (JZ)V
  */
 JNIEXPORT void JNICALL Java_com_ctre_phoenix_motorcontrol_can_MotControllerJNI_OverrideSoftLimitsEnable
@@ -425,6 +384,22 @@ JNIEXPORT jint JNICALL Java_com_ctre_phoenix_motorcontrol_can_MotControllerJNI_C
 
 /*
  * Class:     com_ctre_phoenix_motorcontrol_can_MotControllerJNI
+ * Method:    ConfigClosedLoopPeakOutput
+ * Signature: (JIDI)I
+ */
+JNIEXPORT jint JNICALL Java_com_ctre_phoenix_motorcontrol_can_MotControllerJNI_ConfigClosedLoopPeakOutput
+  (JNIEnv *, jclass, jlong, jint, jdouble, jint);
+
+/*
+ * Class:     com_ctre_phoenix_motorcontrol_can_MotControllerJNI
+ * Method:    ConfigClosedLoopPeriod
+ * Signature: (JIII)I
+ */
+JNIEXPORT jint JNICALL Java_com_ctre_phoenix_motorcontrol_can_MotControllerJNI_ConfigClosedLoopPeriod
+  (JNIEnv *, jclass, jlong, jint, jint, jint);
+
+/*
+ * Class:     com_ctre_phoenix_motorcontrol_can_MotControllerJNI
  * Method:    SetIntegralAccumulator
  * Signature: (JDII)I
  */
@@ -462,30 +437,6 @@ JNIEXPORT jdouble JNICALL Java_com_ctre_phoenix_motorcontrol_can_MotControllerJN
  */
 JNIEXPORT void JNICALL Java_com_ctre_phoenix_motorcontrol_can_MotControllerJNI_SelectProfileSlot
   (JNIEnv *, jclass, jlong, jint, jint);
-
-/*
- * Class:     com_ctre_phoenix_motorcontrol_can_MotControllerJNI
- * Method:    GetActiveTrajectoryPosition3
- * Signature: (JI)I
- */
-JNIEXPORT jint JNICALL Java_com_ctre_phoenix_motorcontrol_can_MotControllerJNI_GetActiveTrajectoryPosition3
-  (JNIEnv *, jclass, jlong, jint);
-
-/*
- * Class:     com_ctre_phoenix_motorcontrol_can_MotControllerJNI
- * Method:    GetActiveTrajectoryVelocity3
- * Signature: (JI)I
- */
-JNIEXPORT jint JNICALL Java_com_ctre_phoenix_motorcontrol_can_MotControllerJNI_GetActiveTrajectoryVelocity3
-  (JNIEnv *, jclass, jlong, jint);
-
-/*
- * Class:     com_ctre_phoenix_motorcontrol_can_MotControllerJNI
- * Method:    GetActiveTrajectoryArbFeedFwd3
- * Signature: (JI)D
- */
-JNIEXPORT jdouble JNICALL Java_com_ctre_phoenix_motorcontrol_can_MotControllerJNI_GetActiveTrajectoryArbFeedFwd3
-  (JNIEnv *, jclass, jlong, jint);
 
 /*
  * Class:     com_ctre_phoenix_motorcontrol_can_MotControllerJNI
@@ -554,26 +505,10 @@ JNIEXPORT jint JNICALL Java_com_ctre_phoenix_motorcontrol_can_MotControllerJNI_P
 /*
  * Class:     com_ctre_phoenix_motorcontrol_can_MotControllerJNI
  * Method:    PushMotionProfileTrajectory2
- * Signature: (JDDDIIZZI)I
+ * Signature: (JDDDIZZ)I
  */
 JNIEXPORT jint JNICALL Java_com_ctre_phoenix_motorcontrol_can_MotControllerJNI_PushMotionProfileTrajectory2
   (JNIEnv *, jclass, jlong, jdouble, jdouble, jdouble, jint, jint, jboolean, jboolean, jint);
-
-/*
- * Class:     com_ctre_phoenix_motorcontrol_can_MotControllerJNI
- * Method:    PushMotionProfileTrajectory3
- * Signature: (JDDDDDDIIZZIZ)I
- */
-JNIEXPORT jint JNICALL Java_com_ctre_phoenix_motorcontrol_can_MotControllerJNI_PushMotionProfileTrajectory3
-  (JNIEnv *, jclass, jlong, jdouble, jdouble, jdouble, jdouble, jdouble, jdouble, jint, jint, jboolean, jboolean, jint, jboolean);
-
-/*
- * Class:     com_ctre_phoenix_motorcontrol_can_MotControllerJNI
- * Method:    StartMotionProfile
- * Signature: (JJII)I
- */
-JNIEXPORT jint JNICALL Java_com_ctre_phoenix_motorcontrol_can_MotControllerJNI_StartMotionProfile
-  (JNIEnv *, jclass, jlong, jlong, jint, jint);
 
 /*
  * Class:     com_ctre_phoenix_motorcontrol_can_MotControllerJNI
@@ -581,14 +516,6 @@ JNIEXPORT jint JNICALL Java_com_ctre_phoenix_motorcontrol_can_MotControllerJNI_S
  * Signature: (J)Z
  */
 JNIEXPORT jboolean JNICALL Java_com_ctre_phoenix_motorcontrol_can_MotControllerJNI_IsMotionProfileTopLevelBufferFull
-  (JNIEnv *, jclass, jlong);
-
-/*
- * Class:     com_ctre_phoenix_motorcontrol_can_MotControllerJNI
- * Method:    IsMotionProfileFinished
- * Signature: (J)Z
- */
-JNIEXPORT jboolean JNICALL Java_com_ctre_phoenix_motorcontrol_can_MotControllerJNI_IsMotionProfileFinished
   (JNIEnv *, jclass, jlong);
 
 /*
@@ -634,89 +561,9 @@ JNIEXPORT jint JNICALL Java_com_ctre_phoenix_motorcontrol_can_MotControllerJNI_C
 /*
  * Class:     com_ctre_phoenix_motorcontrol_can_MotControllerJNI
  * Method:    ConfigMotionProfileTrajectoryPeriod
- * Signature: (JII)I
+ * Signature: (JI)I
  */
 JNIEXPORT jint JNICALL Java_com_ctre_phoenix_motorcontrol_can_MotControllerJNI_ConfigMotionProfileTrajectoryPeriod
-  (JNIEnv *, jclass, jlong, jint, jint);
-
-/*
- * Class:     com_ctre_phoenix_motorcontrol_can_MotControllerJNI
- * Method:    ConfigMotionProfileTrajectoryInterpolationEnable
- * Signature: (JZI)I
- */
-JNIEXPORT jint JNICALL Java_com_ctre_phoenix_motorcontrol_can_MotControllerJNI_ConfigMotionProfileTrajectoryInterpolationEnable
-  (JNIEnv *, jclass, jlong, jboolean, jint);
-
-/*
- * Class:     com_ctre_phoenix_motorcontrol_can_MotControllerJNI
- * Method:    ConfigFeedbackNotContinuous
- * Signature: (JZI)I
- */
-JNIEXPORT jint JNICALL Java_com_ctre_phoenix_motorcontrol_can_MotControllerJNI_ConfigFeedbackNotContinuous
-  (JNIEnv *, jclass, jlong, jboolean, jint);
-
-/*
- * Class:     com_ctre_phoenix_motorcontrol_can_MotControllerJNI
- * Method:    ConfigRemoteSensorClosedLoopDisableNeutralOnLOS
- * Signature: (JZI)I
- */
-JNIEXPORT jint JNICALL Java_com_ctre_phoenix_motorcontrol_can_MotControllerJNI_ConfigRemoteSensorClosedLoopDisableNeutralOnLOS
-  (JNIEnv *, jclass, jlong, jboolean, jint);
-
-/*
- * Class:     com_ctre_phoenix_motorcontrol_can_MotControllerJNI
- * Method:    ConfigClearPositionOnLimitF
- * Signature: (JZI)I
- */
-JNIEXPORT jint JNICALL Java_com_ctre_phoenix_motorcontrol_can_MotControllerJNI_ConfigClearPositionOnLimitF
-  (JNIEnv *, jclass, jlong, jboolean, jint);
-
-/*
- * Class:     com_ctre_phoenix_motorcontrol_can_MotControllerJNI
- * Method:    ConfigClearPositionOnLimitR
- * Signature: (JZI)I
- */
-JNIEXPORT jint JNICALL Java_com_ctre_phoenix_motorcontrol_can_MotControllerJNI_ConfigClearPositionOnLimitR
-  (JNIEnv *, jclass, jlong, jboolean, jint);
-
-/*
- * Class:     com_ctre_phoenix_motorcontrol_can_MotControllerJNI
- * Method:    ConfigClearPositionOnQuadIdx
- * Signature: (JZI)I
- */
-JNIEXPORT jint JNICALL Java_com_ctre_phoenix_motorcontrol_can_MotControllerJNI_ConfigClearPositionOnQuadIdx
-  (JNIEnv *, jclass, jlong, jboolean, jint);
-
-/*
- * Class:     com_ctre_phoenix_motorcontrol_can_MotControllerJNI
- * Method:    ConfigLimitSwitchDisableNeutralOnLOS
- * Signature: (JZI)I
- */
-JNIEXPORT jint JNICALL Java_com_ctre_phoenix_motorcontrol_can_MotControllerJNI_ConfigLimitSwitchDisableNeutralOnLOS
-  (JNIEnv *, jclass, jlong, jboolean, jint);
-
-/*
- * Class:     com_ctre_phoenix_motorcontrol_can_MotControllerJNI
- * Method:    ConfigSoftLimitDisableNeutralOnLOS
- * Signature: (JZI)I
- */
-JNIEXPORT jint JNICALL Java_com_ctre_phoenix_motorcontrol_can_MotControllerJNI_ConfigSoftLimitDisableNeutralOnLOS
-  (JNIEnv *, jclass, jlong, jboolean, jint);
-
-/*
- * Class:     com_ctre_phoenix_motorcontrol_can_MotControllerJNI
- * Method:    ConfigPulseWidthPeriod_EdgesPerRot
- * Signature: (JII)I
- */
-JNIEXPORT jint JNICALL Java_com_ctre_phoenix_motorcontrol_can_MotControllerJNI_ConfigPulseWidthPeriod_1EdgesPerRot
-  (JNIEnv *, jclass, jlong, jint, jint);
-
-/*
- * Class:     com_ctre_phoenix_motorcontrol_can_MotControllerJNI
- * Method:    ConfigPulseWidthPeriod_FilterWindowSz
- * Signature: (JII)I
- */
-JNIEXPORT jint JNICALL Java_com_ctre_phoenix_motorcontrol_can_MotControllerJNI_ConfigPulseWidthPeriod_1FilterWindowSz
   (JNIEnv *, jclass, jlong, jint, jint);
 
 /*
@@ -998,30 +845,6 @@ JNIEXPORT jint JNICALL Java_com_ctre_phoenix_motorcontrol_can_MotControllerJNI_E
  */
 JNIEXPORT jint JNICALL Java_com_ctre_phoenix_motorcontrol_can_MotControllerJNI_GetClosedLoopTarget
   (JNIEnv *, jclass, jlong, jint);
-
-/*
- * Class:     com_ctre_phoenix_motorcontrol_can_MotControllerJNI
- * Method:    ConfigSelectedFeedbackCoefficient
- * Signature: (JDII)I
- */
-JNIEXPORT jint JNICALL Java_com_ctre_phoenix_motorcontrol_can_MotControllerJNI_ConfigSelectedFeedbackCoefficient
-  (JNIEnv *, jclass, jlong, jdouble, jint, jint);
-
-/*
- * Class:     com_ctre_phoenix_motorcontrol_can_MotControllerJNI
- * Method:    ConfigClosedLoopPeakOutput
- * Signature: (JIDI)I
- */
-JNIEXPORT jint JNICALL Java_com_ctre_phoenix_motorcontrol_can_MotControllerJNI_ConfigClosedLoopPeakOutput
-  (JNIEnv *, jclass, jlong, jint, jdouble, jint);
-
-/*
- * Class:     com_ctre_phoenix_motorcontrol_can_MotControllerJNI
- * Method:    ConfigClosedLoopPeriod
- * Signature: (JIII)I
- */
-JNIEXPORT jint JNICALL Java_com_ctre_phoenix_motorcontrol_can_MotControllerJNI_ConfigClosedLoopPeriod
-  (JNIEnv *, jclass, jlong, jint, jint, jint);
 
 #ifdef __cplusplus
 }

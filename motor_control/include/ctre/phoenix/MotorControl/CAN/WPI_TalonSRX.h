@@ -10,7 +10,7 @@
  */
 #pragma once
 #if defined(CTR_INCLUDE_WPILIB_CLASSES) || defined(__FRC_ROBORIO__)
-#include "ctre/phoenix/MotorControl/CAN/TalonSRX.h"
+#include "ctre/ctre_phoenix/MotorControl/CAN/TalonSRX.h"
 #include "SmartDashboard/SendableBase.h"
 #include "SmartDashboard/SendableBuilder.h"
 #include "SpeedController.h"
@@ -18,7 +18,7 @@
 #include "MotorSafetyHelper.h"
 
 namespace ctre {
-namespace phoenix {
+namespace ctre_phoenix {
 namespace motorcontrol {
 namespace can {
 
@@ -123,6 +123,6 @@ private:
 
 } // namespace can
 } // namespace motorcontrol
-} // namespace phoenix
+} // namespace ctre_phoenix
 } // namespace ctre
 #endif

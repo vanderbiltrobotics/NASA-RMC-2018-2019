@@ -14,5 +14,5 @@ enum NeutralMode {
 };
 
 } // namespace motorcontrol
-} // namespace phoenix
+} // namespace ctre_phoenix
 } // namespace ctre

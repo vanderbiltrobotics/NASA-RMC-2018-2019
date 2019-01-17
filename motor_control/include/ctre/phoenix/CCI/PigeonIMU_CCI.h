@@ -23,25 +23,24 @@
  
  #pragma once
  
-#include "ctre/phoenix/cci/CCI.h"
 #include "ctre/phoenix/ErrorCode.h"
-#include <map>
-#include <cstddef>
+ #include <map>
+
+#ifndef CCIEXPORT
+	#define CCIEXPORT     __attribute__((visibility("default")))
+#endif
  
  static std::map<void *, bool> pigeonPresent;
  
  extern "C"{
 	CCIEXPORT void *c_PigeonIMU_Create2(int talonDeviceID);
 	CCIEXPORT void *c_PigeonIMU_Create1(int deviceNumber);
-    CCIEXPORT ctre::phoenix::ErrorCode c_PigeonIMU_Destroy(void *handle);
-    CCIEXPORT void c_PigeonIMU_DestroyAll();
-	CCIEXPORT ctre::phoenix::ErrorCode c_PigeonIMU_GetDescription(void *handle, char * toFill, int toFillByteSz, size_t * numBytesFilled);
-	CCIEXPORT ctre::phoenix::ErrorCode c_PigeonIMU_ConfigSetParameter(void *handle, int param, double value, uint8_t subValue, int ordinal, int timeoutMs);
+	// void c_PigeonIMU_Destroy(void *handle);
+	CCIEXPORT ctre::phoenix::ErrorCode c_PigeonIMU_GetDescription(void *handle, char * toFill, int toFillByteSz, int * numBytesFilled);
+	CCIEXPORT ctre::phoenix::ErrorCode c_PigeonIMU_ConfigSetParameter(void *handle, int param, double value, int subValue, int ordinal, int timeoutMs);
 	CCIEXPORT ctre::phoenix::ErrorCode c_PigeonIMU_ConfigGetParameter(void *handle, int param, double *value, int ordinal, int timeoutMs);
-	CCIEXPORT ctre::phoenix::ErrorCode c_PigeonIMU_ConfigGetParameter_6(void *handle, int32_t param, int32_t valueToSend, int32_t * valueRecieved, uint8_t * subValue, int32_t ordinal, int32_t timeoutMs);
 	CCIEXPORT ctre::phoenix::ErrorCode c_PigeonIMU_ConfigSetCustomParam(void *handle, int newValue, int paramIndex, int timeoutMs);
 	CCIEXPORT ctre::phoenix::ErrorCode c_PigeonIMU_ConfigGetCustomParam(void *handle, int *readValue, int paramIndex, int timoutMs);
-	CCIEXPORT ctre::phoenix::ErrorCode c_PigeonIMU_ConfigFactoryDefault(void *handle, int timeoutMs);
 	CCIEXPORT ctre::phoenix::ErrorCode c_PigeonIMU_SetYaw(void *handle, double angleDeg, int timeoutMs);
 	CCIEXPORT ctre::phoenix::ErrorCode c_PigeonIMU_AddYaw(void *handle, double angleDeg, int timeoutMs);
 	CCIEXPORT ctre::phoenix::ErrorCode c_PigeonIMU_SetYawToCompass(void *handle, int timeoutMs);
@@ -79,7 +78,7 @@
 	CCIEXPORT ctre::phoenix::ErrorCode c_PigeonIMU_GetFaults(void *handle, int * param);
 	CCIEXPORT ctre::phoenix::ErrorCode c_PigeonIMU_GetStickyFaults(void *handle, int * param);
 	CCIEXPORT ctre::phoenix::ErrorCode c_PigeonIMU_ClearStickyFaults(void *handle, int timeoutMs);
-	CCIEXPORT ctre::phoenix::ErrorCode c_PigeonIMU_SetStatusFramePeriod(void *handle, int frame, uint8_t periodMs, int timeoutMs);
+	CCIEXPORT ctre::phoenix::ErrorCode c_PigeonIMU_SetStatusFramePeriod(void *handle, int frame, int periodMs, int timeoutMs);
 	CCIEXPORT ctre::phoenix::ErrorCode c_PigeonIMU_GetStatusFramePeriod(void *handle, int frame, int *periodMs, int timeoutMs) ;
 	CCIEXPORT ctre::phoenix::ErrorCode c_PigeonIMU_SetControlFramePeriod(void *handle, int frame, int periodMs) ;
 }

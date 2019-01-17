@@ -17,22 +17,6 @@ JNIEXPORT jlong JNICALL Java_com_ctre_phoenix_CANifierJNI_JNI_1new_1CANifier
 
 /*
  * Class:     com_ctre_phoenix_CANifierJNI
- * Method:    JNI_destroy_CANifier
- * Signature: (J)I
- */
-JNIEXPORT jint JNICALL Java_com_ctre_phoenix_CANifierJNI_JNI_1destroy_1CANifier
-  (JNIEnv *, jclass, jlong);
-
-/*
- * Class:     com_ctre_phoenix_CANifierJNI
- * Method:    JNI_destroy_AllCANifiers
- * Signature: ()V
- */
-//JNIEXPORT void JNICALL Java_com_ctre_phoenix_CANifierJNI_JNI_1destroy_1AllCANifiers
-//  (JNIEnv *, jclass);
-
-/*
- * Class:     com_ctre_phoenix_CANifierJNI
  * Method:    JNI_SetLEDOutput
  * Signature: (JII)V
  */
@@ -154,7 +138,7 @@ JNIEXPORT jint JNICALL Java_com_ctre_phoenix_CANifierJNI_JNI_1ConfigVelocityMeas
 /*
  * Class:     com_ctre_phoenix_CANifierJNI
  * Method:    JNI_ConfigClearPositionOnLimitF
- * Signature: (JZI)I
+ * Signature: (JBI)I
  */
 JNIEXPORT jint JNICALL Java_com_ctre_phoenix_CANifierJNI_JNI_1ConfigClearPositionOnLimitF
   (JNIEnv *, jclass, jlong, jboolean, jint);
@@ -162,7 +146,7 @@ JNIEXPORT jint JNICALL Java_com_ctre_phoenix_CANifierJNI_JNI_1ConfigClearPositio
 /*
  * Class:     com_ctre_phoenix_CANifierJNI
  * Method:    JNI_ConfigClearPositionOnLimitR
- * Signature: (JZI)I
+ * Signature: (JBI)I
  */
 JNIEXPORT jint JNICALL Java_com_ctre_phoenix_CANifierJNI_JNI_1ConfigClearPositionOnLimitR
   (JNIEnv *, jclass, jlong, jboolean, jint);
@@ -170,10 +154,10 @@ JNIEXPORT jint JNICALL Java_com_ctre_phoenix_CANifierJNI_JNI_1ConfigClearPositio
 /*
  * Class:     com_ctre_phoenix_CANifierJNI
  * Method:    JNI_ConfigClearPositionOnQuadIdx
- * Signature: (JZI)I
+ * Signature: (JBI)I
  */
 JNIEXPORT jint JNICALL Java_com_ctre_phoenix_CANifierJNI_JNI_1ConfigClearPositionOnQuadIdx
-  (JNIEnv *, jclass, jlong, jboolean, jint);
+  (JNIEnv *env, jclass, jlong, jboolean, jint);
 
 /*
  * Class:     com_ctre_phoenix_CANifierJNI
@@ -206,14 +190,6 @@ JNIEXPORT jint JNICALL Java_com_ctre_phoenix_CANifierJNI_JNI_1ConfigSetParameter
  */
 JNIEXPORT jdouble JNICALL Java_com_ctre_phoenix_CANifierJNI_JNI_1ConfigGetParameter
   (JNIEnv *, jclass, jlong, jint, jint, jint);
-
-/*
- * Class:     com_ctre_phoenix_CANifierJNI
- * Method:    JNI_ConfigFactoryDefault
- * Signature: (JI)I
- */
-JNIEXPORT jint JNICALL Java_com_ctre_phoenix_CANifierJNI_JNI_1ConfigFactoryDefault
-  (JNIEnv *, jclass, jlong, jint);
 
 /*
  * Class:     com_ctre_phoenix_CANifierJNI

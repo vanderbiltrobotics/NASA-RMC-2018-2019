@@ -1,17 +1,17 @@
 #pragma once
 
-#include "ctre/phoenix/motorcontrol/ControlMode.h"
-#include "ctre/phoenix/motorcontrol/ControlFrame.h"
-#include "ctre/phoenix/motorcontrol/NeutralMode.h"
-#include "ctre/phoenix/motorcontrol/FeedbackDevice.h"
-#include "ctre/phoenix/motorcontrol/SensorCollection.h"
-#include "ctre/phoenix/motorcontrol/StatusFrame.h"
-#include "ctre/phoenix/motorcontrol/LimitSwitchType.h"
-#include "ctre/phoenix/motorcontrol/Faults.h"
-#include "ctre/phoenix/motorcontrol/StickyFaults.h"
+#include "ctre/phoenix/MotorControl/ControlMode.h"
+#include "ctre/phoenix/MotorControl/ControlFrame.h"
+#include "ctre/phoenix/MotorControl/NeutralMode.h"
+#include "ctre/phoenix/MotorControl/FeedbackDevice.h"
+#include "ctre/phoenix/MotorControl/SensorCollection.h"
+#include "ctre/phoenix/MotorControl/StatusFrame.h"
+#include "ctre/phoenix/MotorControl/LimitSwitchType.h"
+#include "ctre/phoenix/MotorControl/Faults.h"
+#include "ctre/phoenix/MotorControl/StickyFaults.h"
 #include "ctre/phoenix/paramEnum.h"
-#include "ctre/phoenix/motion/TrajectoryPoint.h"
-#include "ctre/phoenix/motion/MotionProfileStatus.h"
+#include "ctre/phoenix/Motion/TrajectoryPoint.h"
+#include "ctre/phoenix/Motion/MotionProfileStatus.h"
 #include "ctre/phoenix/ErrorCode.h"
 #include "IFollower.h"
 
@@ -53,15 +53,12 @@ public:
 	/* in parent */
 
 	//------ status frame period changes ----------//
-	virtual ErrorCode SetStatusFramePeriod(StatusFrame frame, uint8_t periodMs,
+	virtual ErrorCode SetStatusFramePeriod(StatusFrame frame, int periodMs,
 			int timeoutMs = 0) = 0;
 	virtual ErrorCode SetStatusFramePeriod(StatusFrameEnhanced frame,
-			uint8_t periodMs, int timeoutMs = 0) = 0;
+			int periodMs, int timeoutMs = 0) = 0;
 	virtual int GetStatusFramePeriod(StatusFrame frame, int timeoutMs = 0) = 0;
 	virtual int GetStatusFramePeriod(StatusFrameEnhanced frame, int timeoutMs = 0) = 0;
-
-	//------ General Status ----------//
-	virtual double GetOutputCurrent() = 0;
 
 	//----- velocity signal conditionaing ------//
 	virtual ErrorCode ConfigVelocityMeasurementPeriod(VelocityMeasPeriod period,
@@ -88,7 +85,7 @@ public:
 
 	//------ RAW Sensor API ----------//
 	/**
-	 * @return object that can get/set individual RAW sensor values.
+	 * @retrieve object that can get/set individual RAW sensor values.
 	 */
 	ctre::phoenix::motorcontrol::SensorCollection & GetSensorCollection();
 
@@ -128,5 +125,5 @@ public:
 
 }; // class IMotorControllerEnhanced
 } // namespace motorcontrol
-} // namespace phoenix
+} // namespace ctre_phoenix
 } // namespace ctre

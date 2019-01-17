@@ -1,22 +1,25 @@
 #pragma once
 
-#include "ctre/phoenix/motorcontrol/ControlMode.h"
-#include "ctre/phoenix/motorcontrol/ControlFrame.h"
-#include "ctre/phoenix/motorcontrol/DemandType.h"
-#include "ctre/phoenix/motorcontrol/InvertType.h"
-#include "ctre/phoenix/motorcontrol/NeutralMode.h"
-#include "ctre/phoenix/motorcontrol/FeedbackDevice.h"
-#include "ctre/phoenix/motorcontrol/RemoteSensorSource.h"
-#include "ctre/phoenix/motorcontrol/SensorTerm.h"
-#include "ctre/phoenix/motorcontrol/StatusFrame.h"
-#include "ctre/phoenix/motorcontrol/LimitSwitchType.h"
-#include "ctre/phoenix/motorcontrol/Faults.h"
-#include "ctre/phoenix/motorcontrol/StickyFaults.h"
+#include "ctre/phoenix/MotorControl/ControlMode.h"
+#include "ctre/phoenix/MotorControl/ControlFrame.h"
+#include "ctre/phoenix/MotorControl/DemandType.h"
+#include "ctre/phoenix/MotorControl/NeutralMode.h"
+#include "ctre/phoenix/MotorControl/FeedbackDevice.h"
+#include "ctre/phoenix/MotorControl/RemoteSensorSource.h"
+#include "ctre/phoenix/MotorControl/SensorTerm.h"
+#include "ctre/phoenix/MotorControl/StatusFrame.h"
+#include "ctre/phoenix/MotorControl/LimitSwitchType.h"
+#include "ctre/phoenix/MotorControl/Faults.h"
+#include "ctre/phoenix/MotorControl/StickyFaults.h"
 #include "ctre/phoenix/paramEnum.h"
-#include "ctre/phoenix/motion/TrajectoryPoint.h"
-#include "ctre/phoenix/motion/MotionProfileStatus.h"
+#include "ctre/phoenix/Motion/TrajectoryPoint.h"
+#include "ctre/phoenix/Motion/MotionProfileStatus.h"
 #include "ctre/phoenix/ErrorCode.h"
 #include "IFollower.h"
+#if defined(CTR_INCLUDE_WPILIB_CLASSES) || defined(__FRC_ROBORIO__)
+/* WPILIB */
+#include "SpeedController.h"
+#endif
 
 namespace ctre {
 namespace phoenix {
@@ -36,7 +39,6 @@ public:
 	//------ Invert behavior ----------//
 	virtual void SetSensorPhase(bool PhaseSensor) = 0;
 	virtual void SetInverted(bool invert) = 0;
-	virtual void SetInverted(InvertType invertType) = 0;
 	virtual bool GetInverted() const = 0;
 
 	//----- Factory Default Configuration -----//
@@ -69,6 +71,7 @@ public:
 	virtual double GetBusVoltage() = 0;
 	virtual double GetMotorOutputPercent() = 0;
 	virtual double GetMotorOutputVoltage() = 0;
+	virtual double GetOutputCurrent() = 0;
 	virtual double GetTemperature() = 0;
 
 	//------ sensor selection ----------//
@@ -90,7 +93,7 @@ public:
 	//------ status frame period changes ----------//
 	virtual ErrorCode SetControlFramePeriod(ControlFrame frame,
 			int periodMs) = 0;
-	virtual ErrorCode SetStatusFramePeriod(StatusFrame frame, uint8_t periodMs,
+	virtual ErrorCode SetStatusFramePeriod(StatusFrame frame, int periodMs,
 			int timeoutMs = 0) = 0;
 	virtual int GetStatusFramePeriod(StatusFrame frame, int timeoutMs = 0) = 0;
 
@@ -148,10 +151,9 @@ public:
 
 	virtual ErrorCode SelectProfileSlot(int slotIdx, int pidIdx) = 0;
 
-	virtual double GetClosedLoopTarget(int pidIdx = 0) = 0;
-	virtual int GetActiveTrajectoryPosition(int pidIdx = 0) = 0;
-	virtual int GetActiveTrajectoryVelocity(int pidIdx = 0) = 0;
-	virtual double GetActiveTrajectoryArbFeedFwd(int pidIdx = 0) = 0;
+	virtual int GetClosedLoopTarget(int pidIdx = 0) = 0;
+	virtual int GetActiveTrajectoryPosition() = 0;
+	virtual int GetActiveTrajectoryVelocity() = 0;
 	virtual double GetActiveTrajectoryHeading() = 0;
 
 	//------ Motion Profile Settings used in Motion Magic  ----------//
@@ -217,5 +219,5 @@ public:
 };
 
 }
-} // namespace phoenix
+} // namespace ctre_phoenix
 }

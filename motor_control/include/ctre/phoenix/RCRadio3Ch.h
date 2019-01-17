@@ -2,7 +2,7 @@
 
 #include <vector>
 #include "ctre/phoenix/CANifier.h"
-#include "ctre/phoenix/tasking/IProcessable.h"
+#include "ctre/phoenix/Tasking/IProcessable.h"
 
 namespace ctre{
 namespace phoenix {
@@ -22,10 +22,10 @@ public:
 	Status CurrentStatus = Status::Okay;
 
 	RCRadio3Ch(ctre::phoenix::CANifier *canifier);
-	double GetDutyCycleUs(Channel channel);
-	double GetDutyCyclePerc(Channel channel);
+	float GetDutyCycleUs(Channel channel);
+	float GetDutyCyclePerc(Channel channel);
 	bool GetSwitchValue(Channel channel);
-	double GetPeriodUs(Channel channel);
+	float GetPeriodUs(Channel channel);
 
 	//ILoopable
 	void Process();

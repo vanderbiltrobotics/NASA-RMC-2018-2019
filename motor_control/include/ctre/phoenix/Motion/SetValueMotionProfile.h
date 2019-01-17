@@ -9,5 +9,5 @@ enum SetValueMotionProfile {
 };
 
 } // namespace motion
-} // namespace phoenix
+} // namespace ctre_phoenix
 } // namespace ctre

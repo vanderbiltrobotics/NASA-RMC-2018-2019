@@ -12,5 +12,5 @@ public:
 };
 
 } // namespace  Signals
-} // namespace phoenix
+} // namespace ctre_phoenix
 } // namespace ctre

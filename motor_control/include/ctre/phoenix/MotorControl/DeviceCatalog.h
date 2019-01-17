@@ -13,7 +13,7 @@ public:
 		_mcs.push_back(motorController);
 	}
 
-	size_t MotorControllerCount() {
+	int MotorControllerCount() {
 		return _mcs.size();
 	}
 
@@ -33,6 +33,6 @@ private:
 };
 
 }
-} // namespace phoenix
+} // namespace ctre_phoenix
 }
 

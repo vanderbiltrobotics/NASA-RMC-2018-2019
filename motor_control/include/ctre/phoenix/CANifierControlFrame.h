@@ -9,5 +9,5 @@ enum CANifierControlFrame {
 	CANifier_Control_2_PwmOutput = 0x03040040,
 };
 
-} // namespace phoenix
+} // namespace ctre_phoenix
 } // namespace ctre

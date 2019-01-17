@@ -25,8 +25,6 @@ enum StatusFrameEnhanced {
 	Status_13_Base_PIDF0 = 0x1700,
 	Status_14_Turn_PIDF1 = 0x1740,
 	Status_15_FirmareApiStatus = 0x1780,
-	/** MotionProfile Targets for Auxiliary PID1. */
-	Status_17_Targets1 = 0x1C00,
 
 	Status_3_Quadrature = 0x1480,
 	Status_8_PulseWidth = 0x15C0,
@@ -54,8 +52,6 @@ enum StatusFrame {
 	Status_13_Base_PIDF0_ = 0x1700,
 	Status_14_Turn_PIDF1_ = 0x1740,
 	Status_15_FirmareApiStatus_ = 0x1780,
-	/** MotionProfile Targets for Auxiliary PID1. */
-	Status_17_Targets1_ = 0x1C00,
 };
 class StatusFrameRoutines {
 public:
@@ -64,5 +60,5 @@ public:
 	}
 };
 } // namespace motorcontrol
-} // namespace phoenix
+} // namespace ctre_phoenix
 } // namespace ctre

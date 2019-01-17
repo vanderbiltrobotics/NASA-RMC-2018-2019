@@ -14,5 +14,5 @@ enum CANifierStatusFrame {
 	CANifierStatusFrame_Status_8_Misc = 0x0415C0,
 };
 
-} // namespace phoenix
+} // namespace ctre_phoenix
 } // namespace ctre

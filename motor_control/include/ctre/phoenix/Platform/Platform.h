@@ -1,5 +1,5 @@
 #pragma once
-#include "ctre/phoenix/platform/Platform-pack.h"
+#include "ctre/phoenix/Platform/Platform-pack.h"
 #include <stdint.h>
 #include <string>
 
@@ -24,16 +24,16 @@ namespace can {
 		uint8_t dlc; //!< Number of bytes in payload
 	} canframe_t;
 
-	//-------------- Low Level CANBus interface, this is required if using phoenix-canutil--------------------------//
+	//-------------- Low Level CANBus interface, this is required if using ctre_phoenix-canutil--------------------------//
 	void CANbus_GetStatus(float *busUtilPerc, uint32_t *busOffCount, uint32_t *txFullCount, uint32_t *rec, uint32_t *tec, int32_t *status);
 	int32_t CANbus_SendFrame(uint32_t messageID, const uint8_t *data, uint8_t dataSize);
-	/* assumed blocking */
-	int32_t CANbus_ReceiveFrame(canframe_t * toFill, uint32_t frameCap, uint32_t *numFilled);
-    
-    int32_t SetCANInterface(const char * CANInterface);
+	int32_t CANbus_ReceiveFrame(canframe_t &toFill);
 
-	//-------------- Mid Level CANBus interface, this is required if NOT using phoenix-canutil, --------------------------//
+	//-------------- Mid Level CANBus interface, this is required if NOT using ctre_phoenix-canutil, --------------------------//
 	void CANComm_SendMessage(uint32_t messageID, const uint8_t *data, uint8_t dataSize, int32_t periodMs, int32_t *status);
+	/**
+	 * @param messageIDMask Completely ignored, TODO remove this.
+	 */
 	void CANComm_ReceiveMessage(uint32_t *messageID, uint32_t messageIDMask, uint8_t *data, uint8_t *dataSize, uint32_t *timeStamp, int32_t *status);
 	void CANComm_OpenStreamSession(uint32_t *sessionHandle, uint32_t messageID, uint32_t messageIDMask, uint32_t maxMessages, int32_t *status);
 	void CANComm_CloseStreamSession(uint32_t sessionHandle);
@@ -46,14 +46,19 @@ namespace can {
 
 } //namespace can
 } //namespace platform
-} //namespace phoenix
+} //namespace ctre_phoenix
 } //namespace ctre
 
 namespace ctre {
 namespace phoenix {
 namespace platform {
-
-    enum DeviceType {TalonSRXType, VictorSPXType, CANifierType, PigeonIMUType};
+	/**
+	 * @param [out] isEnabled	Set to true to enable actuators (Talons for example).
+	 *							Sometimes this is called robot-enable.
+	 * @return 0 if routine is successful. Nonzero for error code, and 
+	 *							caller will disable system regardless of isEnabled.
+	 */
+	int IsSystemActuatorEnabled(bool & isEnabled);
 
 	/**
 	 * @param timeUs	How long to yield current thread in microseconds (us).  
@@ -72,21 +77,6 @@ namespace platform {
 	void ReportError(int isError, int32_t errorCode, int isLVCode,
 		const char *details, const char *location, const char *callStack);
 
-    int32_t SimCreate(DeviceType type, int id);
-
-    int32_t SimConfigGet(DeviceType type, uint32_t param, uint32_t valueToSend, uint32_t & outValueReceived, uint32_t & outSubvalue, uint32_t ordinal, uint32_t id);
-    
-    int32_t SimConfigSet(DeviceType type, uint32_t param, uint32_t value, uint32_t subValue, uint32_t ordinal, uint32_t id);
-
-	int32_t SimDestroy(DeviceType type, int id);
-	int32_t SimDestroyAll();
-
-    int32_t DisposePlatform();
-    int32_t StartPlatform();
-
-    int32_t DisposeMgr();
-    int32_t StartMgr();
-    
 } // namespace platform
-} // namespace phoenix
+} // namespace ctre_phoenix
 } // namespace ctre
