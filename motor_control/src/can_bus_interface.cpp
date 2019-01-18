@@ -15,7 +15,29 @@
 #include "ros/ros.h"
 #include "geometry_msgs/Twist.h"
 
-// Global pointers for each motor controller
+const double WHEEL_DIAMETER = 0.15;
+const double ROBOT_WIDTH = 0.75; //measured from the centers of the wheels
+// if that matter for anything
+
+
+// getWheelAngularVelocity
+// this method calculates the required angular velocity of a wheel for the robot to turn the required distance
+//pre:
+//   sign conventions
+//   forward and counterclockwise from the center of the robot are the positive
+//   senses for both the linear and the angular velocity invalid_argument
+//   side: 1 for right side of center, -1 for left side
+double getWheelAngularVelocity(double linV, double angV, int side) {
+    if (side != -1 && side != 1) {
+        throw std::invalid_argument("'side' parameter invalid");
+    } else {
+        double out = 0.5 * ROBOT_WIDTH * angV;
+        out = linV + (side * out);
+        out = out / (WHEEL_DIAMETER / 2);
+        return out;
+    }
+}
+
 
 int main(int argc, char **argv) {
 
@@ -41,8 +63,7 @@ int main(int argc, char **argv) {
     ros::Rate loop_rate(1);
 
     // Loop
-    while (ros::ok())
-    {
+    while (ros::ok()) {
         // Read information from the Talon
         std::cout << "Current voltage: " << fl.GetBusVoltage() << std::endl;
 
