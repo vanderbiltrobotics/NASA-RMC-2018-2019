@@ -25,5 +25,6 @@
   <depend>rospy</depend>
   <depend>std_msgs</depend>
   <depend>geometry_msgs</depend>
+  <depend>custom_msgs</depend>
 
 </package>

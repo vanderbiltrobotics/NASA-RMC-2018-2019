@@ -7,15 +7,13 @@
 # import required packages
 import rospy
 from geometry_msgs.msg import Twist
-from std_msgs.msg import UInt8
 from custom_msgs.msg import DriveMotorSpeeds
 
 class DriveController:
 
-	# Constructor
+    # Constructor
     def __init__(self):
-
-    	# Initialize publishers
+        # Initialize publishers
         self.speeds_pub = rospy.Publisher('drive_motor_speeds', DriveMotorSpeeds, queue_size=1)
 
         # Initialize subscribers
@@ -23,38 +21,40 @@ class DriveController:
 
     # Callback function for new drive commands
     def process_drive_cmd(self, data):
+        linear = data.linear.x
+        angular = data.angular.x
+
+        # Constant robot values - will be in parameter server
         CONST_ROBOT_WIDTH = 0.75
-        CONST_WHEEL_DIAMETER = 0.15
+        CONST_WHEEL_DIAMETER = 0.1524  # in meters
 
-        #FIXME: Calculations for motor speed
+        # Compute linear and angular velocity components
+        linear_component = (linear / CONST_WHEEL_DIAMETER) / 2
+        angular_component = (angular * CONST_ROBOT_WIDTH / 2) / (CONST_WHEEL_DIAMETER / 2)
 
-        speed = 0.5 * CONST_ROBOT_WIDTH * self.cmd_sub.angular
-        speed = self.cmd_sub.linear + speed
-        speed = speed / (CONST_WHEEL_DIAMETER / 2)
-        print(speed)
-        return speed
+        # Clockwise is negative, Counter-Clockwise is positive
+        right_speeds = linear_component - angular_component
+        left_speeds = linear_component + angular_component
 
-        #publish the motor speeds
+        # publish the motor speeds
         motor_speeds = DriveMotorSpeeds()
 
-        #determine which side is positive
-        left_side = -1
-        right_side = 1
-        motor_speeds.front_l = speed * left_side
-        motor_speeds.rear_l = speeds * left_side
-        motor_speeds.front_r = speed * right_side
-        motor_speeds.rear_r = speed * right_side
+        # Assign and publish motor speed messages
+        motor_speeds.front_l = left_speeds
+        motor_speeds.rear_l = left_speeds
+        motor_speeds.front_r = right_speeds
+        motor_speeds.rear_r = right_speeds
 
-        self.speeds_pub.Publish(motor_speeds)
-        pass
+        self.speeds_pub.publish(motor_speeds)
+
 
 # Run the node
 if __name__ == '__main__':
 
-	# Initialize as ROS node
+    # Initialize as ROS node
     rospy.init_node('drive_motor_controller')
 
-    # Create a DriveController object 
+    # Create a DriveController object
     controller = DriveController()
 
     # Ready to go
@@ -63,4 +63,4 @@ if __name__ == '__main__':
     # Loop continuously
     rate = rospy.Rate(2)
     while not rospy.is_shutdown():
-    	pass
+        pass
