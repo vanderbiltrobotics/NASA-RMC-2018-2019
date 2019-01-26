@@ -29,8 +29,8 @@ class DriveController:
         CONST_WHEEL_DIAMETER = 0.1524  # in meters
 
         # Compute linear and angular velocity components
-        linear_component = (linear / CONST_WHEEL_DIAMETER) / 2
-        angular_component = (angular * CONST_ROBOT_WIDTH / 2) / (CONST_WHEEL_DIAMETER / 2)
+        linear_component = (linear / (CONST_WHEEL_DIAMETER / 2))
+        angular_component = (angular * CONST_ROBOT_WIDTH) / (CONST_WHEEL_DIAMETER)
 
         # Clockwise is negative, Counter-Clockwise is positive
         right_speeds = linear_component - angular_component
