@@ -12,7 +12,7 @@ from custom_msgs.msg import DriveMotorSpeeds
 class DriveController:
 
     # Constructor
-    def __init__(self):
+    def __init__(self, wheel_base_separation, wheel_radius):
         # Initialize publishers
         self.speeds_pub = rospy.Publisher('drive_motor_speeds', DriveMotorSpeeds, queue_size=1)
 
@@ -24,13 +24,9 @@ class DriveController:
         linear = data.linear.x
         angular = data.angular.x
 
-        # Constant robot values - will be in parameter server
-        CONST_ROBOT_WIDTH = 0.75
-        CONST_WHEEL_DIAMETER = 0.1524  # in meters
-
         # Compute linear and angular velocity components
-        linear_component = (linear / (CONST_WHEEL_DIAMETER / 2))
-        angular_component = (angular * CONST_ROBOT_WIDTH) / (CONST_WHEEL_DIAMETER)
+        linear_component = (linear / (self.wheel_radius))
+        angular_component = (angular * self.wheel_base_separation) / (self.wheel_radius)
 
         # Clockwise is negative, Counter-Clockwise is positive
         right_speeds = linear_component - angular_component
@@ -54,8 +50,12 @@ if __name__ == '__main__':
     # Initialize as ROS node
     rospy.init_node('drive_motor_controller')
 
+    # Read values from server
+    wheel_base_separation = rospy.get_param("wheel_base_separation")
+    wheel_radius = rospy.get_param("wheel_radius")
+
     # Create a DriveController object
-    controller = DriveController()
+    controller = DriveController(wheel_base_separation, wheel_radius)
 
     # Ready to go
     rospy.loginfo("Drive Motor Controller initialized...")
