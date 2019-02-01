@@ -7,13 +7,12 @@ import numpy as np
 
 # import ros packages
 import rospy
-from geometry_msgs.msg import Twist
-
+from geometry_msgs.msg import Pose, PoseWithCovarianceStamped
 
 # Define the Jacobian matrix for measurement update
 # Robot movement in each direction is independent of the other two directions
 def HJacobian(x):
-    return np.eye(6) 
+    return np.eye(7) 
 
 # Define callback function to calculate the expected sensor measurement
 # mean state vector is a distance; ArUco pose estimation algorithm measures distance
@@ -31,7 +30,7 @@ class ArucoExtendedKalmanFilter:
         # For AruCo, our state vector consists of (x,y,theta)
         # Second arugment is dimension of the measurement input Z
         # For AruCo, measurement input is (x,y,theta)
-        self.arucoEKF = EKF.ExtendedKalmanFilter(6,6)
+        self.arucoEKF = EKF.ExtendedKalmanFilter(7,7)
 
         '''
         EKF.x initialized to zeros by constructor
@@ -39,11 +38,10 @@ class ArucoExtendedKalmanFilter:
         EKF.F = I; F = state transition matrix; state does not change w/o control input
 
 
-
         '''
 
         # Define the measurement noise covariance matrix
-        self.arucoEKF.R = np.eye(6) * 1
+        self.arucoEKF.R = np.eye(7) * 1
 
         # Define the process noise covariance matrix
         #arucoEKF.Q = 
