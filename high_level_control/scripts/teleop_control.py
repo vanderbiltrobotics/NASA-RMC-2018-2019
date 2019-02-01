@@ -41,6 +41,7 @@ class TeleopControl:
         
         # Initialize publishers
         self.drive_pub = rospy.Publisher('drive_cmd', Twist)
+        # other publishers will be added when necessary
 
         # Initialize subscribers
         self.joy_sub = rospy.Subscriber("joy", Joy, self.joy_callback)
@@ -48,10 +49,21 @@ class TeleopControl:
 
     # Callback function for joystick controls
     def joy_callback(self, data):
+        self.set_drive_speed(data)
+        self.set_digging_mode(data)
+
+    # Sets drive speed based on left joystick input
+    def set_drive_speed(self, data):
         twist = Twist()
         twist.linear.x = data.axes[1]
         twist.angular.z = data.axes[0]
         self.drive_pub.publish(twist)
+
+    # Sets digging mode based on ???? (TBD)
+    def set_digging_mode(self, data):
+        pass
+
+    # additional functions TBD
 
 
 if __name__ == '__main__':
