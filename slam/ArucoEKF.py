@@ -19,7 +19,7 @@ class ArucoExtendedKalmanFilter:
         # For AruCo, our state vector consists of (x,y,theta)
         # Second arugment is dimension of the measurement input Z
         # For AruCo, measurement input is (x,y,theta)
-        self.arucoEKF = EKF.ExtendedKalmanFilter(7,7)
+        self.arucoEKF = EKF.ExtendedKalmanFilter(6,6)
 
         '''
         EKF.x initialized to zeros by constructor
@@ -28,31 +28,52 @@ class ArucoExtendedKalmanFilter:
         '''
 
         # Define the measurement noise covariance matrix
-        self.arucoEKF.R = np.eye(7) * 1
+        self.arucoEKF.R = np.eye(6) * 1
 
         # Define the process noise covariance matrix
         #arucoEKF.Q = 
 
+        # Consecutively increasing ID for header in pose with covariance stamped
+        self.seqID = 0
+
     def update(self,pose):
         #Initialize empty np array
-        z = np.empty((7,1))
+        z = np.empty((6,1))
 
         #Convert Pose object into a 7x1 numpy array to pass to 
         z[0][1] = pose.position.x
         z[1][1] = pose.position.y
         z[2][1] = pose.position.z
-        z[3][1] = pose.quaternion.x
-        z[4][1] = pose.quaternion.y
-        z[5][1] = pose.quaternion.z
-        z[6][1] = pose.quaternion.w
+        z[3][1] = pose.orientation.x
+        z[4][1] = pose.orientation.y
+        z[5][1] = pose.orientation.z
+        # z[6][1] = pose.orientation.w
 
         self.arucoEKF.predict_update(z, self.HJacobian, self.hx)
 
     def getPose(self):
-        # pose = Pose()
-        # pose.position.x = self.arucoEKF.x[0][1]
+        pose = Pose()
+        pose.position.x = self.arucoEKF.x[0][0]
+        pose.position.y = self.arucoEKF.x[0][1]
+        pose.position.z = self.arucoEKF.x[0][2]
+        pose.orientation.x = self.arucoEKF.x[0][3]
+        pose.orientation.y = self.arucoEKF.x[0][4]
+        pose.orientation.z = self.arucoEKF.x[0][5]
+        # pose.orientation.w = self.arucoEKF.x[0][6]
+
         return Pose()
+
     def getPoseCovStamped(self):
+        poseCovStamped = PoseWithCovarianceStamped()
+        
+        poseCovStamped.header.seq = self.seqID
+        poseCovStamped.header.stamp = rospy.Time.now()
+        poseCovStamped.header.frame_id = str(self.seqID)
+        self.seqID += 1 
+        
+        poseCovStamped.pose.pose = self.getPose()
+        poseCovStamped.pose.covariance = self.arucoEKF.P
+       
         return PoseWithCovarianceStamped()
 
 
@@ -76,7 +97,7 @@ if(__name__ == "__main__"):
     rospy.init_node("aruco_ekf")
     r = rospy.Rate(10) # 10hz
 
-    rospy.Subscriber('aruco_pose_raw', Pose, arucoEKF.update)
+    poseSubscriber = rospy.Subscriber('aruco_pose_raw', Pose, arucoEKF.update)
 
     posePublisher = rospy.Publisher('aruco_pose_filtered', Pose, queue_size=1)
     poseCovStampPublisher = rospy.Publisher('aruco_pose_filtered_covariance', PoseWithCovarianceStamped, queue_size=1)
@@ -85,4 +106,3 @@ if(__name__ == "__main__"):
         posePublisher.publish(arucoEKF.getPose())
         poseCovStampPublisher.publish(arucoEKF.getPoseCovStamped())
         r.sleep()
-
