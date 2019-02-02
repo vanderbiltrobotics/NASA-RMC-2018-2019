@@ -1,0 +1,12 @@
+
+<launch>
+
+  <!-- Start the publishing Kinect data through freenect -->
+  <include file="$(find freenect_launch)/launch/freenect.launch" />
+
+  <!-- Source elevation_mapping_demos/simple_demo.launch -->
+  <include file="$(find elevation_mapping_demos)/launch/simple_demo.launch" />
+
+  
+
+</launch>
