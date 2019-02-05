@@ -3,7 +3,7 @@
 
   <!-- basic data -->
   <name>drive_system</name>
-  <version>0.1.0</version>
+  <version>1.0.0</version>
   <description>The drive_system package</description>
 
   <!-- maintainers -->
@@ -17,7 +17,8 @@
 
   <!-- authors -->
   <author email="jacob.gloudemans@vanderbilt.edu">Jacob Gloudemans</author>
-  <author email="jason.lao@vanderbilt.edu">Jason Lao</author>
+  <author>Jiaqi Li</author>
+  <author>Chuka Munkh-Achit</author>
 
   <!-- dependencies -->
   <buildtool_depend>catkin</buildtool_depend>
@@ -25,6 +26,5 @@
   <depend>rospy</depend>
   <depend>std_msgs</depend>
   <depend>geometry_msgs</depend>
-  <depend>custom_msgs</depend>
 
 </package>
