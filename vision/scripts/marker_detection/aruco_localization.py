@@ -10,13 +10,14 @@ import tf.transformations
 
 # Import other required packages
 import cv2.aruco as aruco
-import cv2
 import numpy as np
 import yaml
+import sys
 
 
 DEFAULT_CALIB_FILE = 'camera_a.yaml'
-CALIBRATION_FILE_DIR = '../camera_calibration/calibration_data/'
+CALIBRATION_FILE_DIR = sys.path[0] + '/../camera_calibration/calibration_data/'
+
 
 class ImageHandler:
 

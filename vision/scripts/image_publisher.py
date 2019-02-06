@@ -1,4 +1,4 @@
-
+#!/usr/bin/env python
 
 # Import ROS packages
 import rospy
@@ -9,17 +9,18 @@ from cv_bridge import CvBridge
 import cv2
 import yaml
 import numpy as np
+import sys
 
 # Configuration params
 DEFAULT_DEVICE_ID = 0
 DEFAULT_CALIB_FILE = 'camera_a.yaml'
-DEFAULT_PUB_RATE = 1
+DEFAULT_PUB_RATE = 20
 DEFAULT_IMG_WIDTH = 640
 DEFAULT_IMG_HEIGHT = 480
 DEFAULT_ALPHA = 1
 
 # Other params
-CALIBRATION_FILE_DIR = "camera_calibration/calibration_data/"
+CALIBRATION_FILE_DIR = sys.path[0] + "/camera_calibration/calibration_data/"
 
 # Run the node
 if __name__ == '__main__':
@@ -53,7 +54,7 @@ if __name__ == '__main__':
     bridge = CvBridge()
 
     # Loop indefinitely
-    rate = rospy.Rate(29)
+    rate = rospy.Rate(publish_rate)
     while not rospy.is_shutdown():
 
         # Get next frame

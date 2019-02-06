@@ -29,7 +29,7 @@ class ArucoExtendedKalmanFilter:
         # Second arugment is dimension of the measurement input Z
         # For AruCo, measurement input is (x,y,theta)
 
-        self.arucoEKF = EKF.ExtendedKalmanFilter(6,6)
+        self.arucoEKF = EKF.ExtendedKalmanFilter(7,7)
 
         '''
         EKF.x initialized to zeros by constructor
@@ -38,7 +38,7 @@ class ArucoExtendedKalmanFilter:
         '''
 
         # Define the measurement noise covariance matrix
-        self.arucoEKF.R = np.eye(6) * 1
+        self.arucoEKF.R = np.eye(7) * 1
 
         # Define the process noise covariance matrix
         #arucoEKF.Q = 
@@ -48,16 +48,16 @@ class ArucoExtendedKalmanFilter:
 
     def update(self,pose):
         #Initialize empty np array
-        z = np.empty((6,1))
+        z = np.empty((7,1))
 
         #Convert Pose object into a 7x1 numpy array to pass to 
-        z[0][1] = pose.position.x
-        z[1][1] = pose.position.y
-        z[2][1] = pose.position.z
-        z[3][1] = pose.orientation.x
-        z[4][1] = pose.orientation.y
-        z[5][1] = pose.orientation.z
-        # z[6][1] = pose.orientation.w
+        z[0][0] = pose.position.x
+        z[1][0] = pose.position.y
+        z[2][0] = pose.position.z
+        z[3][0] = pose.orientation.x
+        z[4][0] = pose.orientation.y
+        z[5][0] = pose.orientation.z
+        z[6][0] = pose.orientation.w
 
         self.arucoEKF.predict_update(z, self.HJacobian, self.hx)
 
@@ -69,7 +69,7 @@ class ArucoExtendedKalmanFilter:
         pose.orientation.x = self.arucoEKF.x[3][0]
         pose.orientation.y = self.arucoEKF.x[4][0]
         pose.orientation.z = self.arucoEKF.x[5][0]
-        # pose.orientation.w = self.arucoEKF.x[0][6]
+        pose.orientation.w = self.arucoEKF.x[6][0]
 
         return Pose()
 
