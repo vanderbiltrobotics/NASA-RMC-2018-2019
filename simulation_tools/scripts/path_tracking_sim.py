@@ -20,7 +20,7 @@ class Robot:
         # True state of robot
         self.pose = init_pose
         self.desired_lin_vel = 1.0
-        self.desired_ang_vel = -2.12132034356
+        self.desired_ang_vel = 2 / -2.12132034356
 
         # Subscriber to listen for incoming drive commands
         self.twist_sub = rospy.Subscriber(twist_topic, Twist, self.set_twist)
@@ -60,6 +60,8 @@ class Robot:
     # Publish estimate of the robot's pose (if noise is set, won't exactly match true pose)
     def send_pose_est(self):
         self.pose_pub.publish(self.pose)
+
+
 
 
 if __name__ == "__main__":
@@ -110,11 +112,11 @@ if __name__ == "__main__":
         arrow_y2 = arrow_y1 - (sin(theta) * .15)
         cv2.arrowedLine(frame, (int(arrow_x1 * scale), int(arrow_y1 * scale)),
                         (int(arrow_x2 * scale), int(arrow_y2 * scale)), p_color, 2, tipLength=0.5)
-        cv2.circle(frame, (int(arrow_x1 * scale), int(arrow_y1 * scale)), 5, r_color)
+        cv2.circle(frame, (int(arrow_x1 * scale), int(arrow_y1 * scale)), 5, r_color, thickness=-1)
 
         # DRAW TEST POINT
         target_point = [1.7071067811865475, 0.7071067811865475]
-        cv2.circle(frame, (int(target_point[0] * scale), int((field_length - target_point[1]) * scale)), 5, (0, 0, 255))
+        cv2.circle(frame, (int(target_point[0] * scale), int((field_length - target_point[1]) * scale)), 5, (0, 0, 255), thickness=-1)
 
         # Display image
         cv2.imshow("Path tracking simulation", frame)
