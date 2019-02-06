@@ -31,10 +31,10 @@ if __name__ == '__main__':
     rospy.loginfo("Image publisher initialized...")
 
     # Initialize publishers for image topics
-    img_raw_pub = rospy.Publisher("image_raw", Image, queue_size=1)
-    img_comp_pub = rospy.Publisher("image_compressed", CompressedImage, queue_size=1)
-    img_rect_pub = rospy.Publisher("image_rect", Image, queue_size=1)
-    img_rect_comp_pub = rospy.Publisher("image_rect_compressed", CompressedImage, queue_size=1)
+    img_raw_pub = rospy.Publisher("camera/image_raw", Image, queue_size=1)
+    img_comp_pub = rospy.Publisher("camera/image_compressed", CompressedImage, queue_size=1)
+    img_rect_pub = rospy.Publisher("camera/image_rect", Image, queue_size=1)
+    img_rect_comp_pub = rospy.Publisher("camera/image_rect_compressed", CompressedImage, queue_size=1)
 
     # Read configuration parameters
     device_id = rospy.get_param("device_id", DEFAULT_DEVICE_ID)

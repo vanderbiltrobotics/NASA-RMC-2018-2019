@@ -35,8 +35,8 @@ class ImageHandler:
         self.aruco_param = aruco.DetectorParameters_create()  # default parameters
         self.aruco_board = aruco.GridBoard_create(5, 7, markerLength, markerSeparation, self.aruco_dict)
 
-        self.image_sub = rospy.Subscriber('/image_raw', Image, self.image_callback)
-        self.pose_pub = rospy.Publisher("aruco/pose", Pose, queue_size=0)
+        self.image_sub = rospy.Subscriber('camera/image_raw', Image, self.image_callback)
+        self.pose_pub = rospy.Publisher("aruco/pose_raw", Pose, queue_size=0)
         self.bool_pub = rospy.Publisher("aruco/marker_detected", Bool, queue_size=0)
         self.bridge = CvBridge()
 
