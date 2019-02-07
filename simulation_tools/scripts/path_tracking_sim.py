@@ -19,8 +19,8 @@ class Robot:
 
         # True state of robot
         self.pose = init_pose
-        self.desired_lin_vel = 1.0
-        self.desired_ang_vel = 2 / -2.12132034356
+        self.desired_lin_vel = 0.0
+        self.desired_ang_vel = 0.0
 
         # Subscriber to listen for incoming drive commands
         self.twist_sub = rospy.Subscriber(twist_topic, Twist, self.set_twist)
@@ -79,12 +79,12 @@ if __name__ == "__main__":
 
     # Initial pose for robot
     init_pose = Pose()
-    init_pose.position.x = 0.5
-    init_pose.position.y = 0.5
-    init_pose.orientation.x = pi / 4
+    init_pose.position.x = field_width / 2.0
+    init_pose.position.y = field_width / 2.0
+    init_pose.orientation.x = 0
 
     # Create a simulated robot
-    robot = Robot("drive_cmd", "current_pose_estimate", init_pose)
+    robot = Robot("/drive/drive_cmd", "current_pose_estimate", init_pose)
 
     # Set update rate for robots (how often path tracking node can receive new pose estimate)
     loop_frequency = 100
@@ -114,9 +114,9 @@ if __name__ == "__main__":
                         (int(arrow_x2 * scale), int(arrow_y2 * scale)), p_color, 2, tipLength=0.5)
         cv2.circle(frame, (int(arrow_x1 * scale), int(arrow_y1 * scale)), 5, r_color, thickness=-1)
 
-        # DRAW TEST POINT
-        target_point = [1.7071067811865475, 0.7071067811865475]
-        cv2.circle(frame, (int(target_point[0] * scale), int((field_length - target_point[1]) * scale)), 5, (0, 0, 255), thickness=-1)
+        # # DRAW TEST POINT
+        # target_point = [1.7071067811865475, 0.7071067811865475]
+        # cv2.circle(frame, (int(target_point[0] * scale), int((field_length - target_point[1]) * scale)), 5, (0, 0, 255), thickness=-1)
 
         # Display image
         cv2.imshow("Path tracking simulation", frame)

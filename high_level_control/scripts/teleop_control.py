@@ -40,7 +40,7 @@ class TeleopControl:
     def __init__(self):
         
         # Initialize publishers
-        self.drive_pub = rospy.Publisher('drive_cmd', Twist)
+        self.drive_pub = rospy.Publisher('drive/drive_cmd', Twist, queue_size=0)
         # other publishers will be added when necessary
 
         # Initialize subscribers
@@ -55,8 +55,8 @@ class TeleopControl:
     # Sets drive speed based on left joystick input
     def set_drive_speed(self, data):
         twist = Twist()
-        twist.linear.x = data.axes[1]
-        twist.angular.z = data.axes[0]
+        twist.linear.x = data.axes[1] * 3
+        twist.angular.x = data.axes[3] * 3
         self.drive_pub.publish(twist)
 
     # Sets digging mode based on ???? (TBD)
@@ -78,5 +78,4 @@ if __name__ == '__main__':
     rospy.loginfo("Teleop Control initialized...")
 
     # Loop continuously
-    while not rospy.is_shutdown():
-    	pass
+    rospy.spin()
