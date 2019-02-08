@@ -40,7 +40,7 @@ class TeleopControl:
     def __init__(self):
         
         # Initialize publishers
-        self.drive_pub = rospy.Publisher('drive/drive_cmd', Twist, queue_size=0)
+        self.drive_pub = rospy.Publisher('drive_cmd', Twist, queue_size=0)
         # other publishers will be added when necessary
 
         # Initialize subscribers

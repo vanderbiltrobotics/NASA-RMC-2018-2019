@@ -84,7 +84,7 @@ if __name__ == "__main__":
     init_pose.orientation.x = 0
 
     # Create a simulated robot
-    robot = Robot("/drive/drive_cmd", "current_pose_estimate", init_pose)
+    robot = Robot("drive_cmd", "current_pose_estimate", init_pose)
 
     # Set update rate for robots (how often path tracking node can receive new pose estimate)
     loop_frequency = 100

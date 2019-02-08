@@ -40,7 +40,7 @@ class DriveController:
         self.speed_pub_br = rospy.Publisher('motor_speeds/back_right/' + topic_str, Float64, queue_size=1)
 
         # Initialize subscriber
-        self.cmd_sub = rospy.Subscriber('drive/drive_cmd', Twist, self.process_drive_cmd)
+        self.cmd_sub = rospy.Subscriber('drive_cmd', Twist, self.process_drive_cmd)
 
     # Remap linear velocity from input range to output range
     def remap_lin_vel(self, vel):
@@ -119,13 +119,13 @@ if __name__ == '__main__':
     rospy.init_node('drive_motor_controller')
 
     # Read values from server
-    wheel_sep = rospy.get_param("robot/wheel_separation")
-    wheel_rad = rospy.get_param("robot/wheel_radius")
-    in_max_lin_vel = rospy.get_param("drive/max_in_lin_vel")
-    in_max_ang_vel = rospy.get_param("drive/max_in_ang_vel")
-    out_max_lin_vel = rospy.get_param("drive/max_out_lin_vel")
-    out_max_ang_vel = rospy.get_param("drive/max_out_ang_vel")
-    output_format = rospy.get_param("drive/output_mode")
+    wheel_sep = rospy.get_param("wheel_separation")
+    wheel_rad = rospy.get_param("wheel_radius")
+    in_max_lin_vel = rospy.get_param("max_in_lin_vel")
+    in_max_ang_vel = rospy.get_param("max_in_ang_vel")
+    out_max_lin_vel = rospy.get_param("max_out_lin_vel")
+    out_max_ang_vel = rospy.get_param("max_out_ang_vel")
+    output_format = rospy.get_param("output_mode")
 
     # Create a DriveController object
     controller = DriveController(wheel_rad, wheel_rad, in_max_lin_vel, in_max_ang_vel,

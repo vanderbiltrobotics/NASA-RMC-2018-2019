@@ -7,15 +7,25 @@
     <node name="teleop_control" pkg="high_level_control" type="teleop_control.py"/>
 
     <!-- Drive motor control node - translates twist message into individual motor speeds -->
-    <param name="robot/wheel_separation" type="double" value="0.31"/>
-    <param name="robot/wheel_radius" type="double" value="0.108"/>
-    <param name="drive/max_in_lin_vel" type="double" value="1.0"/>
-    <param name="drive/max_in_ang_vel" type="double" value="1.0"/>
-    <param name="drive/max_out_lin_vel" type="double" value="0.5"/>
-    <param name="drive/max_out_ang_vel" type="double" value="1.0"/>
-    <param name="drive/output_mode" type="string" value="pwm"/>
+    <param name="wheel_separation" type="double" value="0.31"/>
+    <param name="wheel_radius" type="double" value="0.108"/>
+    <param name="max_in_lin_vel" type="double" value="1.0"/>
+    <param name="max_in_ang_vel" type="double" value="1.0"/>
+    <param name="max_out_lin_vel" type="double" value="0.5"/>
+    <param name="max_out_ang_vel" type="double" value="1.0"/>
+    <param name="output_mode" type="string" value="pwm"/>
+
     <node name="drive_motor_controller" pkg="drive_system" type="drive_motor_controller.py"/>
 
 
+    <group>
+        <node name="simulator" pkg="simulation_tools" type="path_tracking_sim.py"/>
+    </group>
+
+
+    <!--<machine name="rpi" address="192.168.0.103" user="vur">-->
+        <!--<rosparam command="load" file="$(find motor_control)/launch/example.yaml" />-->
+        <!--<node pkg="motor_control" type="motor_control_node" name="motor_control" respawn="false" />-->
+    <!--</machine>-->
 
 </launch>
