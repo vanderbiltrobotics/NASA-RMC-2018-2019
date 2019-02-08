@@ -1,5 +1,5 @@
 # Ignore top level CMakeLists.txt
-CMakeLists.txt
+src/CMakeLists.txt
 
 # Ignore vscode hidden folders
 /**/*.vscode/
