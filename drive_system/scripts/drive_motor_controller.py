@@ -14,7 +14,7 @@
 # Import ROS packages
 import rospy
 from geometry_msgs.msg import Twist
-from std_msgs.msg import Float32
+from std_msgs.msg import Float64
 
 
 class DriveController:
@@ -33,13 +33,14 @@ class DriveController:
         self.out_format = out_format
 
         # Initialize publishers
-        self.speed_pub_fl = rospy.Publisher('drive/motor_speeds/fl', Float32, queue_size=1)
-        self.speed_pub_bl = rospy.Publisher('drive/motor_speeds/bl', Float32, queue_size=1)
-        self.speed_pub_fr = rospy.Publisher('drive/motor_speeds/fr', Float32, queue_size=1)
-        self.speed_pub_br = rospy.Publisher('drive/motor_speeds/br', Float32, queue_size=1)
+        topic_str = "set_percent_output" if self.out_format == "pwm" else "set_velocity"
+        self.speed_pub_fl = rospy.Publisher('motor_speeds/front_left/' + topic_str, Float64, queue_size=1)
+        self.speed_pub_bl = rospy.Publisher('motor_speeds/back_left/' + topic_str, Float64, queue_size=1)
+        self.speed_pub_fr = rospy.Publisher('motor_speeds/front_right/' + topic_str, Float64, queue_size=1)
+        self.speed_pub_br = rospy.Publisher('motor_speeds/back_right/' + topic_str, Float64, queue_size=1)
 
         # Initialize subscriber
-        self.cmd_sub = rospy.Subscriber('drive_cmd', Twist, self.process_drive_cmd)
+        self.cmd_sub = rospy.Subscriber('drive/drive_cmd', Twist, self.process_drive_cmd)
 
     # Remap linear velocity from input range to output range
     def remap_lin_vel(self, vel):
@@ -93,10 +94,10 @@ class DriveController:
             left_speeds, right_speeds = self.wheel_vels_to_pwms(left_speeds, right_speeds)
 
         # Create messages for publishing motor speeds
-        motor_speed_fl = Float32()
-        motor_speed_bl = Float32()
-        motor_speed_fr = Float32()
-        motor_speed_br = Float32()
+        motor_speed_fl = Float64()
+        motor_speed_bl = Float64()
+        motor_speed_fr = Float64()
+        motor_speed_br = Float64()
 
         # Set message values
         motor_speed_fl.data = left_speeds
@@ -124,7 +125,7 @@ if __name__ == '__main__':
     in_max_ang_vel = rospy.get_param("drive/max_in_ang_vel")
     out_max_lin_vel = rospy.get_param("drive/max_out_lin_vel")
     out_max_ang_vel = rospy.get_param("drive/max_out_ang_vel")
-    output_format = rospy.get_param("drive/exp_motor_cmd_fmt")
+    output_format = rospy.get_param("drive/output_mode")
 
     # Create a DriveController object
     controller = DriveController(wheel_rad, wheel_rad, in_max_lin_vel, in_max_ang_vel,
