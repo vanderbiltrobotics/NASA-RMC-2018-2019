@@ -5,7 +5,7 @@ project(motor_control)
 EXECUTE_PROCESS( COMMAND uname -m COMMAND tr -d '\n' OUTPUT_VARIABLE arch )
 
 ## Compile as C++11, supported in ROS Kinetic and newer
-add_compile_options(-std=c++11)
+add_compile_options(-std=c++17)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -20,7 +20,7 @@ find_package(catkin REQUIRED
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
-find_package (Threads REQUIRED)
+find_package(Threads REQUIRED)
 
 ################################################
 ## Declare ROS messages, services and actions ##
@@ -79,7 +79,7 @@ generate_dynamic_reconfigure_options(
 )
 
 ## Generate launch files
-roslaunch_add_file_check(${PROJECT_SOURCE_DIR}/launch/test.launch)
+roslaunch_add_file_check(${PROJECT_SOURCE_DIR}/launch/example.launch)
 
 ###################################
 ## catkin specific configuration ##
@@ -93,8 +93,7 @@ roslaunch_add_file_check(${PROJECT_SOURCE_DIR}/launch/test.launch)
 catkin_package(
         INCLUDE_DIRS include
         LIBRARIES CTRE_Phoenix CTRE_PhoenixCCI CTRE_PhoenixPlatformLinuxSocketCan CTRE_PhoenixCanutils
-#  CATKIN_DEPENDS other_catkin_pkg
-#  DEPENDS system_lib
+        CATKIN_DEPENDS roscpp geometry_msgs dynamic_reconfigure roslaunch
 )
 
 ###########
@@ -105,7 +104,7 @@ catkin_package(
 ## Your package locations should be listed before other locations
 include_directories(
         include
-        ${catkin_INCLUDE_DIRS}
+        SYSTEM ${catkin_INCLUDE_DIRS}
 )
 
 ## Declare libraries to be imported
@@ -142,30 +141,27 @@ endif()
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/phoenix_node.cpp)
 #add_executable(phoenix_node ${PROJECT_SOURCE_DIR}/example.cpp)
-add_executable(${PROJECT_NAME}_test_node ${PROJECT_SOURCE_DIR}/example.cpp)
+add_executable(motor_control_cmd_example ${PROJECT_SOURCE_DIR}/src/CmdExmaple.cpp)
+add_dependencies(motor_control_cmd_example ${PROJECT_NAME}_gencfg ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
-add_executable(talon_node ${PROJECT_SOURCE_DIR}/src/TalonNode.cpp)
-add_dependencies(talon_node ${PROJECT_NAME}_gencfg)
-
-add_executable(victor_node ${PROJECT_SOURCE_DIR}/src/VictorNode.cpp)
-add_dependencies(victor_node ${PROJECT_NAME}_gencfg)
+add_executable(motor_control_node
+        ${PROJECT_SOURCE_DIR}/src/TalonNode.cpp
+        ${PROJECT_SOURCE_DIR}/src/VictorNode.cpp
+        ${PROJECT_SOURCE_DIR}/src/MotorControl.cpp
+)
+add_dependencies(motor_control_node ${PROJECT_NAME}_gencfg ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
 #add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(${PROJECT_NAME}_test_node
+target_link_libraries(motor_control_cmd_example
     ${catkin_LIBRARIES}
     Threads::Threads
     CTRE_Phoenix CTRE_PhoenixCCI CTRE_PhoenixPlatformLinuxSocketCan CTRE_PhoenixCanutils
 )
-target_link_libraries(talon_node
-    ${catkin_LIBRARIES}
-    Threads::Threads
-    CTRE_Phoenix CTRE_PhoenixCCI CTRE_PhoenixPlatformLinuxSocketCan CTRE_PhoenixCanutils
-)
-target_link_libraries(victor_node
+target_link_libraries(motor_control_node
     ${catkin_LIBRARIES}
     Threads::Threads
     CTRE_Phoenix CTRE_PhoenixCCI CTRE_PhoenixPlatformLinuxSocketCan CTRE_PhoenixCanutils
@@ -183,5 +179,10 @@ install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/${arch}/*
 install(DIRECTORY include/
     DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
     FILES_MATCHING PATTERN "*.h"
+    PATTERN ".svn" EXCLUDE
+)
+## Mark launch files for installation
+install(DIRECTORY launch/
+    DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
     PATTERN ".svn" EXCLUDE
 )

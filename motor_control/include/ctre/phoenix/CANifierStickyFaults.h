@@ -19,5 +19,5 @@ struct CANifierStickyFaults {
 	}
 };
 
-} // ctre_phoenix
+} // phoenix
 } // ctre
