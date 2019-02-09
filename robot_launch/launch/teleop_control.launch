@@ -22,10 +22,11 @@
         <node name="simulator" pkg="simulation_tools" type="path_tracking_sim.py"/>
     </group>
 
+    <!--&lt;!&ndash; Declare raspberry pi as a machine to run nodes on &ndash;&gt;-->
+    <!--<machine name="rpi" address="192.168.0.104" user="vur"/>-->
 
-    <!--<machine name="rpi" address="192.168.0.103" user="vur">-->
-        <!--<rosparam command="load" file="$(find motor_control)/launch/example.yaml" />-->
-        <!--<node pkg="motor_control" type="motor_control_node" name="motor_control" respawn="false" />-->
-    <!--</machine>-->
+    <!--&lt;!&ndash; Load parameters for motor_control node onto server, run motor_control nodes on raspberry pi &ndash;&gt;-->
+    <!--<rosparam command="load" file="$(find motor_control)/launch/example.yaml" />-->
+    <!--<node machine="rpi" pkg="motor_control" type="motor_control_node" name="motor_control" respawn="false" />-->
 
 </launch>

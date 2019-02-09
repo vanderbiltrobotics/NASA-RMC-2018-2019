@@ -34,10 +34,10 @@ class DriveController:
 
         # Initialize publishers
         topic_str = "set_percent_output" if self.out_format == "pwm" else "set_velocity"
-        self.speed_pub_fl = rospy.Publisher('motor_speeds/front_left/' + topic_str, Float64, queue_size=1)
-        self.speed_pub_bl = rospy.Publisher('motor_speeds/back_left/' + topic_str, Float64, queue_size=1)
-        self.speed_pub_fr = rospy.Publisher('motor_speeds/front_right/' + topic_str, Float64, queue_size=1)
-        self.speed_pub_br = rospy.Publisher('motor_speeds/back_right/' + topic_str, Float64, queue_size=1)
+        self.speed_pub_fl = rospy.Publisher('front_left/' + topic_str, Float64, queue_size=1)
+        self.speed_pub_bl = rospy.Publisher('back_left/' + topic_str, Float64, queue_size=1)
+        self.speed_pub_fr = rospy.Publisher('front_right/' + topic_str, Float64, queue_size=1)
+        self.speed_pub_br = rospy.Publisher('back_right/' + topic_str, Float64, queue_size=1)
 
         # Initialize subscriber
         self.cmd_sub = rospy.Subscriber('drive_cmd', Twist, self.process_drive_cmd)
