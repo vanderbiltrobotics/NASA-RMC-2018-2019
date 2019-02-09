@@ -21,7 +21,7 @@ class DriveController:
 
     # Constructor
     def __init__(self, wheel_sep, wheel_rad, in_max_lin_vel, in_max_ang_vel,
-                 out_max_lin_vel, out_max_ang_vel, out_format):
+                 out_max_lin_vel, out_max_ang_vel, out_format, input_queue_size):
 
         # Store parameters
         self.wheel_separation = wheel_sep
@@ -31,6 +31,10 @@ class DriveController:
         self.out_max_lin_vel = out_max_lin_vel
         self.out_max_ang_vel = out_max_ang_vel
         self.out_format = out_format
+        self.max_queue_size = input_queue_size
+
+        # Initialize queue list
+        self.queue = []
 
         # Initialize publishers
         topic_str = "set_percent_output" if self.out_format == "pwm" else "set_velocity"
@@ -70,12 +74,36 @@ class DriveController:
         # Return the pair of scaled values as a tuple
         return left_pwm, right_pwm
 
+    # Calculate average velocities in queue of inputs
+    def avg_queue_vel(self, data):
+        # Local variables initialized
+        current_queue_size = self.queue.count()
+        lin_sum = 0
+        ang_sum = 0
+
+        # Append the inputs to the list while deleting inputs older than 100 values ago
+        if current_queue_size < self.max_queue_size:
+            self.queue.append(data)
+        else:
+            self.queue.delete(0)
+            self.queue.append(data)
+
+        # Get the sum of the current list of values for each x/y in linear/angular
+        for i in range(0, current_queue_size):
+            lin_sum += self.queue[i].linear.x
+            ang_sum += self.queue[i].angular.x
+
+        # Divide sum by total
+        lin_avg = lin_sum/current_queue_size
+        ang_avg = ang_sum/current_queue_size
+
+        return lin_avg, ang_avg
+
     # Callback function for new drive commands
     def process_drive_cmd(self, data):
 
         # Extract the relevant values from the incoming message
-        linear = data.linear.x
-        angular = data.angular.x
+        linear, angular = self.avg_queue_vel(data)
 
         # Remap the velocities to the desired output range
         linear = self.remap_lin_vel(linear)
@@ -126,10 +154,11 @@ if __name__ == '__main__':
     out_max_lin_vel = rospy.get_param("max_out_lin_vel")
     out_max_ang_vel = rospy.get_param("max_out_ang_vel")
     output_format = rospy.get_param("output_mode")
+    input_queue_size = rospy.get_param*("input_queue_size")
 
     # Create a DriveController object
     controller = DriveController(wheel_rad, wheel_rad, in_max_lin_vel, in_max_ang_vel,
-                                 out_max_lin_vel, out_max_ang_vel, output_format)
+                                 out_max_lin_vel, out_max_ang_vel, output_format, input_queue_size)
 
     # Ready to go
     rospy.loginfo("Drive Motor Controller initialized...")

@@ -14,6 +14,7 @@
     <param name="max_out_lin_vel" type="double" value="0.5"/>
     <param name="max_out_ang_vel" type="double" value="1.0"/>
     <param name="output_mode" type="string" value="pwm"/>
+    <param name="input_queue_size" type="int" value="50"/>
 
     <node name="drive_motor_controller" pkg="drive_system" type="drive_motor_controller.py"/>
 
