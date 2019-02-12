@@ -40,7 +40,7 @@ class TeleopControl:
     def __init__(self):
         
         # Initialize publishers
-        self.drive_pub = rospy.Publisher('drive_cmd', Twist, queue_size=0)
+        self.drive_pub = rospy.Publisher('cmd_vel', Twist, queue_size=0)
         # other publishers will be added when necessary
 
         # Initialize subscribers
@@ -56,7 +56,7 @@ class TeleopControl:
     def set_drive_speed(self, data):
         twist = Twist()
         twist.linear.x = data.axes[1]
-        twist.angular.x = data.axes[3]
+        twist.angular.z = data.axes[3]
         self.drive_pub.publish(twist)
 
     # Sets digging mode based on ???? (TBD)

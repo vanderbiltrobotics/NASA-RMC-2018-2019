@@ -75,7 +75,7 @@ class DriveController:
 
         # Extract the relevant values from the incoming message
         linear = data.linear.x
-        angular = data.angular.x
+        angular = data.angular.z
 
         # Remap the velocities to the desired output range
         linear = self.remap_lin_vel(linear)

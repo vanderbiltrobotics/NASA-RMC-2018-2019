@@ -23,7 +23,7 @@ if __name__ == '__main__':
     # Send linear and angular velocities
     test_msg = Twist()
     test_msg.linear.x = 0
-    test_msg.angular.x = 1
+    test_msg.angular.z = 1
 
     while test_publisher.get_num_connections() < 1:
         rospy.sleep(1)
