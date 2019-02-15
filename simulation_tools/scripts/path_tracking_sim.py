@@ -8,7 +8,7 @@
 import rospy
 from geometry_msgs.msg import Twist, Pose, PoseStamped
 from nav_msgs.msg import Path
-from tf.transformations import quaternion_from_euler
+from tf.transformations import quaternion_from_euler, euler_from_quaternion
 
 # Import other required packages
 from math import sin, cos, pi
@@ -42,9 +42,18 @@ class Robot:
         noisy_lin_vel = self.desired_lin_vel + np.random.normal(0.0, abs(self.desired_lin_vel / 5.0))
         noisy_ang_vel = self.desired_ang_vel + np.random.normal(0.0, abs(self.desired_ang_vel / 5.0))
 
+        # Convert orientation to rpy
+        quat = (
+            self.pose.pose.orientation.x,
+            self.pose.pose.orientation.y,
+            self.pose.pose.orientation.z,
+            self.pose.pose.orientation.w
+        )
+        rpy = euler_from_quaternion(quat)
+
         # Compute new position and orientation
-        init_theta = self.pose.pose.orientation.z
-        final_theta = self.pose.pose.orientation.z + (noisy_ang_vel * sec)
+        init_theta = rpy[2]
+        final_theta = init_theta + (noisy_ang_vel * sec)
         avg_theta = (final_theta + init_theta) / 2.0
         final_x = self.pose.pose.position.x + (noisy_lin_vel * cos(avg_theta) * sec)
         final_y = self.pose.pose.position.y + (noisy_lin_vel * sin(avg_theta) * sec)
