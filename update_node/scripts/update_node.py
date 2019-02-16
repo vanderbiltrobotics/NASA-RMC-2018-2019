@@ -6,10 +6,10 @@
 
 # imports
 import rospy
-from std_msgs.msg import UInt8
-from geometry_msgs.msg import Twist
-from geometry_msgs.msg import Pose
-from std_msgs.msg import Float64, Float32
+from std_msgs.msg import *
+from geometry_msgs.msg import *
+from nav_msgs.msg import *
+from sensor_msgs.msg import *
 
 class UpdatePublisher:
 
@@ -19,10 +19,10 @@ class UpdatePublisher:
         latest_var = 0
 
         #Initialize Publisher
-        self.publisher = rospy.publisher('updates/' + topic_name, Float64, queue_size=0)
+        self.publisher = rospy.Publisher('updates/' + topic_name, Float64, queue_size=0)
 
         #Initialize Subscriber
-        self.subscriber = rospy.subscriber(topic_name, Float64, self.update_message)
+        self.subscriber = rospy.Subscriber(topic_name, Float64, self.update_message)
 
     def update_message(self, data):
 
@@ -36,6 +36,14 @@ class UpdatePublisher:
         #Publish the variable
         self.publisher.publish(latest_var)
 
+    @staticmethod
+    def load_config_file(file_name):
+
+        updaters = []
+
+        # Create a list of UpdatePublishers
+
+        return updaters
 
 if __name__ == "__main__":
 
@@ -45,12 +53,18 @@ if __name__ == "__main__":
     #create UpdatePublisher object
     updater = UpdatePublisher()
 
+    # TODO: Read a file containing a bunch of [topic name, message type] pairs, create an UpdatePublisher for each
+    # updaters = load_config_file(filename)
+
     #read values from server
     update_rate = rospy.get_param("update_rate")
 
     #Log initialization message
     rospy.loginfo("Update node initialized...")
 
-    rate = rospy.rate(update_rate)
+    rate = rospy.Rate(update_rate)
     while not rospy.is_shutdown():
-        rospy.sleep()
+
+        # Send an update from each UpdatePublisher
+
+        rate.sleep()
