@@ -29,12 +29,15 @@ class ImageHandler:
         self.cmatx = np.asarray(cal_data["camera_matrix"])
         self.dist = np.asarray(cal_data["dist_coefficients"])
 
+        ## GET RID OF ASSUMING LAUNCH FILE PARAMS WORK
+        # markerLength = .029  # m; determine later
+        # markerSeparation = .006  # m; determine later
+        ##
+
         # Set up aruco boards
-        markerLength = .029  # m; determine later
-        markerSeparation = .006  # m; determine later
         self.aruco_dict = aruco.Dictionary_get(aruco.DICT_6X6_250)
         self.aruco_param = aruco.DetectorParameters_create()  # default parameters
-        self.aruco_board = aruco.GridBoard_create(5, 7, markerLength, markerSeparation, self.aruco_dict)
+        self.aruco_board = aruco.GridBoard_create(numMarkersX, numMarkersY, markerLength, markerSeparation, self.aruco_dict)
 
         self.image_sub = rospy.Subscriber('camera/image_raw', Image, self.image_callback)
         self.pose_pub = rospy.Publisher("aruco/pose_raw", Pose, queue_size=0)
@@ -89,6 +92,12 @@ if __name__ == "__main__":
 
     # Initialize as ROS node
     rospy.init_node('aruco_localization')
+
+    # Get params to create Aruco board
+    numMarkersX = rospy.get_param("board_x_markers", 0)
+    numMarkersY = rospy.get_param("board_y_markers", 0)
+    markerLength = rospy.get_param("board_marker_length", 0)
+    markerSeparation = rospy.get_param("board_marker_separation", 0)
 
     # Create subscriber for aruco image frames
     handler = ImageHandler()
