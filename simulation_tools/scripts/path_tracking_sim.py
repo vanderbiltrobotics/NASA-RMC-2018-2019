@@ -121,14 +121,17 @@ if __name__ == "__main__":
     #     new_pose.pose.position.x = 1.0 + i * 0.01
     #     new_pose.pose.position.y = 1.5 + 0.20 * sin(2.0 * pi * (1.0 / 50.0) * i)
     #     test_path.poses.append(new_pose)
-    test_path.poses.append(init_pose)
-    for i in range(10):
+    init_noisy_pose = PoseStamped()
+    init_noisy_pose.header.frame_id = "world"
+    init_noisy_pose.pose.position.x = 0.1
+    init_noisy_pose.pose.position.y = 0.1
+    test_path.poses.append(init_noisy_pose)
+    for i in range(150):
         new_pose = PoseStamped()
         new_pose.header.frame_id = "world"
-        new_pose.pose.position.x = test_path.poses[len(test_path.poses)-1].pose.position.x + 0.1*random.randrange(int(test_path.poses[len(test_path.poses)-1].pose.position.x), 18)
-        new_pose.pose.position.y = test_path.poses[len(test_path.poses)-1].pose.position.y + 0.1*random.randrange(int(test_path.poses[len(test_path.poses)-1].pose.position.y), 18)
+        new_pose.pose.position.x = test_path.poses[len(test_path.poses)-1].pose.position.x + 0.01*random.randrange(int(test_path.poses[len(test_path.poses)-1].pose.position.x), field_width, 1)
+        new_pose.pose.position.y = test_path.poses[len(test_path.poses)-1].pose.position.y + 0.01*random.randrange(int(test_path.poses[len(test_path.poses)-1].pose.position.y), field_width, 1)
         test_path.poses.append(new_pose)
-    print test_path
 
     # Create path publisher
     path_pub = rospy.Publisher("cur_path", Path, queue_size=0)
