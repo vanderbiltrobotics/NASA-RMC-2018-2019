@@ -34,7 +34,12 @@ int main(int argc, char **argv)
 	msg.orientation.z = AHRSUpdateBase.quat_z
 	msg.orientation_covariance = {-1, 0, 0, 0, 0, 0, 0, 0, 0};
 
-	ROS_INFO("%s", msg.data.c_str()); //TODO
+	ROS_INFO("Angular Velocity: 	(%s, %s, %s)\n
+		  Linear Acceleration:  (%s, %s, %s)\n
+		  Orientation: 		(%s, %s, %s)\n",
+		  msg.angular_velocity.x, msg.angular_velocity.y, msg.angular_velocity.z,
+		  msg.linear_acceleration.x, msg.linear_velocity.y, msg.linear_velocity.z,
+		  msg.orientation.x, msg.orientation.y, msg.orientation.z);
 
 	pub.publish(msg);
 
