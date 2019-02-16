@@ -71,7 +71,7 @@ class ArucoExtendedKalmanFilter:
         pose.orientation.z = self.arucoEKF.x[5][0]
         pose.orientation.w = self.arucoEKF.x[6][0]
 
-        return Pose()
+        return pose
 
     def getPoseCovStamped(self):
         poseCovStamped = PoseWithCovarianceStamped()
