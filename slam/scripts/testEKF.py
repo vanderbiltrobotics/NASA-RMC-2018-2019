@@ -6,6 +6,7 @@
 # import ros packages
 import rospy
 from geometry_msgs.msg import Pose, PoseWithCovarianceStamped
+from std_msgs.msg import Bool
 
 # Import other required packages
 import numpy as np
@@ -26,6 +27,9 @@ class ArucoPoseTracker:
         self.trueOrientationW = trueOrientationW
         self.totalDataPoints = totalDataPoints
 
+        # Only store data if board is detected
+        self.isBoardDetected = False
+
         # Indices to track how many data points we have read in out of the total
         self.indexRaw = 0
         self.indexEKF = 0
@@ -39,11 +43,15 @@ class ArucoPoseTracker:
         self.arucoRawMeanAndStd = np.zeros((7,2))
         self.arucoEKFMeanAndStd = np.zeros((7,2))
 
+    # Update whether marker is detected or not
+    def updateMarkerDetected(self, msg):
+        self.isBoardDetected = msg.data
+
     # Record raw aruco error
     def exportRaw(self,pose):
 
         # Collect up to specified number of data points
-        if self.indexRaw < self.totalDataPoints:
+        if self.indexRaw < self.totalDataPoints and self.isBoardDetected:
 
             # Store raw error in the next open array index
             self.arucoRaw[0][self.indexRaw] = pose.position.x - self.trueX
@@ -61,7 +69,7 @@ class ArucoPoseTracker:
     def exportFiltered(self,pose):
 
         # Collect up to specified number of data points
-        if self.indexEKF < self.totalDataPoints:
+        if self.indexEKF < self.totalDataPoints and self.isBoardDetected:
 
             # Store ekf pose error in the next open array index
             self.arucoEKF[0][self.indexEKF] = pose.position.x - self.trueX
@@ -77,6 +85,8 @@ class ArucoPoseTracker:
 
     # Calculate mean and standard deviation 
     def calculateMeanAndStd(self):
+
+        rospy.loginfo(self.arucoRaw[2])
 
         # Calculates the raw and ekf mean and standard deviation in all dimensions
         for x in range(7):
@@ -111,6 +121,7 @@ if __name__ == "__main__":
     # Create subscribers to raw and filtered pose topics
     poseSubscriber_raw = rospy.Subscriber('aruco/pose_raw', Pose, aruco_pose_tracker.exportRaw)
     poseSubscriber_filter_cov = rospy.Subscriber('ekf/pose_filtered', Pose, aruco_pose_tracker.exportFiltered)
+    markerDetectedSub = rospy.Subscriber('aruco/marker_detected', Bool, aruco_pose_tracker.updateMarkerDetected)
 
     # Wait until enough data points have been collected
     while aruco_pose_tracker.indexRaw < totalDataPoints and \

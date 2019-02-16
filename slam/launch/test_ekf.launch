@@ -1,14 +1,14 @@
 <launch>
 
     <!-- Parameters to define true pose for reference in error calculations-->
-    <param name="true_x" type="double" value="-1"/>
-    <param name="true_y" type="double" value="-1"/>
-    <param name="true_z" type="double" value="-1"/>
-    <param name="true_orientation_x" type="double" value="-1"/>
-    <param name="true_orientation_y" type="double" value="-1"/>
-    <param name="true_orientation_z" type="double" value="-1"/>
-    <param name="true_orientation_w" type="double" value="-1"/>
-    <param name="total_data_points" type="int" value="20"/>
+    <param name="true_x" type="double" value="0"/>
+    <param name="true_y" type="double" value="0"/>
+    <param name="true_z" type="double" value="1"/>
+    <param name="true_orientation_x" type="double" value="0"/>
+    <param name="true_orientation_y" type="double" value="0"/>
+    <param name="true_orientation_z" type="double" value="0"/>
+    <param name="true_orientation_w" type="double" value="1"/>
+    <param name="total_data_points" type="int" value="500"/>
 
     <!-- parameters for image_publisher node -->
     <param name="device_id" value="0"/>
