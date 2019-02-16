@@ -1,10 +1,6 @@
 #include "ros/ros.h"
-#include "std_msgs/String.h"
 #include "./navXTimeSync/AHRS.h"
 #include "sensor_msgs/Imu.h"
-#include <string>
-
-using std::to_string;
 
 int main(int argc, char **argv)
 {
@@ -17,13 +13,28 @@ int main(int argc, char **argv)
     int count(0);
     while (ros::ok())
     {
-        std_msgs::String msg;
+	sensor_msgs::Imu msg;	
 	
 	AHRS com = AHRS("/dev/ttyACM0");
 
-	msgs.data = to_string(com.GetPitch()) + to_string(com.GetRoll()) + to_string(com.GetYaw());
+	msg.header.stamp = ros::Time::now();
 
-	ROS_INFO("%s", msg.data.c_str());
+	msg.angular_velocity.x = AHRSPosUpdate.vel_x; 
+	msg.angular_velocity.y = AHRSPosUpdate.vel_y;
+	msg.angular_velocity.z = AHRSPosUpdate.vel_z;
+	msg.angular_velocity_covariance = {-1, 0, 0, 0, 0, 0, 0, 0, 0}; 
+
+	msg.linear_acceleration.x = AHRSUpdateBase.linear_accel_x;
+	msg.linear_acceleration.y = AHRSUpdateBase.linear_accel_y;
+	msg.linear_acceleration.z = AHRSUpdateBase.linear_accel_z;
+	msg.linear_acceleration_covariance = {-1, 0, 0, 0, 0, 0, 0, 0, 0};
+
+	msg.orientation.x = AHRSUpdateBase.quat_x;
+	msg.orientation.y = AHRSUpdateBase.quat_y;
+	msg.orientation.z = AHRSUpdateBase.quat_z
+	msg.orientation_covariance = {-1, 0, 0, 0, 0, 0, 0, 0, 0};
+
+	ROS_INFO("%s", msg.data.c_str()); //TODO
 
 	pub.publish(msg);
 
