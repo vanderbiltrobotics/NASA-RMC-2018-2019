@@ -5,6 +5,8 @@ import rospy
 import tf2_ros
 from geometry_msgs.msg import PoseStamped
 from geometry_msgs.msg import Pose
+import json
+
 
 
 def aruco_pose_callback(pose_msg):
@@ -50,6 +52,30 @@ def camera_angle_callback(pose_msg):
     # Publish transform
     b.sendTransform(tf_msg)
 
+# getStaticTransform returns a TransformStamped filled with values defined in parameter server
+# Parameter server key should be /transform/{TRANSFORM_NAME}
+def getStaticTransform(paramServerDict):
+    tf = tf2_ros.TransformStamped()
+    tf.stamp = rospy.Time.now()
+
+    # Read in frame ids from parameter server
+    tf.header.frame_id = paramServerDict["frame_id"]
+    tf.child_frame_id = paramServerDict["child_frame_id"]
+
+    # Read in translation from parameter server
+    tf.transform.translation.x = paramServerDict["trans_x"]
+    tf.transform.translation.y = paramServerDict["trans_y"]
+    tf.transform.translation.z = paramServerDict["trans_z"]
+
+    # Read in rotation from parameter server
+    tf.transform.rotation.x = paramServerDict["rot_x"]
+    tf.transform.rotation.y = paramServerDict["rot_y"]
+    tf.transform.rotation.z = paramServerDict["rot_z"]
+    tf.transform.rotation.w = paramServerDict["rot_w"]
+
+    return tf
+
+
 if __name__ == "__main__":
 
     # Initialize ROS node
@@ -58,79 +84,26 @@ if __name__ == "__main__":
     # 'world' frame assumed to be the base of the collection bin (side by the outer wall,
     # closest to the corner of the competition area)
 
+
     # Marker board transform (relative to world - FIXED)
     broadcaster = tf2_ros.StaticTransformBroadcaster()
-    board_tf = tf2_ros.TransformStamped()
-    board_tf.header.stamp = rospy.Time.now()
-    board_tf.header.frame_id = "world"
-    board_tf.child_frame_id = "aruco_board_origin"
-    board_tf.transform.translation.x = 0.2
-    board_tf.transform.translation.y = 0.1
-    board_tf.transform.translation.z = 0.75
-    board_tf.transform.rotation.w = 1.0
-    broadcaster.sendTransform(board_tf)
+
+    # Read in transform file from parameter server
+    transformFile = rospy.get_param("/transform_file")
+    with open("transformFile") as f:
+        transformDict = json.load(f)
+
+    # Extract list of transform objects
+    transformList = transformDict["transforms"]
+
+    for transform in transformList:
+        broadcaster.sendTransform(getStaticTransform(transform))
+
 
     # Aruco marker camera transform (relative to marker board)
     rospy.Subscriber("ekf/pose_filtered", Pose, aruco_pose_callback)
 
     # Aruco marker camera base transform (relative to marker camera)
     rospy.Subscriber("camera_angle", Pose, camera_angle_callback)
-
-    # Robot front left (relative to robot center)
-    robot_front_left_tf = tf2_ros.TransformStamped()
-    robot_front_left_tf.header.stamp = rospy.Time.now()
-    robot_front_left_tf.header.frame_id = "robot_front_left"
-    robot_front_left_tf.child_frame_id = "robot_frame"
-    robot_front_left_tf.transform.translation.x = 0   #define these with CAD
-    robot_front_left_tf.transform.translation.y = 0   #define these with CAD
-    robot_front_left_tf.transform.translation.z = 0  #define these with CAD
-    robot_front_left_tf.transform.rotation.w = 1.0
-    broadcaster.sendTransform(robot_front_left_tf)
-
-    # Robot front_right (relative to robot center)
-    robot_front_right_tf = tf2_ros.TransformStamped()
-    robot_front_right_tf.header.stamp = rospy.Time.now()
-    robot_front_right_tf.header.frame_id = "robot_front_right"
-    robot_front_right_tf.child_frame_id = "robot_frame"
-    robot_front_right_tf.transform.translation.x = 0  # define these with CAD
-    robot_front_right_tf.transform.translation.y = 0  # define these with CAD
-    robot_front_right_tf.transform.translation.z = 0  # define these with CAD
-    robot_front_right_tf.transform.rotation.w = 1.0
-    broadcaster.sendTransform(robot_front_right_tf)
-
-    # Robot back_left (relative to robot center)
-    robot_back_left_tf = tf2_ros.TransformStamped()
-    robot_back_left_tf.header.stamp = rospy.Time.now()
-    robot_back_left_tf.header.frame_id = "robot_back_left"
-    robot_back_left_tf.child_frame_id = "robot_frame"
-    robot_back_left_tf.transform.translation.x = 0  # define these with CAD
-    robot_back_left_tf.transform.translation.y = 0  # define these with CAD
-    robot_back_left_tf.transform.translation.z = 0  # define these with CAD
-    robot_back_left_tf.transform.rotation.w = 1.0
-    broadcaster.sendTransform(robot_back_left_tf)
-
-    # Robot back_right (relative to robot center)
-    robot_back_right_tf = tf2_ros.TransformStamped()
-    robot_back_right_tf.header.stamp = rospy.Time.now()
-    robot_back_right_tf.header.frame_id = "robot_back_right"
-    robot_back_right_tf.child_frame_id = "robot_frame"
-    robot_back_right_tf.transform.translation.x = 0  # define these with CAD
-    robot_back_right_tf.transform.translation.y = 0  # define these with CAD
-    robot_back_right_tf.transform.translation.z = 0  # define these with CAD
-    robot_back_right_tf.transform.rotation.w = 1.0
-    broadcaster.sendTransform(robot_back_right_tf)
-
-    # Kinect base transform (relative to robot center)
-    robot_kinect_tf = tf2_ros.TransformStamped()
-    robot_kinect_tf.header.stamp = rospy.Time.now()
-    robot_kinect_tf.header.frame_id = "robot_kinect"
-    robot_kinect_tf.child_frame_id = "robot_frame"
-    robot_kinect_tf.transform.translation.x = 0  # define these with CAD
-    robot_kinect_tf.transform.translation.y = 0  # define these with CAD
-    robot_kinect_tf.transform.translation.z = 0  # define these with CAD
-    robot_kinect_tf.transform.rotation.w = 1.0
-    broadcaster.sendTransform(robot_kinect_tf)
-
-    # (OTHER KINECT FRAMES AUTOMATICALLY PUBLISHED RELATIVE TO KINECT BASE)
 
     rospy.spin()
