@@ -8,6 +8,7 @@
 import rospy
 from geometry_msgs.msg import Twist, Pose, PoseStamped
 from nav_msgs.msg import Path
+import random
 from tf.transformations import quaternion_from_euler, euler_from_quaternion
 
 # Import other required packages
@@ -114,12 +115,20 @@ if __name__ == "__main__":
     # Create example path
     test_path = Path()
     test_path.header.frame_id = "world"
-    for i in range(500):
+    # for i in range(500):
+    #     new_pose = PoseStamped()
+    #     new_pose.header.frame_id = "world"
+    #     new_pose.pose.position.x = 1.0 + i * 0.01
+    #     new_pose.pose.position.y = 1.5 + 0.20 * sin(2.0 * pi * (1.0 / 50.0) * i)
+    #     test_path.poses.append(new_pose)
+    test_path.poses.append(init_pose)
+    for i in range(10):
         new_pose = PoseStamped()
         new_pose.header.frame_id = "world"
-        new_pose.pose.position.x = 1.0 + i * 0.01
-        new_pose.pose.position.y = 1.5 + 0.20 * sin(2.0 * pi * (1.0 / 50.0) * i)
+        new_pose.pose.position.x = test_path.poses[len(test_path.poses)-1].pose.position.x + 0.1*random.randrange(int(test_path.poses[len(test_path.poses)-1].pose.position.x), 18)
+        new_pose.pose.position.y = test_path.poses[len(test_path.poses)-1].pose.position.y + 0.1*random.randrange(int(test_path.poses[len(test_path.poses)-1].pose.position.y), 18)
         test_path.poses.append(new_pose)
+    print test_path
 
     # Create path publisher
     path_pub = rospy.Publisher("cur_path", Path, queue_size=0)
@@ -129,7 +138,7 @@ if __name__ == "__main__":
     path_pub.publish(test_path)
 
     # Set update rate for robots (how often path tracking node can receive new pose estimate)
-    loop_frequency = 100
+    loop_frequency = 10
     update_rate = rospy.Rate(loop_frequency)
 
     # Run simulation
