@@ -2,7 +2,7 @@
 
 # --------------------------------------------------------------------------------------- #
 #
-# DRIVE MOTOR CONTROLLER NODE
+# DRIVE SPEED CONVERSION NODE
 #
 # This node receives commands specifying the desired linear and angular velocity
 # for the full robot. It determines the speeds that each wheel needs to move at
@@ -16,12 +16,15 @@ import rospy
 from geometry_msgs.msg import Twist
 from std_msgs.msg import Float64
 
+# Import other required packages
+from collections import deque
+
 
 class DriveController:
 
     # Constructor
     def __init__(self, wheel_sep, wheel_rad, in_max_lin_vel, in_max_ang_vel,
-                 out_max_lin_vel, out_max_ang_vel, out_format, input_queue_size):
+                 out_max_lin_vel, out_max_ang_vel, out_format, queue_size):
 
         # Store parameters
         self.wheel_separation = wheel_sep
@@ -31,10 +34,11 @@ class DriveController:
         self.out_max_lin_vel = out_max_lin_vel
         self.out_max_ang_vel = out_max_ang_vel
         self.out_format = out_format
-        self.max_queue_size = input_queue_size
+        self.max_queue_size = queue_size
 
         # Initialize queue list
-        self.queue = []
+        self.lin_queue = deque([0] * queue_size)
+        self.ang_queue = deque([0] * queue_size)
 
         # Initialize publishers
         topic_str = "set_percent_output" if self.out_format == "pwm" else "set_velocity"
@@ -76,26 +80,22 @@ class DriveController:
 
     # Calculate average velocities in queue of inputs
     def avg_queue_vel(self, data):
-        # Local variables initialized
-        current_queue_size = self.queue.count()
-        lin_sum = 0
-        ang_sum = 0
 
-        # Append the inputs to the list while deleting inputs older than 100 values ago
-        if current_queue_size < self.max_queue_size:
-            self.queue.append(data)
-        else:
-            self.queue.delete(0)
-            self.queue.append(data)
+        # Get linear, angular components of Twist message
+        linear = data.linear.x
+        angular = data.angular.z
 
-        # Get the sum of the current list of values for each x/y in linear/angular
-        for i in range(0, current_queue_size):
-            lin_sum += self.queue[i].linear.x
-            ang_sum += self.queue[i].angular.x
+        # Update linear queue
+        self.lin_queue.append(linear)
+        self.lin_queue.popleft()
 
-        # Divide sum by total
-        lin_avg = lin_sum/current_queue_size
-        ang_avg = ang_sum/current_queue_size
+        # Update angular queue
+        self.ang_queue.append(angular)
+        self.ang_queue.popleft()
+
+        # Find the average value in each queue
+        lin_avg = sum(self.lin_queue) / len(self.lin_queue)
+        ang_avg = sum(self.ang_queue) / len(self.ang_queue)
 
         return lin_avg, ang_avg
 
@@ -154,11 +154,11 @@ if __name__ == '__main__':
     out_max_lin_vel = rospy.get_param("max_out_lin_vel")
     out_max_ang_vel = rospy.get_param("max_out_ang_vel")
     output_format = rospy.get_param("output_mode")
-    input_queue_size = rospy.get_param("input_queue_size")
+    queue_size = rospy.get_param("queue_size")
 
     # Create a DriveController object
     controller = DriveController(wheel_rad, wheel_rad, in_max_lin_vel, in_max_ang_vel,
-                                 out_max_lin_vel, out_max_ang_vel, output_format, input_queue_size)
+                                 out_max_lin_vel, out_max_ang_vel, output_format, queue_size)
 
     # Ready to go
     rospy.loginfo("Drive Motor Controller initialized...")
