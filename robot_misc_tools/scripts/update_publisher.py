@@ -13,28 +13,24 @@ from sensor_msgs.msg import *
 
 class UpdatePublisher:
 
-    def __init__ (self, topic_name):
+    def __init__ (self, topic_name, message_type):
 
         #Initialize variable to be updated
-        latest_var = 0
+        self.latest_var = 0
 
         #Initialize Publisher
-        self.publisher = rospy.Publisher('updates/' + topic_name, Float64, queue_size=0)
+        self.publisher = rospy.Publisher('updates/' + topic_name, message_type, queue_size=0)
 
         #Initialize Subscriber
-        self.subscriber = rospy.Subscriber(topic_name, Float64, self.update_message)
+        self.subscriber = rospy.Subscriber(topic_name, message_type, self.update_message)
 
+    # Update the variable when a message is published on the main topic
     def update_message(self, data):
+        self.latest_var = data
 
-        #Update the variable
-        latest_var = data
-        return latest_var
-
-
-    def publish_message(self, latest_var):
-
-        #Publish the variable
-        self.publisher.publish(latest_var)
+    # Publish an update
+    def publish_message(self):
+        self.publisher.publish(self.latest_var)
 
     @staticmethod
     def load_config_file(file_name):
@@ -54,7 +50,7 @@ if __name__ == "__main__":
     updater = UpdatePublisher()
 
     # TODO: Read a file containing a bunch of [topic name, message type] pairs, create an UpdatePublisher for each
-    # updaters = load_config_file(filename)
+    # updaters = UpdatePublisher.load_config_file("update_configs/test_config.csv")
 
     #read values from server
     update_rate = rospy.get_param("update_rate")
