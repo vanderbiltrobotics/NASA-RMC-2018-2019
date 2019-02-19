@@ -1,5 +1,4 @@
-# Ignore top level CMakeLists.txt
-CMakeLists.txt
+/CMakeLists.txt
 
 # Ignore vscode hidden folders
 /**/*.vscode/
@@ -111,5 +110,4 @@ fabric.properties
 # Android studio 3.1+ serialized cache file
 .idea/caches/build_file_checksums.ser
 
-#CMakeLists for ROS
-CMakeLists.txt
+
