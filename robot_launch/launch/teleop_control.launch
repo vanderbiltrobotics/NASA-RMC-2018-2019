@@ -17,6 +17,10 @@
 
     <node name="drive_motor_controller" pkg="drive_system" type="drive_motor_controller.py"/>
 
+    <!-- Update node - reads mission control messages and updates them at a slower rate -->
+    <param name="update_rate" type="int" value="1"/>
+
+    <node name="update_node" pkg="update_node" type="update_node.py"/>
 
     <group>
         <node name="simulator" pkg="simulation_tools" type="path_tracking_sim.py"/>
