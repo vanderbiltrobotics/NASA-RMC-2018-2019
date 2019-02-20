@@ -12,7 +12,7 @@
             "rot_w" : 1
         },
         {
-            "frame_id" : "robot_front_left",
+            "frame_id" : "aruco_camera",
             "child_id" : "robot_frame",
             "trans_x" : 0,
             "trans_y" : 0,
@@ -23,8 +23,8 @@
             "rot_w" : 1
         },
         {
-            "frame_id" : "robot_front_right",
-            "child_id" : "robot_frame",
+            "frame_id" : "robot_frame",
+            "child_id" : "robot_front_left",
             "trans_x" : 0,
             "trans_y" : 0,
             "trans_z" : 0,
@@ -34,8 +34,8 @@
             "rot_w" : 1
         },
         {
-            "frame_id" : "robot_back_left",
-            "child_id" : "robot_frame",
+            "frame_id" : "robot_frame",
+            "child_id" : "robot_front_right",
             "trans_x" : 0,
             "trans_y" : 0,
             "trans_z" : 0,
@@ -45,8 +45,8 @@
             "rot_w" : 1
         },
         {
-            "frame_id" : "robot_back_right",
-            "child_id" : "robot_frame",
+            "frame_id" : "robot_frame",
+            "child_id" : "robot_back_left",
             "trans_x" : 0,
             "trans_y" : 0,
             "trans_z" : 0,
@@ -56,8 +56,19 @@
             "rot_w" : 1
         },
         {
-            "frame_id" : "robot_kinect",
-            "child_id" : "robot_frame",
+            "frame_id" : "robot_frame",
+            "child_id" : "robot_back_right",
+            "trans_x" : 0,
+            "trans_y" : 0,
+            "trans_z" : 0,
+            "rot_x" : 0,
+            "rot_y" : 0,
+            "rot_z" : 0,
+            "rot_w" : 1
+        },
+        {
+            "frame_id" : "robot_frame",
+            "child_id" : "kinect_base",
             "trans_x" : 0,
             "trans_y" : 0,
             "trans_z" : 0,
