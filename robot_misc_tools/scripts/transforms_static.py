@@ -51,10 +51,10 @@ def get_transform_msgs(transforms):
 if __name__ == "__main__":
 
     # Initialize ROS node
-    rospy.init_node("transforms_dynamic")
+    rospy.init_node("transforms_static")
 
     # Read in the name of transform file from parameter server
-    file_name = rospy.get_param("transform_file", default="full_system.json")
+    file_name = rospy.get_param("tf_file_static", default="full_system.json")
 
     # Load file contents into a dictionary
     with open(PATH_TO_DIR + file_name) as f:
