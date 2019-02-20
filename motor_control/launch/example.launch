@@ -1,5 +1,0 @@
-<launch>
-    <rosparam command="load" file="$(find motor_control)/launch/example.yaml" />
-    <node pkg="motor_control" type="motor_control_node" name="motor_control" respawn="false" />
-    <!--<node pkg="motor_control" type="motor_control_cmd_example" name="cmd_exmaple" respawn="false" />-->
-</launch>
