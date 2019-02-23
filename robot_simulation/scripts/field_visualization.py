@@ -11,6 +11,9 @@ from visualization_msgs.msg import *
 
 class RectangleMarker(Marker):
 
+    # Increment when adding markers to give them new id's
+    count = 0
+
     def __init__(self, frame_id, pose_array, x_len, y_len, z_len, color_array):
 
         # Call init for super class
@@ -20,16 +23,20 @@ class RectangleMarker(Marker):
 
         # Basic info
         self.header.frame_id = frame_id
+        self.id = RectangleMarker.count
         self.type = Marker.CUBE
+
+        # Update count
+        RectangleMarker.count += 1
 
         # Pose the x, y, z dims are relative to
         self.pose.position.x = pose_array[0] + (x_len / 2.0)
         self.pose.position.y = pose_array[1] + (y_len / 2.0)
         self.pose.position.z = pose_array[2] + (z_len / 2.0)
-        self.pose.orientation.x = pose_array[0]
-        self.pose.orientation.y = pose_array[1]
-        self.pose.orientation.z = pose_array[2]
-        self.pose.orientation.w = pose_array[3]
+        self.pose.orientation.x = pose_array[3]
+        self.pose.orientation.y = pose_array[4]
+        self.pose.orientation.z = pose_array[5]
+        self.pose.orientation.w = pose_array[6]
 
         # Set x, y, z dims
         self.scale.x = x_len
@@ -44,37 +51,68 @@ class RectangleMarker(Marker):
 
 
 
-
 if __name__ == "__main__":
 
     # Initalize ROS node
     rospy.init_node("field_visualization")
 
     # Create publisher for markers
-    marker_pub = rospy.Publisher("vizualization/field_markers", Marker, queue_size=0)
+    marker_pub = rospy.Publisher("vizualization/arena_markers", MarkerArray, queue_size=0)
+    marker_array = MarkerArray()
 
     # --- CREATE VISUALIZATION OBJECTS --- #
 
-    # Ground
-    ground_pose = [0, 0, 0, 0.707, 0, 0, 0.707]
-    ground_color = [1.0, 0.0, 1.0, 1.0]
-    ground_msg = RectangleMarker("world", ground_pose, 0.5, 0.2, 1.0, ground_color)
+    # Dimensions
+    wall_height = 0.3
+    wall_width = 0.1
+    field_length = 7.31
+    field_width = 3.81
 
-    # Front Wall
+    # Colors
+    wall_color = [0.25, 0.25, 0.25, 1.0]
+    ground_color = [0.9, 0.8, 0.7, 1.0]
 
-    # Back Wall
+    # -- Add walls -- #
 
-    # Left Wall
+    # Front
+    wall_front_pose = [-wall_width, -wall_width, 0, 0, 0, 0, 0]
+    wall_front_msg = RectangleMarker("world", wall_front_pose, field_width + (wall_width * 2),
+                                     wall_width, wall_height, wall_color)
 
-    # Right Wall
+    # Back
+    wall_back_pose = [-wall_width, field_length, 0, 0, 0, 0, 0]
+    wall_back_msg = RectangleMarker("world", wall_back_pose, field_width + (wall_width * 2),
+                                    wall_width, wall_height, wall_color)
+
+    # Left
+    wall_left_pose = [-wall_width, 0, 0, 0, 0, 0, 0]
+    wall_left_msg = RectangleMarker("world", wall_left_pose, wall_width,
+                                    field_length, wall_height, wall_color)
+
+    # Right
+    wall_right_pose = [field_width, 0, 0, 0, 0, 0, 0]
+    wall_right_msg = RectangleMarker("world", wall_right_pose, wall_width,
+                                     field_length, wall_height, wall_color)
+
+    # -- Add ground -- #
+
+    ground_pose = [-wall_width, -wall_width, 0, 0, 0, 0, 0]
+    ground_msg = RectangleMarker("world", ground_pose, field_width + (wall_width * 2), field_length + (wall_width * 2), 0.001, ground_color)
+
+    # Add all the messages to the marker array
+    marker_array.markers.append(wall_front_msg)
+    marker_array.markers.append(wall_back_msg)
+    marker_array.markers.append(wall_left_msg)
+    marker_array.markers.append(wall_right_msg)
+    marker_array.markers.append(ground_msg)
 
     # Loop rate
     loop_rate = rospy.Rate(5)
 
     while not rospy.is_shutdown():
 
-        # Publish ground
-        marker_pub.publish(ground_msg)
+        # Publish walls
+        marker_pub.publish(marker_array)
 
         # Sleep based on loop rate
         loop_rate.sleep()

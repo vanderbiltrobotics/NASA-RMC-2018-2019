@@ -3,9 +3,9 @@
         {
             "frame_id" : "world",
             "child_id" : "aruco_board_origin",
-            "trans_x" : 0.2,
-            "trans_y" : 0.1,
-            "trans_z" : 0.75,
+            "trans_x" : 0.0,
+            "trans_y" : 0.0,
+            "trans_z" : 0.0,
             "rot_x" : 0,
             "rot_y" : 0,
             "rot_z" : 0,
@@ -68,7 +68,7 @@
         },
         {
             "frame_id" : "robot_frame",
-            "child_id" : "kinect_base",
+            "child_id" : "camera_link",
             "trans_x" : 0,
             "trans_y" : 0,
             "trans_z" : 0,
