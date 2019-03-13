@@ -5,7 +5,7 @@
 
 # Import ROS packages
 import rospy
-import rospkg from rospy
+import rospkg 
 from sensor_msgs.msg import Image
 from geometry_msgs.msg import Pose
 from std_msgs.msg import Bool, Int32
@@ -61,7 +61,7 @@ class ArucoCamera:
             self.setPoint = self.maxTheta
             self.sweepDirection = -1
 
-        else if self.setPoint <= self.minTheta:
+        elif self.setPoint <= self.minTheta:
             self.setPoint = self.minTheta
             self.sweepDirection = 1
 
