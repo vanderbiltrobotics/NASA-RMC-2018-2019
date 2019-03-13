@@ -5,7 +5,7 @@
 
 # Import ROS packages
 import rospy
-import rospkg
+import rospkg from rospy
 from sensor_msgs.msg import Image
 from geometry_msgs.msg import Pose
 from std_msgs.msg import Bool, Int32
