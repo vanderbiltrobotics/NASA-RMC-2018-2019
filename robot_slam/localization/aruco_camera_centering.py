@@ -27,15 +27,16 @@ class ArucoCamera:
 
         # Servo equivalent x value in center of frame; ROS Int32 Object
         # Use self.theta.data to access angle 
-        self.theta = Int32()   
+        self.theta = Int32()
         self.setPoint = 0
         self.markerCenter = 0 # Stores the center position of the marker
         self.minTheta = -90
         self.maxTheta = 90
         self.markerDetected = False
         self.sweepDirection = 1
-        self.k = .05 # Proportional gain
-        self.delta_theta = 2 
+        self.k = 1 # Proportional gain
+        self.deltaTheta = 1
+        self.rangeOfMax = 2
 
         self.servoThetaPub = rospy.Publisher("aruco/servo_theta", Int32, queue_size=0)
 
@@ -54,20 +55,33 @@ class ArucoCamera:
         else:
             
             # Update set point
-            self.setPoint += self.delta_theta*self.sweepDirection
+            self.setPoint += self.deltaTheta*self.sweepDirection
 
         # Check if the set point has passed servo bounds
         if (self.setPoint >= self.maxTheta):
             self.setPoint = self.maxTheta
             self.sweepDirection = -1
 
-        elif self.setPoint <= self.minTheta:
+        elif (self.setPoint <= self.minTheta):
             self.setPoint = self.minTheta
             self.sweepDirection = 1
 
-        # Update servo orientation
+        # Calculate new servo position
+
         self.theta.data += self.k * (self.setPoint - self.theta.data)
+
+        # Check servo bounds 
+        if (self.theta.data >= self.maxTheta):
+            self.theta.data = self.maxTheta
+    
+        elif (self.theta.data <= self.minTheta):
+            self.theta.data = self.minTheta
+        print(self.setPoint)
+
+        # Update servo position
         self.servoThetaPub.publish(self.theta)
+
+        # print(self.setPoint)
 
 
 if __name__ == "__main__":
