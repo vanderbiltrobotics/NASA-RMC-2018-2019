@@ -16,8 +16,6 @@
     <!-- Run all the nodes required for the ekf test -->
     <node name="image_publisher" pkg="robot_sensors" type="image_publisher.py"/> 
     <node name="aruco" pkg="robot_slam" type="aruco_localization.py"/>
-
-    <!-- Launch the rqt_console to view the log info printed at the end of the test -->
-    <node name="rqt_console" pkg="rqt_console" type="rqt_console"/>
+    <node name="aruco_camera" pkg="robot_slam" type="aruco_camera_centering.py"/>
 
 </launch>

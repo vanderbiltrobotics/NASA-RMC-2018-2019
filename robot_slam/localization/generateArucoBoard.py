@@ -1,3 +1,4 @@
+import cv2 
 import cv2.aruco as aruco
 import numpy as np
 
@@ -15,4 +16,5 @@ parameters = aruco.DetectorParameters_create()  # default parameters
 board = aruco.GridBoard_create(numMarkersX, numMarkersY, markerLength, markerSeparation, dictionary)
 
 # Draw board and write to file
-boardImage = aruco.draw(board, boardImage)
+image = board.draw((1000, 1000))
+cv2.imwrite('arucoBoard.png',image)
