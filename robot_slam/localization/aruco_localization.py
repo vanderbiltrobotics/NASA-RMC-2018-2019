@@ -64,7 +64,8 @@ class ImageHandler:
         # Find corners and IDs of aruco markers
         corners, ids, rejectedImgPoints = aruco.detectMarkers(cv_image, self.aruco_dict, parameters=self.aruco_param)
         aruco.refineDetectedMarkers(cv_image, self.aruco_board, corners, ids, rejectedImgPoints, self.cmatx, self.dist)
-        # rospy.loginfo(corners) # test 
+        # rospy.loginfo(corners) # test
+        # print(np.shape(corners))
 
         # If markers found, estimate pose
         if ids is not None:
@@ -86,16 +87,29 @@ class ImageHandler:
                 pose_msg.orientation.w = quat[3]
 
                 # Calculate the average x distance between the corners 
-                avg_corners = np.sum(corners)/4
+                # avg_corners = np.min(corners[:, 0, :, 0])
+                # print(type(corners[0]))
+                print(len(corners))
+                bla = corners[0][0][:, 0]
+                min = corners[0][0, 0, 0]
+                max = corners[0][0, 0, 0]
+                meh = 0
+                for corner in corners:
+                    if np.min(corner[0, :, 0]) < min:
+                        min = np.min(corner[0, :, 0])
+                    elif np.max(corner[0, :, 0]) > max:
+                        max = np.max(corner[0, :, 0])
+
+                self.avg_of_corners.publish((min + max)/2.0)
         else:
             bool_msg.data = False
+            self.avg_of_corners.publish(avg_corners)
 
         rospy.loginfo(avg_corners)
 
         # Publish messages
         self.pose_pub.publish(pose_msg)
         self.bool_pub.publish(bool_msg)
-        self.avg_of_corners.publish(avg_corners)
 
         # Apply transforms to get coordinates in world_frame
 
