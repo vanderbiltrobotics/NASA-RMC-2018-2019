@@ -4,10 +4,10 @@ import numpy as np
 # Simple script to generate a specific Arubo board. Writes the board to a file.
 
 # Parameters to vary
-numMarkersX = 0
-numMarkersY = 0
-markerLength = 0
-markerSeparation = 0
+numMarkersX = 5
+numMarkersY = 7
+markerLength = .029
+markerSeparation = .006
 
 # Create dictionary and board
 dictionary = aruco.Dictionary_get(aruco.DICT_6X6_250)
