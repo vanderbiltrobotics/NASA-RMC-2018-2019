@@ -16,26 +16,26 @@ import tf.transformations
 import cv2.aruco as aruco
 import numpy as np
 
-
 class ArucoCamera:
 
     def __init__(self):
 
-        # Initialize an Aruco camera object that contains the camera's current x-coord,
-        # the value it is trying to reach, and parameters defining whether or not an Aruco marker 
-        # is in the frame.
+        # Initialize an Aruco camera object
 
-        # Servo equivalent x value in center of frame; ROS Int32 Object
-        # Use self.theta.data to access angle
-        self.cameraCenterX = rospy.get_param("image_width", default=640) / 2
-        self.theta = Int32()
-        self.setPoint = 0
+        self.cameraCenterX = rospy.get_param("image_width", default=640) / 2  # Camera center 
+        self.theta = Int32()  # ROS object that stores current servo theta orientation
+        self.error = 0        # Error between current theta and where the camera should be 
         self.markerCenter = 0 # Stores the center position of the marker
-        self.minTheta = -90
-        self.maxTheta = 90
-        self.markerDetected = False
-        self.sweepDirection = 1
-        self.k = -0.0005 # Proportional gain
+        self.minTheta = -90   # Minimum servo bound
+        self.maxTheta = 90    # Maximum servo bound
+        self.markerDetected = False # True if an AruCo marker is in view
+        self.sweepDirection = 1 # Controls the direction of sweep
+
+        # Proportional gain; It represents a transformation from the camera pixel subspace to servo angle. 
+        # Vary the magnitude of k to change how much the servo angle should change based off the error
+        self.k = -0.0005 
+
+        
         self.deltaTheta = 1
         self.rangeOfMax = 2
 
@@ -52,20 +52,18 @@ class ArucoCamera:
     # Rotate servo to track the Aruco marker or sweep the camera to find a marker
     def updatePosition(self):
         if self.markerDetected:
-            self.setPoint = self.markerCenter - self.cameraCenterX  # servo will track Aruco marker
+            self.error = self.markerCenter - self.cameraCenterX  # servo will track Aruco marker
             self.k = -0.0005
         else:
             
             # Update set point
-            self.setPoint += self.deltaTheta*self.sweepDirection
+            self.error += self.deltaTheta*self.sweepDirection
             self.k = 1
 
         # Calculate new servo position
-
-        self.theta.data += self.k * self.setPoint
-        print(self.setPoint)
-        # print(self.setPoint)
-        # Check servo bounds
+        self.theta.data += self.k * self.error
+      
+        # Check servo bounds and switch sweep direction
         if self.theta.data >= self.maxTheta:
             self.theta.data = self.maxTheta
             self.sweepDirection = -1
@@ -73,8 +71,6 @@ class ArucoCamera:
         elif self.theta.data <= self.minTheta:
             self.theta.data = self.minTheta
             self.sweepDirection = 1
-
-        # print(self.theta)
 
         # Update servo position
         self.servoThetaPub.publish(self.theta)
