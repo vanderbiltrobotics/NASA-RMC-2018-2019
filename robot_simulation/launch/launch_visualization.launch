@@ -1,0 +1,12 @@
+<launch>
+
+    <!-- set parameters for visualization -->
+    <param name="robot_description" textfile="$(find robot_simulation)/urdf/robot_model.urdf"/>
+
+    <!-- launch visualization node -->
+    <node name="field_visualization" pkg="robot_simulation" type="field_visualization.py"/>
+
+    <!-- launch rviz -->
+    <node type="rviz" name="rviz" pkg="rviz" args="-d $(find robot_simulation)/rviz/competition_config.rviz"/>
+
+</launch>
