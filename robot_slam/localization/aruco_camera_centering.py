@@ -67,11 +67,11 @@ class ArucoCamera:
         else:
             # Will increment servo by deltaTheta in the sweep direction
             # Divides by P gain so that the P gain will cancel out in new theta calculation
-            self.error += self.deltaTheta*self.sweepDirection / self.k
+            self.error = self.deltaTheta*self.sweepDirection / self.k
 
         # Calculate new servo position
         self.theta.data += self.k * self.error
-      
+
         # Check servo bounds and switch sweep direction
         if self.theta.data >= self.maxTheta:
             self.theta.data = self.maxTheta
