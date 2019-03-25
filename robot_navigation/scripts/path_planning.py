@@ -2,6 +2,7 @@
 
 # Import ROS packages
 import rospy
+import astar
 from geometry_msgs.msg import Pose, PoseStamped
 from nav_msgs.msg import Path, OccupancyGrid
 from nav_msgs.srv import GetMap
@@ -51,7 +52,9 @@ class PathPlanner:
     # Compute a new route from start_pose to goal_pose and publish
     # Uses A* search algorithm to compute the route
     def generate_route(self):
-        pass
+        path = astar.AStar()
+        self.map = path.astar(self.start_pose,self.goal_pose)
+        print path
 
 
 if __name__ == "__main__":
