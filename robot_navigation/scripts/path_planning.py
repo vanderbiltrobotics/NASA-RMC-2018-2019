@@ -2,19 +2,22 @@
 
 # Import ROS packages
 import rospy
-import astar
-from geometry_msgs.msg import Pose, PoseStamped
+from geometry_msgs.msg import Pose, PoseStamped, Point
 from nav_msgs.msg import Path, OccupancyGrid
 from nav_msgs.srv import GetMap
 
 # Import other required packages
 import numpy as np
 from matplotlib import pyplot as plt
+from pathfinding.core.diagonal_movement import DiagonalMovement
+from pathfinding.core.grid import Grid
+from pathfinding.finder.a_star import AStarFinder
+from pathfinding.core.util import smoothen_path
+
 
 class PathPlanner:
 
     def __init__(self, path_topic, map_service):
-
         # Variables to store current start and goal poses as well as world map
         self.start_pose = Pose()
         self.goal_pose = Pose()
@@ -40,7 +43,6 @@ class PathPlanner:
 
     # Update the map which routes are computed relative to (triggers route generation)
     def update_map(self):
-
         # Get new map, make sure dimensions are correct
         new_map = self.get_map().map
         self.map_length = new_map.info.height
@@ -52,13 +54,17 @@ class PathPlanner:
     # Compute a new route from start_pose to goal_pose and publish
     # Uses A* search algorithm to compute the route
     def generate_route(self):
-        path = astar.AStar()
-        self.map = path.astar(self.start_pose,self.goal_pose)
-        print path
+        grid = Grid(matrix=self.map.data)
+        start = grid.node(self.start_pose.position.x, self.start_pose.position.y)
+        end = grid.node(self.goal_pose.position.x, self.goal_pose.position.y)
+        finder = AStarFinder(diagonal_movement=DiagonalMovement.always)
+        path, _ = finder.find_path(start, end, grid)
+        path = Path(poses=[PoseStamped(pose=Pose(position=Point(x=point[0], y=point[1], z=0))) for point in
+                           smoothen_path(grid, path)])
+        return path
 
 
 if __name__ == "__main__":
-
     # Initialize ROS node
     rospy.init_node("path_planning")
 
