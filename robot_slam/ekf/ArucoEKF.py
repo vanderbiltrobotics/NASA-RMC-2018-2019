@@ -63,13 +63,13 @@ class ArucoExtendedKalmanFilter:
 
     def getPose(self):
         pose = Pose()
-        pose.position.x = self.arucoEKF.x[0][0]
-        pose.position.y = self.arucoEKF.x[1][0]
+        pose.position.x = 0.0 #self.arucoEKF.x[0][0]
+        pose.position.y = 0.0 #self.arucoEKF.x[1][0]
         pose.position.z = self.arucoEKF.x[2][0]
         pose.orientation.x = self.arucoEKF.x[3][0]
         pose.orientation.y = self.arucoEKF.x[4][0]
         pose.orientation.z = self.arucoEKF.x[5][0]
-        pose.orientation.w = self.arucoEKF.x[6][0]
+        pose.orientation.w = 1.0 #self.arucoEKF.x[6][0]
 
         return pose
 
@@ -82,9 +82,9 @@ class ArucoExtendedKalmanFilter:
         self.seqID += 1 
         
         poseCovStamped.pose.pose = self.getPose()
-        poseCovStamped.pose.covariance = self.arucoEKF.P
+        poseCovStamped.pose.covariance = np.reshape(np.eye(6)*5, (36,)).tolist()
        
-        return PoseWithCovarianceStamped()
+        return poseCovStamped
 
 
     # Define the Jacobian matrix for measurement update

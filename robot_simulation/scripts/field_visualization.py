@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
-# ----------------------------- #
-# Subscribes to drive command, Publishes custom motor speeds. #
-# ----------------------------- #
+# ------------------------------------------------------- #
+# Publishes markers for visualizing the competition arena #
+# ------------------------------------------------------- #
 
 # Import ROS packages
 import rospy
@@ -75,28 +75,28 @@ if __name__ == "__main__":
     # -- Add walls -- #
 
     # Front
-    wall_front_pose = [-wall_width, -wall_width, 0, 0, 0, 0, 0]
+    wall_front_pose = [-wall_width / 2, -wall_width, 0, 0, 0, 0, 0]
     wall_front_msg = RectangleMarker("world", wall_front_pose, field_width + (wall_width * 2),
                                      wall_width, wall_height, wall_color)
 
     # Back
-    wall_back_pose = [-wall_width, field_length, 0, 0, 0, 0, 0]
+    wall_back_pose = [-wall_width / 2, field_length, 0, 0, 0, 0, 0]
     wall_back_msg = RectangleMarker("world", wall_back_pose, field_width + (wall_width * 2),
                                     wall_width, wall_height, wall_color)
 
     # Left
-    wall_left_pose = [-wall_width, 0, 0, 0, 0, 0, 0]
+    wall_left_pose = [-wall_width / 2, 0, 0, 0, 0, 0, 0]
     wall_left_msg = RectangleMarker("world", wall_left_pose, wall_width,
                                     field_length, wall_height, wall_color)
 
     # Right
-    wall_right_pose = [field_width, 0, 0, 0, 0, 0, 0]
+    wall_right_pose = [field_width + (wall_width / 2), 0, 0, 0, 0, 0, 0]
     wall_right_msg = RectangleMarker("world", wall_right_pose, wall_width,
                                      field_length, wall_height, wall_color)
 
     # -- Add ground -- #
 
-    ground_pose = [-wall_width, -wall_width, 0, 0, 0, 0, 0]
+    ground_pose = [-wall_width / 2, -wall_width, 0, 0, 0, 0, 0]
     ground_msg = RectangleMarker("world", ground_pose, field_width + (wall_width * 2), field_length + (wall_width * 2), 0.001, ground_color)
 
     # Add all the messages to the marker array

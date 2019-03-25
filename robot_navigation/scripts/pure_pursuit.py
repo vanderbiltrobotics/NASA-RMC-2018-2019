@@ -1,4 +1,4 @@
-
+#!/usr/bin/env python
 
 # Import ROS packages
 import rospy
@@ -132,8 +132,8 @@ if __name__ == "__main__":
     rospy.init_node("pure_pursuit")
 
     # Read parameters off server
-    lin_vel = rospy.get_param("pp_base_lin_vel", default=0.5)
-    max_lookahead = rospy.get_param("pp_max_lookahead", default=0.05)
+    lin_vel = rospy.get_param("pp_base_lin_vel", default=0.1)
+    max_lookahead = rospy.get_param("pp_max_lookahead", default=1.0)
 
     # Create pure pursuit object
     pp = PurePursuit(lin_vel, max_lookahead)
