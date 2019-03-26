@@ -53,8 +53,8 @@ class PathPlanner:
         grid = Grid(matrix=self.map)
 
         # Define nodes for start position and target position
-        start = grid.node(self.start_pose.position.x, self.start_pose.position.y)
-        end = grid.node(self.goal_pose.position.x, self.goal_pose.position.y)
+        start = grid.node(int(self.start_pose.position.x * 100), int(self.start_pose.position.y * 100))
+        end = grid.node(int(self.goal_pose.position.x * 100), int(self.goal_pose.position.y * 100))
 
         # Create an A-star path finder object
         finder = AStarFinder(diagonal_movement=DiagonalMovement.always)
@@ -77,7 +77,7 @@ class PathPlanner:
             new_path.poses.append(new_pose)
 
         # Publish the path message
-        self.route_pub.publish(path)
+        self.route_pub.publish(new_path)
 
 
 if __name__ == "__main__":
