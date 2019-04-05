@@ -3,7 +3,7 @@
         {
             "frame_id" : "aruco_board_origin",
             "child_id" : "aruco_camera",
-            "pose_topic" : "cur_pose"
+            "pose_topic" : "ekf/pose_filtered"
         }
     ]
 }

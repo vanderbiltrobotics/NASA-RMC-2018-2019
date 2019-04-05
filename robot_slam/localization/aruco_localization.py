@@ -56,7 +56,7 @@ class ImageHandler:
         # Define variables for messages to publish
         pose_msg = Pose()
         bool_msg = Bool()
-        avg_corners = 0;
+        avg_corners = 0
 
         # Convert from ROS message to OpenCV image
         cv_image = self.bridge.imgmsg_to_cv2(data, desired_encoding="passthrough")

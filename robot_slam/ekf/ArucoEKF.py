@@ -16,6 +16,7 @@ from geometry_msgs.msg import Pose, PoseWithCovarianceStamped
 # Import other required packages
 from filterpy.kalman import EKF
 import numpy as np
+from math import sqrt
 
 
 class ArucoExtendedKalmanFilter:
@@ -38,7 +39,7 @@ class ArucoExtendedKalmanFilter:
         '''
 
         # Define the measurement noise covariance matrix
-        self.arucoEKF.R = np.eye(7) * 1
+        self.arucoEKF.R = np.eye(7) * 0.01
 
         # Define the process noise covariance matrix
         #arucoEKF.Q = 
@@ -59,17 +60,29 @@ class ArucoExtendedKalmanFilter:
         z[5][0] = pose.orientation.z
         z[6][0] = pose.orientation.w
 
-        self.arucoEKF.predict_update(z, self.HJacobian, self.hx)
+        if pose.orientation.w != 0:
+            self.arucoEKF.predict_update(z, self.HJacobian, self.hx)
 
     def getPose(self):
         pose = Pose()
-        pose.position.x = 0.0 #self.arucoEKF.x[0][0]
-        pose.position.y = 0.0 #self.arucoEKF.x[1][0]
+        pose.position.x = self.arucoEKF.x[0][0]
+        pose.position.y = self.arucoEKF.x[1][0]
         pose.position.z = self.arucoEKF.x[2][0]
-        pose.orientation.x = self.arucoEKF.x[3][0]
-        pose.orientation.y = self.arucoEKF.x[4][0]
-        pose.orientation.z = self.arucoEKF.x[5][0]
-        pose.orientation.w = 1.0 #self.arucoEKF.x[6][0]
+        new_x = self.arucoEKF.x[3][0]
+        new_y = self.arucoEKF.x[4][0]
+        new_z = self.arucoEKF.x[5][0]
+        new_w = self.arucoEKF.x[6][0]
+
+        # Normalize quaternion
+        mag = sqrt(new_x**2 + new_y**2 + new_z**2 + new_w**2)
+
+        if mag == 0:
+            mag = 1.0
+
+        pose.orientation.x = new_x / mag
+        pose.orientation.y = new_y / mag
+        pose.orientation.z = new_z / mag
+        pose.orientation.w = new_w / mag
 
         return pose
 
