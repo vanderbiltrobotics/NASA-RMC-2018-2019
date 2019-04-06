@@ -51,16 +51,13 @@ class Field:
 
                      (adj_x, adj_y) = adj_lmap.shape[:2]
                      
-                     
-                     local_x = cur_tf.getOrigin().x()
-                     local_y = cur_tf.getOrigin().y()
-                     (field_x, field_y) = Field.shape[:2]
-                     field_x /= 2
-                     field_y /= 2
-                     dif_x = np.abs(field_x - local_x)
-                     dif_y = np.abs(field_y - local_y)
+                     #dif = difference in the origins between local map and world map
+                     dif_x = cur_tf.transform.translation.x
+                     dif_y = cur_tf.transform.translation.y
+                     corner_x = dif_x - (adj_x/2)
+                     corner_y = dif_y - (adj_x/2)
 
-                     Field[dif_x:(dif_x+adj_x), dif_y:(dif_y+adj_y)] = adj_lmap
+                     self.map[corner_x:(corner_x+adj_x), corner_y:(corner_y+adj_y)] = adj_lmap
                                                  
                              
                     
