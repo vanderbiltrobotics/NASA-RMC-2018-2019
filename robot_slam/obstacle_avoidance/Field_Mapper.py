@@ -31,6 +31,10 @@ class Field:
                           cur_tf.transform.rotation.z,
                           cur_tf.transform.rotation.w]  #quaternion from tf
                      rpy = euler_from_quaternion(Quaternion(q[0], q[1], q[2], q[3]))
+                     
+                     #Add 1 to each valid point to differentiate from the later junk values
+                     local_map += 1
+                     
                      #Rotate the local map based on the difference in angles of the transforms
                      (h, w) = local_map.shape[:2]
                      (origin_X, origin_Y) = (w/2, h/2)
@@ -56,9 +60,11 @@ class Field:
                      dif_y = cur_tf.transform.translation.y
                      corner_x = dif_x - (adj_x/2)
                      corner_y = dif_y - (adj_x/2)
-
-                     self.map[corner_x:(corner_x+adj_x), corner_y:(corner_y+adj_y)] = adj_lmap
-                                                 
+                     
+                     #Take the greater value between the given field
+                     self.map[corner_x:(corner_x+adj_x), corner_y:(corner_y+adj_y)] = np.maximum(self.map[corner_x:(corner_x+adj_x), corner_y:(corner_y+adj_y)], adj_lmap)
+                     #Alternative: specifically for excluding 0 - probably better for our purposes. Didn't work well with images when testing.
+                     #np.place(self.map[corner_x:(corner_x+adj_x), corner_y:(corner_y+adj_y)], adj_lmap > 0, adj_lmap)
                              
                     
 
