@@ -5,6 +5,8 @@ import threading
 from qt_gui.plugin import Plugin
 from python_qt_binding import loadUi
 from python_qt_binding import QtWidgets
+from std_msgs.msg import Bool
+
 
 
 class MyPlugin(Plugin):
@@ -29,14 +31,19 @@ class MyPlugin(Plugin):
         # Create QWidget
         self._widget = QtWidgets.QWidget()
 
-        self.hard_stop.clicked[bool].connect(self._hardstop)
-        self.soft_stop.clicked[bool].connect(self._softstop)
-        self.control.clicked[bool].connect(self._switchmode)
-        self.mode_val = 'Automatic'
-        self.stopped = False
-        self.mode.setText(self.mode_val)
+        # Sets up the functions to be called on clicking on buttons
+        self._widget.hard_stop.clicked[bool].connect(self._hardstop)
+        self._widget.soft_stop.clicked[bool].connect(self._softstop)
+        self._widget.control.clicked[bool].connect(self._switchmode)
 
-        self.control_publisher = rospy.Publisher("control_mode", int, queue_size=0)
+        # Sets up the variables and the text label
+        self.mode_val = False
+        self.soft_stop = False
+        self.decide_text()
+
+        # Sets the topics and the publishing rate
+        self.control_publisher = rospy.Publisher("control_mode", Bool, queue_size=0)
+        self.stop_publisher = rospy.Publisher("soft_stop", Bool, queue_size=0)
         self.rate = rospy.Rate(10)
 
         # Get path to UI file which should be in the "resource" folder of this package
@@ -55,24 +62,37 @@ class MyPlugin(Plugin):
         # Add widget to the user interface
         context.add_widget(self._widget)
 
+        # Starts a thread to run in parallel publishing messages
         threading.Thread(target=self.publish_manually, args=(0,)).start()
 
     def _hardstop(self):
+        # Kills all the running nodes
         os.system("rosnode kill -a")
-        self.mode.setText('Hard Stop')
 
     def _softstop(self):
-        if not self.stopped:
-            self.mode.setText('Soft Stop')
-        else:
-            pass
+        # Changes the value of the soft_stop variable
+        # False means not stopped and True means stopped
+        self.soft_stop = not self.soft_stop
 
     def _switchmode(self):
-        if self.mode_val == 'Automatic':
-            self.mode_val = 'Manual'
-        else:
-            self.mode_val = 'Automatic'
-        self.mode.setText(self.mode_val)
+        # Changes the value of the mode_val variable
+        # False means automatic and True means manual
+        self.mode_val = not self.mode_val
+        # Updates the text label
+        self.decide_text()
+
+    def publish_manually(self):
+        # Runs till killed
+        while not rospy.is_shutdown():
+            # Publishes the value of the variables to the topics
+            self.stop_publisher.publish(Bool(self.soft_stop))
+            self.control_publisher.publish(Bool(self.mode_val))
+            # Publishes at the set rate
+            self.rate.sleep()
+
+    def decide_text(self):
+        # Sets the value for the text label
+        self._widget.mode.setText(['Manual' if self.mode_val else 'Automatic'][0])
 
     # def shutdown_plugin(self):
     #     # unregister all publishers here
@@ -87,13 +107,3 @@ class MyPlugin(Plugin):
     #     # restore intrinsic configuration, usually using:
     #     # v = instance_settings.value(k)
     #     pass
-
-    def publish_manually(self):
-        while not rospy.is_shutdown():
-            if self.mode_val == 'Manual':
-                self.control_publisher.publish(1)
-            elif self.mode_val == 'Soft Stop':
-                self.control_publisher.publish(2)
-            else:
-                self.control_publisher.publish(0)
-            self.rate.sleep()
