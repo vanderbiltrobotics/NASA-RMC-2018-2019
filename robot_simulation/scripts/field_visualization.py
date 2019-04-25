@@ -104,7 +104,7 @@ if __name__ == "__main__":
     marker_array.markers.append(wall_back_msg)
     marker_array.markers.append(wall_left_msg)
     marker_array.markers.append(wall_right_msg)
-    marker_array.markers.append(ground_msg)
+    #marker_array.markers.append(ground_msg)           Not publishing for now since we're displaying drivability map
 
     # Loop rate
     loop_rate = rospy.Rate(5)

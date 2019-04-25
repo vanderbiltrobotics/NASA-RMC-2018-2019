@@ -116,13 +116,16 @@ class ArucoExtendedKalmanFilter:
 if(__name__ == "__main__"):
 
     # Initialize EKF for Aruco Markers
-    arucoEKF = ArucoExtendedKalmanFilter()
+    robot_pose_ekf = ArucoExtendedKalmanFilter()
     
     # Init ros node as aruco_ekf
-    rospy.init_node("aruco_ekf")
+    rospy.init_node("robot_pose_ekf")
+
+    # Read unfiltered pose topic from parameter server
+    unfiltered_pose_topic = rospy.get_param("unfiltered_pose_topic")
 
     # Create subscriber to pose updates from aruco node
-    poseSubscriber = rospy.Subscriber('aruco/pose_raw', Pose, arucoEKF.update)
+    poseSubscriber = rospy.Subscriber(unfiltered_pose_topic, Pose, robot_pose_ekf.update)
 
     # Create publishers for filtered pose messages
     posePublisher = rospy.Publisher('ekf/pose_filtered', Pose, queue_size=1)
@@ -132,6 +135,6 @@ if(__name__ == "__main__"):
     r = rospy.Rate(10)  # 10hz
 
     while not rospy.is_shutdown():
-        posePublisher.publish(arucoEKF.getPose())
-        poseCovStampPublisher.publish(arucoEKF.getPoseCovStamped())
+        posePublisher.publish(robot_pose_ekf.getPose())
+        poseCovStampPublisher.publish(robot_pose_ekf.getPoseCovStamped())
         r.sleep()
