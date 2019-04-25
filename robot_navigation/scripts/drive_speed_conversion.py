@@ -164,6 +164,6 @@ if __name__ == '__main__':
     rospy.loginfo("Drive Motor Controller initialized...")
 
     # Loop continuously
-    rate = rospy.Rate(2)
+    rate = rospy.Rate(10)
     while not rospy.is_shutdown():
         pass

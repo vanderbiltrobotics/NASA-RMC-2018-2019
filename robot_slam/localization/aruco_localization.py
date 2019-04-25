@@ -11,6 +11,7 @@ import tf.transformations
 
 # Import other required packages
 import cv2.aruco as aruco
+import cv2
 import numpy as np
 import yaml
 
@@ -72,15 +73,16 @@ class ImageHandler:
             retval, rvec, tvec = aruco.estimatePoseBoard(corners, ids, self.aruco_board, self.cmatx, self.dist)
             bool_msg.data = retval
 
+
             # If succesful, convert rvec from rpy to quaternion, fill pose message
             if retval:
 
-                quat = tf.transformations.quaternion_from_euler(rvec[0], rvec[1], rvec[2])
+                quat = tf.transformations.quaternion_from_euler(rvec[1], rvec[0], rvec[2])
 
                 # Store pose and quaternion information of Aruco Board
-                pose_msg.position.x = tvec[0]
-                pose_msg.position.y = tvec[1]
-                pose_msg.position.z = tvec[2]
+                pose_msg.position.x = tvec[2]
+                pose_msg.position.y = -tvec[0]
+                pose_msg.position.z = tvec[1]
                 pose_msg.orientation.x = quat[0]
                 pose_msg.orientation.y = quat[1]
                 pose_msg.orientation.z = quat[2]
@@ -89,11 +91,10 @@ class ImageHandler:
                 # Calculate the average x distance between the corners 
                 # avg_corners = np.min(corners[:, 0, :, 0])
                 # print(type(corners[0]))
-                print(len(corners))
                 bla = corners[0][0][:, 0]
                 min = corners[0][0, 0, 0]
                 max = corners[0][0, 0, 0]
-                meh = 0
+
                 for corner in corners:
                     if np.min(corner[0, :, 0]) < min:
                         min = np.min(corner[0, :, 0])
@@ -101,17 +102,14 @@ class ImageHandler:
                         max = np.max(corner[0, :, 0])
 
                 self.avg_of_corners.publish((min + max)/2.0)
+
         else:
             bool_msg.data = False
             self.avg_of_corners.publish(avg_corners)
 
-        rospy.loginfo(avg_corners)
-
         # Publish messages
         self.pose_pub.publish(pose_msg)
         self.bool_pub.publish(bool_msg)
-
-        # Apply transforms to get coordinates in world_frame
 
 
 if __name__ == "__main__":

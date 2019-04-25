@@ -6,32 +6,38 @@ from geometry_msgs.msg import Quaternion
 from tf.transformations import euler_from_quaternion
 from nav_msgs.msg import OccupancyGrid
 import cv2
+from math import degrees
 
 
 class Field:
 
-    def __init__(self, length, width):
+    def __init__(self, length, width, local_map_frame_id, global_map_frame_id):
 
         # Global map we're maintaing
-        self.map = np.zeros(shape=(600, 400))
+        self.map = np.zeros(shape=(length, width))
 
         # Transform listener for getting latest pose information
         self.tfBuffer = tf2_ros.Buffer()
         self.listener = tf2_ros.TransformListener(self.tfBuffer)
 
+        # Frame IDs
+        self.local_map_frame_id = local_map_frame_id
+        self.global_map_frame_id = global_map_frame_id
+
     # Callback for new local map
     def update_field(self, new_map_msg):
 
         # Convert occupancy grid to numpy array
-        local_map = np.reshape(new_map_msg.data, (new_map_msg.info.height, new_map_msg.info.width))
+        local_map = np.reshape(new_map_msg.data, (new_map_msg.info.height, new_map_msg.info.width)).astype(np.float32)
 
         # Get current pose from transform listener
-        cur_tf = self.tfBuffer.lookup_transform("robot_pose", "world_pose", rospy.Time(0))
-        q = [cur_tf.transform.rotation.x,
+        cur_tf = self.tfBuffer.lookup_transform(self.global_map_frame_id, self.local_map_frame_id, rospy.Time(0))
+        q = (cur_tf.transform.rotation.x,
              cur_tf.transform.rotation.y,
              cur_tf.transform.rotation.z,
-             cur_tf.transform.rotation.w]  # quaternion from tf
-        rpy = euler_from_quaternion(Quaternion(q[0], q[1], q[2], q[3]))  # need yaw for the angle of the camera
+             cur_tf.transform.rotation.w)  # quaternion from tf
+        rpy = euler_from_quaternion(q)  # need yaw for the angle of the camera
+        rpy = [degrees(rpy[0]), degrees(rpy[1]), degrees(rpy[2])]
 
         # Add 1 to each valid 0 point to differentiate from the later junk values
         local_map[local_map == 0] += 1
@@ -40,7 +46,7 @@ class Field:
         (h, w) = local_map.shape[:2]
         (origin_X, origin_Y) = (w / 2, h / 2)
 
-        M = cv2.getRotationMatrix2D((origin_X, origin_Y), rpy[2], 1.0)
+        M = cv2.getRotationMatrix2D((origin_X, origin_Y), -rpy[2], 1.0)
         cos = np.abs(M[0, 0])
         sin = np.abs(M[0, 1])
 
@@ -53,15 +59,15 @@ class Field:
 
         # Add values from adjusted local map to world map
 
-        (adj_x, adj_y) = adj_lmap.shape[:2]
+        (adj_y, adj_x) = adj_lmap.shape[:2]
 
         # dif = difference in the origins between local map and world map
-        dif_x = cur_tf.transform.translation.x
-        dif_y = cur_tf.transform.translation.y
+        dif_x = int(100 * cur_tf.transform.translation.x)
+        dif_y = int(100 * cur_tf.transform.translation.y)
 
         # corners of the local map relative to the full map
         corner_xU = dif_x - (adj_x / 2)
-        corner_yL = dif_y - (adj_x / 2)
+        corner_yL = dif_y - (adj_y / 2)
         corner_xD = corner_xU + adj_x
         corner_yR = corner_yL + adj_y
 
@@ -81,7 +87,7 @@ class Field:
             lcorner_yL += (-corner_yL)
             corner_yL = 0
 
-        (fX, fY) = self.map.shape[:2]  # max values of full map
+        (fY, fX) = self.map.shape[:2]  # max values of full map
 
         # deals with values in local map that are in a row greater than max row
         if corner_xD > fX:
@@ -94,12 +100,15 @@ class Field:
             corner_yR = fY
 
         # Transfer all valid values out of adjust local map and update their corresponding positions in the Field
-        np.copyto(self.map[corner_xU:corner_xD, corner_yL:corner_yR],
-                  adj_lmap[lcorner_xU:lcorner_xD, lcorner_yL:lcorner_yR], where=(adj_lmap != 0))
+        mask = adj_lmap[lcorner_yL:lcorner_yR, lcorner_xU:lcorner_xD] != 0
+        np.copyto(self.map[corner_yL:corner_yR, corner_xU:corner_xD],
+                  adj_lmap[lcorner_yL:lcorner_yR, lcorner_xU:lcorner_xD], where=mask)
 
     def get_map_as_grid_msg(self):
 
-        full_map = np.reshape(self.map, (self.map.shape[0] * self.map.shape[1], 1)).tolist()
+        full_map = np.reshape(self.map, (1, self.map.shape[0] * self.map.shape[1])).astype(np.uint8)
+        full_map = full_map.tolist()
+        full_map = full_map[0]
 
         # Create OccupancyGrid messgae
         new_msg = OccupancyGrid()
@@ -121,9 +130,11 @@ if __name__ == "__main__":
     map_length = rospy.get_param("global_map_length", default=738)
     map_width = rospy.get_param("global_map_width", default=378)
     local_map_topic = rospy.get_param("local_elevation_map_topic", default="local_elevation_map")
+    local_map_frame_id = rospy.get_param("local_elevation_map_frame_id", default="robot_center")
+    global_map_frame_id = rospy.get_param("global_elevation_map_frame_id", default="world")
 
     # Create Field object
-    field = Field(length=map_length, width=map_width)
+    field = Field(map_length, map_width, local_map_frame_id, global_map_frame_id)
 
     # Create subscriber to local map occupancy grid
     rospy.Subscriber(local_map_topic, OccupancyGrid, field.update_field)
@@ -131,7 +142,7 @@ if __name__ == "__main__":
     # Create publisher to publish global map
     global_map_pub = rospy.Publisher("global_elevation_map", OccupancyGrid, queue_size=0)
 
-    loop_rate = rospy.Rate(5)
+    loop_rate = rospy.Rate(20)
 
     while not rospy.is_shutdown():
 

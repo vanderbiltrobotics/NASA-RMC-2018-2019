@@ -3,9 +3,7 @@ Panels:
     Help Height: 78
     Name: Displays
     Property Tree Widget:
-      Expanded:
-        - /Global Options1
-        - /Status1
+      Expanded: ~
       Splitter Ratio: 0.5
     Tree Height: 719
   - Class: rviz/Selection
@@ -75,17 +73,17 @@ Visualization Manager:
       Axes Length: 1
       Axes Radius: 0.100000001
       Class: rviz/Pose
-      Color: 255; 25; 0
-      Enabled: true
-      Head Length: 0.0500000007
-      Head Radius: 0.0399999991
+      Color: 1; 230; 255
+      Enabled: false
+      Head Length: 0.100000001
+      Head Radius: 0.0700000003
       Name: Pose
-      Shaft Length: 0.075000003
-      Shaft Radius: 0.0199999996
+      Shaft Length: 0.300000012
+      Shaft Radius: 0.0350000001
       Shape: Arrow
-      Topic: /cur_pose
+      Topic: /robot_pose_sim_stamped
       Unreliable: false
-      Value: true
+      Value: false
     - Alpha: 1
       Class: rviz/PointStamped
       Color: 204; 41; 204
@@ -93,7 +91,7 @@ Visualization Manager:
       History Length: 1
       Name: PointStamped
       Radius: 0.0500000007
-      Topic: /goal_pose
+      Topic: /pp_target_point
       Unreliable: false
       Value: true
     - Class: rviz/MarkerArray
@@ -104,27 +102,6 @@ Visualization Manager:
         "": true
       Queue Size: 100
       Value: true
-    - Alpha: 1
-      Class: rviz/RobotModel
-      Collision Enabled: false
-      Enabled: true
-      Links:
-        All Links Enabled: true
-        Expand Joint Details: false
-        Expand Link Details: false
-        Expand Tree: false
-        Link Tree Style: Links in Alphabetic Order
-        robot_frame:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-      Name: RobotModel
-      Robot Description: robot_description
-      TF Prefix: ""
-      Update Interval: 0
-      Value: true
-      Visual Enabled: true
     - Class: rviz/TF
       Enabled: true
       Frame Timeout: 15
@@ -140,7 +117,7 @@ Visualization Manager:
           Value: true
         robot_back_right:
           Value: true
-        robot_frame:
+        robot_center:
           Value: true
         robot_front_left:
           Value: true
@@ -152,12 +129,12 @@ Visualization Manager:
       Name: TF
       Show Arrows: true
       Show Axes: true
-      Show Names: true
+      Show Names: false
       Tree:
         world:
           aruco_board_origin:
             aruco_camera:
-              robot_frame:
+              robot_center:
                 camera_link:
                   {}
                 robot_back_left:
@@ -169,6 +146,16 @@ Visualization Manager:
                 robot_front_right:
                   {}
       Update Interval: 0
+      Value: true
+    - Alpha: 0.300000012
+      Class: rviz/Map
+      Color Scheme: raw
+      Draw Behind: false
+      Enabled: true
+      Name: Map
+      Topic: /global_elevation_map
+      Unreliable: false
+      Use Timestamp: false
       Value: true
   Enabled: true
   Global Options:
@@ -195,25 +182,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 8.94924641
+      Distance: 14.1283274
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.0599999987
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 1.23887193
-        Y: 3.66830397
-        Z: 0.02667832
+        X: -0.842654586
+        Y: 3.69222021
+        Z: -3.64798117
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.0500000007
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.00999999978
-      Pitch: 0.949795842
+      Pitch: 0.924795866
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 6.26540804
+      Yaw: 6.26541996
     Saved: ~
 Window Geometry:
   Displays:
