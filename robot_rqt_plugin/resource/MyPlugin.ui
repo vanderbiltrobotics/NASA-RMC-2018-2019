@@ -13,43 +13,56 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <widget class="QPushButton" name="stop">
+  <widget class="QPushButton" name="hard_stop">
    <property name="geometry">
     <rect>
-     <x>500</x>
-     <y>270</y>
-     <width>331</width>
-     <height>151</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>e-stop</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="control">
-   <property name="geometry">
-    <rect>
-     <x>80</x>
-     <y>270</y>
+     <x>290</x>
+     <y>440</y>
      <width>311</width>
      <height>151</height>
     </rect>
    </property>
    <property name="text">
-    <string>control_mode</string>
+    <string>Hard Stop</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="control">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>230</y>
+     <width>311</width>
+     <height>151</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Change Control</string>
    </property>
   </widget>
   <widget class="QLabel" name="mode">
    <property name="geometry">
     <rect>
-     <x>300</x>
-     <y>120</y>
+     <x>310</x>
+     <y>70</y>
      <width>331</width>
      <height>101</height>
     </rect>
    </property>
    <property name="text">
     <string>NULL</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="soft_stop">
+   <property name="geometry">
+    <rect>
+     <x>560</x>
+     <y>230</y>
+     <width>311</width>
+     <height>151</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Soft Stop</string>
    </property>
   </widget>
  </widget>
