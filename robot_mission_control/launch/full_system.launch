@@ -59,7 +59,7 @@
         <!-- parameters for image_publisher node -->
         <param name="device_id" value="1"/>
         <param name="calibration_file" value="camera_a.yaml"/>
-        <param name="publish_rate" value="3"/>
+        <param name="publish_rate" value="10"/>
         <param name="image_width" value="640"/>
         <param name="image_height" value="480"/>
 
