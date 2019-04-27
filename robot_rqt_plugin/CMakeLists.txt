@@ -198,7 +198,7 @@ include_directories(
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
 
-install(PROGRAMS scripts/rqt_mypkg
+install(PROGRAMS scripts/robot_rqt_plugin
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
