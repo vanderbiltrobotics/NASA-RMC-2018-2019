@@ -66,12 +66,7 @@ class ArucoExtendedKalmanFilter:
             [pose.orientation.w]
         )).reshape((7,1))
 
-        if np.sum(z) == 0:
-            z[6,0] = 1.0
-            z[0,0] = 1.0
-            z[1,0] = 1.0
-            self.arucoEKF.predict_update(z, self.HJacobian, self.hx)
-        elif pose.orientation.w != 0 and self.arucoDetected:
+        if self.arucoDetected:
             self.arucoEKF.predict_update(z, self.HJacobian, self.hx)
 
 
