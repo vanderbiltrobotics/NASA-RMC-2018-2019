@@ -116,13 +116,13 @@ ADD_LIBRARY(CTRE_PhoenixCanutils STATIC IMPORTED)
 ## Import appropriate libraries for architecture
 if(${arch} STREQUAL "x86_64")
     SET_TARGET_PROPERTIES(CTRE_Phoenix PROPERTIES
-            IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/lib/x86-64/libCTRE_Phoenix.a)
+            IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/lib/x86_64/libCTRE_Phoenix.a)
     SET_TARGET_PROPERTIES(CTRE_PhoenixCCI PROPERTIES
-            IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/lib/x86-64/libCTRE_PhoenixCCI.a)
+            IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/lib/x86_64/libCTRE_PhoenixCCI.a)
     SET_TARGET_PROPERTIES(CTRE_PhoenixPlatformLinuxSocketCan PROPERTIES
-            IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/lib/x86-64/libCTRE_PhoenixPlatformLinuxSocketCan.a)
+            IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/lib/x86_64/libCTRE_PhoenixPlatformLinuxSocketCan.a)
     SET_TARGET_PROPERTIES(CTRE_PhoenixCanutils PROPERTIES
-            IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/lib/x86-64/libCTRE_PhoenixCanutils.a)
+            IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/lib/x86_64/libCTRE_PhoenixCanutils.a)
 elseif(${arch} STREQUAL "armv7l")
     SET_TARGET_PROPERTIES(CTRE_Phoenix PROPERTIES
             IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/lib/raspberry/libCTRE_Phoenix.a)
@@ -170,8 +170,12 @@ target_link_libraries(motor_control_node
 ## Install ##
 #############
 
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/${arch}/*
-    DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+install(FILES
+        ${CMAKE_CURRENT_SOURCE_DIR}/lib/${arch}/libCTRE_Phoenix.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/lib/${arch}/libCTRE_PhoenixCanutils.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/lib/${arch}/libCTRE_PhoenixCCI.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/lib/${arch}/libCTRE_PhoenixPlatformLinuxSocketCan.a
+        DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 )
 
 ## Mark cpp header files for installation
