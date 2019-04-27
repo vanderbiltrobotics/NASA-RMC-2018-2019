@@ -16,6 +16,7 @@ namespace robot_motor_control {
             busVoltagePub(nh.advertise<std_msgs::Float64>("bus_voltage", 1)),
             outputPercentPub(nh.advertise<std_msgs::Float64>("output_percent", 1)),
             outputVoltagePub(nh.advertise<std_msgs::Float64>("output_voltage", 1)),
+            outputCurrentPub(nh.advertise<std_msgs::Float64>("output_current", 1)),
             posPub(nh.advertise<std_msgs::Int32>("position", 1)),
             velPub(nh.advertise<std_msgs::Int32>("velocity", 1)),
             setPercentSub(nh.subscribe("set_percent_output", 1, &TalonNode::setPercentOutput, this)),
@@ -24,6 +25,7 @@ namespace robot_motor_control {
         server.setCallback(boost::bind(&TalonNode::reconfigure, this, _1, _2));
         server.updateConfig(config);
         talon->Set(ControlMode::PercentOutput, 0);
+        configureStatusPeriod(*talon);
     }
 
     void TalonNode::setPercentOutput(std_msgs::Float64 output) {
@@ -42,6 +44,7 @@ namespace robot_motor_control {
         if (config.id != 0 && talon->GetDeviceID() != config.id) {
             ROS_INFO("Resetting TalonNode to new id: %d", config.id);
             talon = std::make_unique<TalonSRX>(config.id);
+            configureStatusPeriod(*talon);
         }
 
         TalonSRXConfiguration c;
@@ -52,6 +55,7 @@ namespace robot_motor_control {
         slot.kF = config.F;
         c.slot0 = slot;
         c.voltageCompSaturation = config.peak_voltage;
+        c.pulseWidthPeriod_EdgesPerRot = 4096;
         talon->ConfigAllSettings(c);
 
         talon->SelectProfileSlot(0,0);
@@ -85,6 +89,10 @@ namespace robot_motor_control {
         outputVoltage.data = talon->GetMotorOutputVoltage();
         outputVoltagePub.publish(outputVoltage);
 
+        std_msgs::Float64 outputCurrent;
+        outputCurrent.data = talon->GetOutputCurrent();
+        outputCurrentPub.publish(outputCurrent);
+
         std_msgs::Int32 position;
         position.data = talon->GetSelectedSensorPosition();
         posPub.publish(position);
@@ -92,6 +100,18 @@ namespace robot_motor_control {
         std_msgs::Int32 velocity;
         velocity.data = talon->GetSelectedSensorVelocity();
         velPub.publish(velocity);
+    }
+
+    void TalonNode::configureStatusPeriod(TalonSRX& talon){
+        talon.SetStatusFramePeriod(StatusFrameEnhanced::Status_1_General, 20);
+        talon.SetStatusFramePeriod(StatusFrameEnhanced::Status_2_Feedback0, 20);
+        talon.SetStatusFramePeriod(StatusFrameEnhanced::Status_3_Quadrature, 20);
+        talon.SetStatusFramePeriod(StatusFrameEnhanced::Status_4_AinTempVbat, 200);
+        talon.SetStatusFramePeriod(StatusFrameEnhanced::Status_8_PulseWidth, 200);
+        talon.SetStatusFramePeriod(StatusFrameEnhanced::Status_12_Feedback1, 200);
+        talon.SetStatusFramePeriod(StatusFrameEnhanced::Status_13_Base_PIDF0, 200);
+        talon.SetStatusFramePeriod(StatusFrameEnhanced::Status_14_Turn_PIDF1, 200);
+        talon.SetStatusFramePeriod(StatusFrameEnhanced::Status_15_FirmareApiStatus, 200);
     }
 
 }

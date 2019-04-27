@@ -31,6 +31,7 @@ namespace robot_motor_control{
         ros::Publisher busVoltagePub;
         ros::Publisher outputPercentPub;
         ros::Publisher outputVoltagePub;
+        ros::Publisher outputCurrentPub;
         ros::Publisher posPub;
         ros::Publisher velPub;
 
@@ -55,6 +56,8 @@ namespace robot_motor_control{
         void setVelocity(std_msgs::Float64 output);
 
         void update();
+
+        static void configureStatusPeriod(TalonSRX& talon);
 
     };
 
