@@ -26,28 +26,36 @@ namespace robot_motor_control {
         talon->Set(ControlMode::PercentOutput, 0);
     }
 
-    void TalonNode::setPercentOutput(std_msgs::Float64Ptr output) {
+    void TalonNode::setPercentOutput(std_msgs::Float64 output) {
         this->_controlMode = ControlMode::PercentOutput;
-        this->_output = output->data;
+        this->_output = output.data;
         this->lastUpdate = ros::Time::now();
     }
 
-    void TalonNode::setVelocity(std_msgs::Float64Ptr output) {
+    void TalonNode::setVelocity(std_msgs::Float64 output) {
         this->_controlMode = ControlMode::Velocity;
-        this->_output = output->data;
+        this->_output = output.data;
         this->lastUpdate = ros::Time::now();
     }
 
     void TalonNode::reconfigure(const TalonConfig &config, uint32_t level) {
-        TalonSRXConfiguration c;
-        talon->ConfigAllSettings(c);
-
         if (config.id != 0 && talon->GetDeviceID() != config.id) {
             ROS_INFO("Resetting TalonNode to new id: %d", config.id);
-            talon.reset(new TalonSRX(config.id));
+            talon = std::make_unique<TalonSRX>(config.id);
         }
+
+        TalonSRXConfiguration c;
+        SlotConfiguration slot;
+        slot.kP = config.P;
+        slot.kI = config.I;
+        slot.kD = config.D;
+        slot.kF = config.F;
+        c.slot0 = slot;
+        c.voltageCompSaturation = config.peak_voltage;
+        talon->ConfigAllSettings(c);
+
+        talon->SelectProfileSlot(0,0);
         talon->SetInverted(config.inverted);
-        talon->ConfigVoltageCompSaturation(config.peak_voltage);
         talon->EnableVoltageCompensation(true);
     }
 
@@ -61,28 +69,28 @@ namespace robot_motor_control {
         }
         talon->Set(this->_controlMode, this->_output);
 
-        std_msgs::Float64Ptr temperature(new std_msgs::Float64());
-        temperature->data = talon->GetTemperature();
+        std_msgs::Float64 temperature;
+        temperature.data = talon->GetTemperature();
         tempPub.publish(temperature);
 
-        std_msgs::Float64Ptr busVoltage(new std_msgs::Float64());
-        busVoltage->data = talon->GetBusVoltage();
+        std_msgs::Float64 busVoltage;
+        busVoltage.data = talon->GetBusVoltage();
         busVoltagePub.publish(busVoltage);
 
-        std_msgs::Float64Ptr outputPercent(new std_msgs::Float64());
-        outputPercent->data = talon->GetMotorOutputPercent();
+        std_msgs::Float64 outputPercent;
+        outputPercent.data = talon->GetMotorOutputPercent();
         outputPercentPub.publish(outputPercent);
 
-        std_msgs::Float64Ptr outputVoltage(new std_msgs::Float64());
-        outputVoltage->data = talon->GetMotorOutputVoltage();
+        std_msgs::Float64 outputVoltage;
+        outputVoltage.data = talon->GetMotorOutputVoltage();
         outputVoltagePub.publish(outputVoltage);
 
-        std_msgs::Int32Ptr position(new std_msgs::Int32());
-        position->data = talon->GetSelectedSensorPosition();
+        std_msgs::Int32 position;
+        position.data = talon->GetSelectedSensorPosition();
         posPub.publish(position);
 
-        std_msgs::Int32Ptr velocity(new std_msgs::Int32());
-        velocity->data = talon->GetSelectedSensorVelocity();
+        std_msgs::Int32 velocity;
+        velocity.data = talon->GetSelectedSensorVelocity();
         velPub.publish(velocity);
     }
 
