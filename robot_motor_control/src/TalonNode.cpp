@@ -10,8 +10,8 @@ using namespace ctre::phoenix::motorcontrol::can;
 
 namespace robot_motor_control {
 
-    TalonNode::TalonNode(ros::NodeHandle nh, std::string name, const TalonConfig &config) :
-            nh(nh), _name(name), server(nh), talon(new TalonSRX(config.id)),
+    TalonNode::TalonNode(const ros::NodeHandle& parent, const std::string& name, const TalonConfig& config) :
+            nh(parent), _name(name), server(nh), talon(new TalonSRX(config.id)),
             tempPub(nh.advertise<std_msgs::Float64>("temperature", 1)),
             busVoltagePub(nh.advertise<std_msgs::Float64>("bus_voltage", 1)),
             outputPercentPub(nh.advertise<std_msgs::Float64>("output_percent", 1)),
