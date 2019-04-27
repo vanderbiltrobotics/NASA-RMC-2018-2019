@@ -161,6 +161,7 @@ target_link_libraries(motor_control_node
 ## Install ##
 #############
 
+## Install runtime libraries
 install(FILES
         ${CMAKE_CURRENT_SOURCE_DIR}/lib/${arch}/libCTRE_Phoenix.a
         ${CMAKE_CURRENT_SOURCE_DIR}/lib/${arch}/libCTRE_PhoenixCanutils.a
@@ -168,7 +169,12 @@ install(FILES
         ${CMAKE_CURRENT_SOURCE_DIR}/lib/${arch}/libCTRE_PhoenixPlatformLinuxSocketCan.a
         DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 )
-
+## Install node executables
+install(TARGETS motor_control_node motor_control_cmd_example
+        ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
 ## Mark cpp header files for installation
 install(DIRECTORY include/
     DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
