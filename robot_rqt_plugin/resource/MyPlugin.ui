@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Form</class>
+ <widget class="QWidget" name="Form">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>504</width>
+    <height>436</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <widget class="QPushButton" name="hard_stop">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>300</y>
+     <width>241</width>
+     <height>111</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Hard Stop</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="control">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>30</y>
+     <width>241</width>
+     <height>111</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Change Control</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="mode">
+   <property name="geometry">
+    <rect>
+     <x>290</x>
+     <y>30</y>
+     <width>201</width>
+     <height>101</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>NULL</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="soft_stop">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>160</y>
+     <width>241</width>
+     <height>111</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Soft Stop</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="soft">
+   <property name="geometry">
+    <rect>
+     <x>290</x>
+     <y>200</y>
+     <width>114</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>NULL</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="hard">
+   <property name="geometry">
+    <rect>
+     <x>290</x>
+     <y>320</y>
+     <width>191</width>
+     <height>71</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

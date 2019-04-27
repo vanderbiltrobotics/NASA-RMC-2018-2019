@@ -90,10 +90,6 @@ if __name__ == "__main__":
     # Create base image for viewing simulation
     field_width = 7.0
     field_length = 3.0
-    scale = 150
-    base_img = np.zeros((int(field_length * scale), int(field_width * scale), 3), np.uint8) + 244
-    p_color = (0, 150, 0)
-    r_color = (150, 0, 0)
 
     # Initialize ROS node
     rospy.init_node("path_tracking_simulator")
@@ -102,43 +98,15 @@ if __name__ == "__main__":
     init_pose = PoseStamped()
     init_pose.header.frame_id = "world"
     init_pose.pose.position.x = field_width / 2.0 - 2.0
-    init_pose.pose.position.y = field_length / 2.0 - 0.75
-    init_quat = quaternion_from_euler(0, 0, -1.0)
+    init_pose.pose.position.y = field_length / 2.0 - 1.0
+    init_quat = quaternion_from_euler(0, 0, 0)
     init_pose.pose.orientation.x = init_quat[0]
     init_pose.pose.orientation.y = init_quat[1]
     init_pose.pose.orientation.z = init_quat[2]
     init_pose.pose.orientation.w = init_quat[3]
 
     # Create a simulated robot
-    robot = Robot("cmd_vel", "cur_pose", init_pose)
-
-    # Create example path
-    test_path = Path()
-    test_path.header.frame_id = "world"
-    # for i in range(500):
-    #     new_pose = PoseStamped()
-    #     new_pose.header.frame_id = "world"
-    #     new_pose.pose.position.x = 1.0 + i * 0.01
-    #     new_pose.pose.position.y = 1.5 + 0.20 * sin(2.0 * pi * (1.0 / 50.0) * i)
-    #     test_path.poses.append(new_pose)
-    init_noisy_pose = PoseStamped()
-    init_noisy_pose.header.frame_id = "world"
-    init_noisy_pose.pose.position.x = 0.1
-    init_noisy_pose.pose.position.y = 0.1
-    test_path.poses.append(init_noisy_pose)
-    for i in range(150):
-        new_pose = PoseStamped()
-        new_pose.header.frame_id = "world"
-        new_pose.pose.position.x = test_path.poses[len(test_path.poses)-1].pose.position.x + 0.01*random.randrange(int(test_path.poses[len(test_path.poses)-1].pose.position.x), field_width, 1)
-        new_pose.pose.position.y = test_path.poses[len(test_path.poses)-1].pose.position.y + 0.01*random.randrange(int(test_path.poses[len(test_path.poses)-1].pose.position.y), field_width, 1)
-        test_path.poses.append(new_pose)
-
-    # Create path publisher
-    path_pub = rospy.Publisher("cur_path", Path, queue_size=0)
-
-    # Wait for connections, then publish
-    rospy.sleep(2)
-    path_pub.publish(test_path)
+    robot = Robot("drive_cmd", "robot_pose_sim", init_pose)
 
     # Set update rate for robots (how often path tracking node can receive new pose estimate)
     loop_frequency = 10
