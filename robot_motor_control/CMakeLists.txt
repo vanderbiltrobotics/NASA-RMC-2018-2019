@@ -114,24 +114,15 @@ ADD_LIBRARY(CTRE_PhoenixPlatformLinuxSocketCan STATIC IMPORTED)
 ADD_LIBRARY(CTRE_PhoenixCanutils STATIC IMPORTED)
 
 ## Import appropriate libraries for architecture
-if(${arch} STREQUAL "x86_64")
+if(${arch} STREQUAL "x86_64" OR ${arch} STREQUAL "armv7l")
     SET_TARGET_PROPERTIES(CTRE_Phoenix PROPERTIES
-            IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/lib/x86_64/libCTRE_Phoenix.a)
+            IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/lib/${arch}/libCTRE_Phoenix.a)
     SET_TARGET_PROPERTIES(CTRE_PhoenixCCI PROPERTIES
-            IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/lib/x86_64/libCTRE_PhoenixCCI.a)
+            IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/lib/${arch}/libCTRE_PhoenixCCI.a)
     SET_TARGET_PROPERTIES(CTRE_PhoenixPlatformLinuxSocketCan PROPERTIES
-            IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/lib/x86_64/libCTRE_PhoenixPlatformLinuxSocketCan.a)
+            IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/lib/${arch}/libCTRE_PhoenixPlatformLinuxSocketCan.a)
     SET_TARGET_PROPERTIES(CTRE_PhoenixCanutils PROPERTIES
-            IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/lib/x86_64/libCTRE_PhoenixCanutils.a)
-elseif(${arch} STREQUAL "armv7l")
-    SET_TARGET_PROPERTIES(CTRE_Phoenix PROPERTIES
-            IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/lib/raspberry/libCTRE_Phoenix.a)
-    SET_TARGET_PROPERTIES(CTRE_PhoenixCCI PROPERTIES
-            IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/lib/raspberry/libCTRE_PhoenixCCI.a)
-    SET_TARGET_PROPERTIES(CTRE_PhoenixPlatformLinuxSocketCan PROPERTIES
-            IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/lib/raspberry/libCTRE_PhoenixPlatformLinuxSocketCan.a)
-    SET_TARGET_PROPERTIES(CTRE_PhoenixCanutils PROPERTIES
-            IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/lib/raspberry/libCTRE_PhoenixCanutils.a)
+            IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/lib/${arch}/libCTRE_PhoenixCanutils.a)
 else()
     message( FATAL_ERROR "Unrecognized architecture: ${arch}" )
 endif()
