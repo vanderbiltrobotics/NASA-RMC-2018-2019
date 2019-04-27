@@ -50,11 +50,9 @@ namespace robot_motor_control{
 
         void reconfigure(const TalonConfig &config, uint32_t level);
 
-        void setPercentOutput(std_msgs::Float64Ptr output);
+        void setPercentOutput(std_msgs::Float64 output);
 
-        void setVelocity(std_msgs::Float64Ptr output);
-
-        void stop();
+        void setVelocity(std_msgs::Float64 output);
 
         void update();
     };
