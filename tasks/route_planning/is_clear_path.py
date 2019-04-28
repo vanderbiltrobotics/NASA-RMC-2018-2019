@@ -58,7 +58,7 @@ def is_clear_path(driveability_map, start_pos, end_pos):
         if occupied == 1:
             return False # obstacle detected, can't cross here
 
-    return True; # Safe to drive along this line
+    return True # Safe to drive along this line
 
 if __name__ == "__main__":
     # Just for testing this value in a vaccuum
