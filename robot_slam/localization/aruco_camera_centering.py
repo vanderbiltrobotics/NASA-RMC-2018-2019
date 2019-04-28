@@ -41,7 +41,7 @@ class ArucoCamera:
         
         # Camera sweep parameters
         self.sweepDirection = 1      # Controls the direction of sweep
-        self.deltaTheta = 1          # Servo angle change per loop during camera sweep
+        self.deltaTheta = 3          # Servo angle change per loop during camera sweep
 
         # Proportional gain; represents a transformation from the camera pixel subspace to servo angle. 
         # Vary the magnitude of k to change how much the servo angle should change based off the error

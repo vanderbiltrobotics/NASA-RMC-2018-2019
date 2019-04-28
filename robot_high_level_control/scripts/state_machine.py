@@ -3,7 +3,9 @@ from geometry_msgs.msg import Twist
 from std_msgs.msg import Bool
 
 class HighLevelController:
+
     def __init__(self, starting_state = "idle"):
+
         # Initialize current state to the starting state
         self.current_state = starting_state
 
@@ -29,12 +31,35 @@ class HighLevelController:
         # Considering the curren state and other info (such as elapsed time), advance to the correct next state
         return
 
-    def run_state(self):
+    def run_states(self):
+
+        # Continue running states until we're done
+        while not rospy.is_shutdown():
+
+            if self.current_state == "idle":
+                self.state_idle()
+            elif self.current_state == "localizing":
+                self.state_localizing()
+            elif self.current_state == "drive_to_p0":
+                self.state_drive_to_P0()
+            elif self.current_state == "drive_to_p1":
+                self.state_drive_to_P1()
+            elif self.current_state == "drive_to_p2":
+                self.state_drive_to_P2()
+            elif self.current_state == "drive_to_p3":
+                self.state_drive_to_P3()
+            elif self.current_state == "mine_gravel":
+                self.state_mine_gravel()
+            elif self.current_state == "approach_bin":
+                self.state_approach_bin()
+            elif self.current_state == "deposit_gravel":
+                self.state_deposit_gravel()
+
         return
 
     # Configure the enable state for each group
     # Each input parameter should be a boolean
-    def set_enables(self, motors, nav, localization, obstacles):
+    def set_enables(self, motors=False, nav=False, localization=False, obstacles=False):
 
         # Create ROS bool messages
         mot_msg = Bool()
@@ -56,20 +81,31 @@ class HighLevelController:
 
 
     ## TODO DEFINE BEHAVIORS FOR EACH STATE ##
+
     def state_idle(self):
 
-        # Disable navigation nodes
-
+        # Disable everything except motor control nodes
+        self.set_enables(motors=True)
 
         # Command motor speeds to zero
+        self.publishers["drive_cmd"].publish(Twist())
 
         # Disable motor control nodes
+        self.set_enables()
 
-        # Disable localization
+        # Set loop rate
+        loop_rate = rospy.Rate(10)
 
         # Wait for further instruction
+        while self.current_state == "idle":
 
+            # Process any commands we may have received
+            self.process_state_changes()
 
+            # Sleep at loop rate
+            loop_rate.sleep()
+
+        self.advance_state()
 
         return
 
