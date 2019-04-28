@@ -1,3 +1,5 @@
+import rospy
+from geometry_msgs.msg import Twist
 
 class HighLevelController:
     def __init__(self, starting_state = "idle"):
@@ -9,7 +11,9 @@ class HighLevelController:
         self.p2 = [3,3]
         self.p3 = [0,0]
 
-        self.publishers = {}
+        self.publishers = {
+            "drive_cmd" : rospy.Publisher('drive_cmd', Twist, queue_size=1)
+        }
         self.state_vars = {}
 
     def process_state_changes(self):
