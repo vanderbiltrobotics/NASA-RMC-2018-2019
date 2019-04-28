@@ -32,6 +32,7 @@ class HighLevelController:
         return
 
     def state_localizing(self):
+        # Enable camera servo node aruco_camera_centering
         return
 
     def state_drive_to_P0(self):
