@@ -1,5 +1,6 @@
 import rospy
 from geometry_msgs.msg import Twist
+from std_msgs.msg import Bool
 
 class HighLevelController:
     def __init__(self, starting_state = "idle"):
@@ -12,7 +13,11 @@ class HighLevelController:
         self.p3 = [0,0]
 
         self.publishers = {
-            "drive_cmd" : rospy.Publisher('drive_cmd', Twist, queue_size=1)
+            "drive_cmd" : rospy.Publisher('drive_cmd', Twist, queue_size=1),
+            "enable_pub_mot": rospy.Publisher("enable/motor_control", Bool, queue_size=1),
+            "enable_pub_nav": rospy.Publisher("enable/navigation", Bool, queue_size=1),
+            "enable_pub_loc": rospy.Publisher("enable/localization", Bool, queue_size=1),
+            "enable_pub_obs": rospy.Publisher("enable/obstacles", Bool, queue_size=1)
         }
         self.state_vars = {}
 
@@ -27,8 +32,45 @@ class HighLevelController:
     def run_state(self):
         return
 
+    # Configure the enable state for each group
+    # Each input parameter should be a boolean
+    def set_enables(self, motors, nav, localization, obstacles):
+
+        # Create ROS bool messages
+        mot_msg = Bool()
+        nav_msg = Bool()
+        loc_msg = Bool()
+        obs_msg = Bool()
+
+        # Set data accordingly
+        mot_msg.data = motors
+        nav_msg.data = nav
+        loc_msg.data = localization
+        obs_msg.data = obstacles
+
+        # Publish messages
+        self.publishers["enable_pub_mot"].publish(mot_msg)
+        self.publishers["enable_pub_nav"].publish(nav_msg)
+        self.publishers["enable_pub_loc"].publish(loc_msg)
+        self.publishers["enable_pub_obs"].publish(obs_msg)
+
+
     ## TODO DEFINE BEHAVIORS FOR EACH STATE ##
     def state_idle(self):
+
+        # Disable navigation nodes
+
+
+        # Command motor speeds to zero
+
+        # Disable motor control nodes
+
+        # Disable localization
+
+        # Wait for further instruction
+
+
+
         return
 
     def state_localizing(self):
