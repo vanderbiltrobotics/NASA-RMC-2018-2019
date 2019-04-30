@@ -12,7 +12,7 @@ from math import sqrt
 def generate_map(length, width):
 
     # First generate empty map
-    new_map = np.ones((length, width), np.uint8)
+    new_map = np.zeros((length, width), np.uint8)
 
     # Obstacles can only be added between these bounds
     upper_bound = length / 3
@@ -42,7 +42,7 @@ def generate_map(length, width):
         for x in range(0, width):
             for y in range(length):
                 if sqrt(pow((x - center_x), 2) + pow((y - center_y), 2)) < obs_rad:
-                    new_map[y, x] = 0
+                    new_map[y, x] = 1
 
     return new_map
 
