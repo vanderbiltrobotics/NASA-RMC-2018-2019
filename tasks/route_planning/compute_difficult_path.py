@@ -71,7 +71,7 @@ def max_pool(map, K):
     print 'Highest weight allowed to drive over: ', threshold * -1
 
     adj_path = np.array(path)
-    adj_path = K * adj_path + 1
+    adj_path = K * adj_path + (K/2)
     print adj_path
 
     for pt in adj_path[:-1]:
