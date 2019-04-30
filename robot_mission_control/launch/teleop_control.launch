@@ -3,7 +3,7 @@
         <param name="dev" value="/dev/input/js0"/>
     </node>
 
-    Teleop control node - reads joy command, publishes Twist message
+    <!-- Teleop control node - reads joy command, publishes Twist message -->
     <node name="teleop_control" pkg="robot_mission_control" type="teleop_control.py"/>
 
     <!--Drive motor control node - translates twist message into individual motor speeds-->
@@ -14,8 +14,14 @@
     <param name="max_out_lin_vel" type="double" value="0.5"/>
     <param name="max_out_ang_vel" type="double" value="1.0"/>
     <param name="output_mode" type="string" value="pwm"/>
-    <param name="queue_size" type="int" value="50"/>
+    <param name="queue_size" type="int" value="25"/>
     <node name="drive_speed_conversion" pkg="robot_navigation" type="drive_speed_conversion.py"/>
+
+    <!-- Dig motor control node -->
+    <node name="digging_control" pkg="robot_motor_control" type="digging_control.py"/>
+
+    <!-- Node to publish concise summary of all motor speeds -->
+    <node name="motor_speed_summary_pub" pkg="robot_motor_control" type="motor_speed_summary.py" />
 
     <!-- Update node - reads mission control messages and updates them at a slower rate -->
     <!--<param name="update_rate" type="int" value="1"/>-->
@@ -23,13 +29,13 @@
 
 
     <!-- Declare raspberry pi as a machine to run nodes on-->
-    <machine name="rpi" address="192.168.0.105" user="vur" password="theswapbot"
-             env-loader="~/catkin_ws/devel/robot_ros_env.sh"/>
+    <!--<machine name="rpi" address="192.168.0.105" user="vur" password="theswapbot"-->
+             <!--env-loader="~/catkin_ws/devel/robot_ros_env.sh"/>-->
 
-    <!--&lt;!&ndash;&lt;!&ndash; Load parameters for motor_control node onto server, run motor_control nodes on raspberry pi &ndash;&gt;&ndash;&gt;-->
-    <!--<rosparam command="load" file="$(find robot_motor_control)/launch/example.yaml" />-->
-    <rosparam command="load" file="$(find robot_motor_control)/launch/example.yaml" />
-    <node machine="rpi" pkg="robot_motor_control" type="motor_control_node" name="motor_control" respawn="false"/>
+    <!-- Motor_control node - runs on raspberry pi -->
+    <rosparam command="load" file="$(find robot_motor_control)/launch/full_system.yaml" />
+    <!--<node machine="rpi" pkg="robot_motor_control" type="motor_control_node" name="motor_control" respawn="false"/>-->
+    <node pkg="robot_motor_control" type="motor_control_node" name="motor_control" respawn="false"/>
 
 
 </launch>

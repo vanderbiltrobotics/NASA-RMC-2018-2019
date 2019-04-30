@@ -36,6 +36,12 @@ class DriveController:
         self.out_format = out_format
         self.max_queue_size = queue_size
 
+        # Store float message for each motor speed
+        self.speed_bl = Float64()
+        self.speed_br = Float64()
+        self.speed_fl = Float64()
+        self.speed_fr = Float64()
+
         # Initialize queue list
         self.lin_queue = deque([0] * queue_size)
         self.ang_queue = deque([0] * queue_size)
@@ -134,10 +140,18 @@ class DriveController:
         motor_speed_br.data = right_speeds
 
         # Publish messages
-        self.speed_pub_fl.publish(motor_speed_fl)
-        self.speed_pub_bl.publish(motor_speed_bl)
-        self.speed_pub_fr.publish(motor_speed_fr)
-        self.speed_pub_br.publish(motor_speed_br)
+        self.speed_bl = motor_speed_bl
+        self.speed_br = motor_speed_br
+        self.speed_fl = motor_speed_fl
+        self.speed_fr = motor_speed_fr
+
+
+    def publish_speeds(self):
+
+        self.speed_pub_fl.publish(self.speed_fl)
+        self.speed_pub_bl.publish(self.speed_bl)
+        self.speed_pub_fr.publish(self.speed_fr)
+        self.speed_pub_br.publish(self.speed_br)
 
 
 # Run the node
@@ -163,7 +177,11 @@ if __name__ == '__main__':
     # Ready to go
     rospy.loginfo("Drive Motor Controller initialized...")
 
-    # Loop continuously
-    rate = rospy.Rate(10)
+    # Define loop rate - should be quite fast
+    loop_rate = rospy.Rate(30)
+
+    # Publish updates at loop rate
     while not rospy.is_shutdown():
-        pass
+
+        controller.publish_speeds()
+        loop_rate.sleep()

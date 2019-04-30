@@ -128,7 +128,11 @@ class PurePursuit:
 
             # If close enough to final point, path is finished
             if np.linalg.norm(position - self.path[-1]) < self.goal_tolerance:
-                print "Reached the end of the path"
+
+                # Notify HLP that goal has been reached
+                rospy.set_param("goal_reached", True)
+
+                # Remove current path and wait for new one
                 self.path = None
                 self.path_len = 0
 

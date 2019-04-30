@@ -1,0 +1,25 @@
+talons:
+  front_left:
+    id: 7
+    inverted: False
+  front_right:
+    id: 8
+    inverted: True
+  back_left:
+    id: 9
+    inverted: False
+  back_right:
+    id: 2
+    inverted: True
+  hinge_motor:
+    id: 1
+    inverted: False
+  lead_screw_motor:
+    id: 3
+    inverted: False
+  bucket_motor:
+    id: 4
+    inverted: False
+  conveyor_motor:
+    id: 5
+    inverted: False
