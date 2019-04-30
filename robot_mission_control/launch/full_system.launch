@@ -36,6 +36,7 @@
         <!--<param name="pp_max_lookahead" value="1.0"/>-->
         <!--<param name="pp_world_frame_id" value="world"/>-->
         <!--<param name="pp_robot_frame_id" value="robot_center"/>-->
+        <!--<param name="pp_aruco_frame_id" value="aruco_board_origin"/>-->
         <!--<node name="path_following" pkg="robot_navigation" type="pure_pursuit.py"/>-->
 
         <!--&lt;!&ndash; Path planning &ndash;&gt;-->

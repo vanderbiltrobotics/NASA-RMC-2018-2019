@@ -1,17 +1,6 @@
 {
     "transforms" : [
         {
-            "frame_id" : "world",
-            "child_id" : "aruco_board_origin",
-            "trans_x" : 0.0,
-            "trans_y" : 0.0,
-            "trans_z" : 0.0,
-            "rot_x" : 0,
-            "rot_y" : 0,
-            "rot_z" : 0,
-            "rot_w" : 1
-        },
-        {
             "frame_id" : "aruco_camera",
             "child_id" : "robot_center",
             "trans_x" : 0,

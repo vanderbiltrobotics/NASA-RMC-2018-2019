@@ -1,5 +1,13 @@
 #!/usr/bin/env python
 
+# This program publishes the location of the aruco marker, determines
+# which of the three field aruco markers the robot localizes to, and
+# sweeps the servo when the aruco marker is missing for an extended 
+# period of time.
+
+# Created by Jacob Gloudemans and Josh Petrin
+
+
 # Import ROS packages
 import rospy
 import rospkg
@@ -12,8 +20,44 @@ import tf.transformations
 # Import other required packages
 import cv2.aruco as aruco
 import cv2
+import math
 import numpy as np
 import yaml
+
+# constant(s)
+SQRT_2 = math.sqrt(2)
+
+# default locations of the aruco markers -- 
+#  aruco marker on the short wall of the arena (1)
+aruco_marker_south_pos_default = {
+    "trans_x": 1.5, # TODO: Change.
+    "trans_y": 0.0,
+    "trans_z": 1.0, # TODO: Change.
+    "rot_w": SQRT_2 / 2,
+    "rot_x": 0.0,
+    "rot_y": 0.0,
+    "rot_z": SQRT_2 / 2, # 90-degree rotation in z
+}
+#  aruco marker on the collection bin (2)
+aruco_marker_bin_pos_default = {
+    "trans_x": 0.0, # TODO: Change.
+    "trans_y": 0.6,
+    "trans_z": 1.0, # TODO: Change.
+    "rot_w": 1.0,
+    "rot_x": 0.0,
+    "rot_y": 0.0,
+    "rot_z": 0.0,
+}
+#  small aruco marker on the collection bin (3)
+aruco_small_marker_bin_pos_default = {
+    "trans_x": 0.0, # TODO: Change.
+    "trans_y": 0.5,
+    "trans_z": 1.1, # TODO: Change.
+    "rot_w": 1.0,
+    "rot_x": 0.0,
+    "rot_y": 0.0,
+    "rot_z": 0.0,
+}
 
 
 DEFAULT_CALIB_FILE = 'camera_a.yaml'
@@ -34,21 +78,57 @@ class ImageHandler:
         # markerSeparation = .006  # m; determine later
         ##
 
+        # tf listeners
+        self.tf_buffer = tf2_ros.Buffer()
+        self.tf_listener = tf2_ros.TransformListener(self.tf_buffer)
+
+        # markerNumber is 1 for the x-aruco, 2 for the big y-aruco
+        # and 3 for the small y-aruco
+        self.markerNumber = 1
+
         # Get params to create Aruco board
         self.numMarkersX = rospy.get_param("board_x_markers", 0)
         self.numMarkersY = rospy.get_param("board_y_markers", 0)
         self.markerLength = rospy.get_param("board_marker_length", 0)
         self.markerSeparation = rospy.get_param("board_marker_separation", 0)
+        self.world_frame_id = rospy.get_param("pp_world_frame_id", default="world")
+        self.robot_frame_id = rospy.get_param("pp_robot_frame_id", default="robot_center")
+        self.aruco_frame_id = rospy.get_param("pp_aruco_frame_id", default="aruco_board_origin")
+        # tf frame id's
+        self.world_frame_id = rospy.get_param("pp_world_frame_id", default="world")
+        self.robot_frame_id = rospy.get_param("pp_robot_frame_id", default="robot_center")
+        self.aruco_frame_id = rospy.get_param("pp_aruco_frame_id", default="aruco_board_origin")
+        # params for the posititions of the aruco markers
+        # aruco marker on the short side of the field (1)
+        self.aruco_marker_south_pos = rospy.get_param(
+            "aruco_marker_south_pos", 
+            default = aruco_marker_south_pos_default
+        )
+        # aruco marker on the collecting bin (2)
+        self.aruco_marker_bin_pos = rospy.get_param(
+            "aruco_marker_bin_pos", 
+            default = aruco_marker_bin_pos_default
+        )
+        # small aruco marker on the collecting bin (3)
+        self.aruco_marker_bin_pos = rospy.get_param(
+            "aruco_small_marker_bin_pos", 
+            default = aruco_small_marker_bin_pos_default
+        )
 
         # Set up aruco boards
         self.aruco_dict = aruco.Dictionary_get(aruco.DICT_6X6_250)
         self.aruco_param = aruco.DetectorParameters_create()  # default parameters
         self.aruco_board = aruco.GridBoard_create(self.numMarkersX, self.numMarkersY, self.markerLength, self.markerSeparation, self.aruco_dict)
 
+        # Subscriber to images
         self.image_sub = rospy.Subscriber('camera/image_raw', Image, self.image_callback)
+        
+        # Publishers
         self.pose_pub = rospy.Publisher("aruco/pose_raw", Pose, queue_size=0)
         self.bool_pub = rospy.Publisher("aruco/marker_detected", Bool, queue_size=0)
         self.avg_of_corners = rospy.Publisher("aruco/avg_of_corners", Int32, queue_size=0)
+        self.aruco_pos_pub = rospy.Publisher("aruco/active_board_position", Pose, queue_size=0)
+        
         self.bridge = CvBridge()
 
     # Callback for received image frames
@@ -112,6 +192,15 @@ class ImageHandler:
         self.bool_pub.publish(bool_msg)
 
 
+    # Update which aruco marker we're looking for. Run every ~1 s.
+    # Senses the robot's position and
+    # 1) sets the target to the south marker if the position is far down
+    # 2) sets to the bin marker if the robot is upfield
+    # 3) sets to the small bin marker if the robot is close to the bin
+    def update_aruco_target(self):
+
+
+
 if __name__ == "__main__":
 
     # Initialize as ROS node
@@ -120,10 +209,10 @@ if __name__ == "__main__":
     # Create subscriber for aruco image frames
     handler = ImageHandler()
 
+    # update the aruco target every once in a while
+    loop_rate = rospy.Rate(1)
     # Run indefinitely
-    rospy.spin()
+    while not rospy.is_shutdown():
+        handler.update_aruco_target()
+        loop_rate.sleep()
 
-#initialize node
-#create subscriber to image frames
-#create subscribers for transforms
-#define callback function that runs when image is received
