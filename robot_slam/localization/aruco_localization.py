@@ -38,6 +38,7 @@ aruco_marker_south_pos_default = {
     "rot_y": 0.0,
     "rot_z": SQRT_2 / 2, # 90-degree rotation in z
 }
+south_pose = Pose()  # gets initialized in __init__
 #  aruco marker on the collection bin (2)
 aruco_marker_bin_pos_default = {
     "trans_x": 0.0, # TODO: Change.
@@ -48,8 +49,9 @@ aruco_marker_bin_pos_default = {
     "rot_y": 0.0,
     "rot_z": 0.0,
 }
+bin_pose = Pose()
 #  small aruco marker on the collection bin (3)
-aruco_small_marker_bin_pos_default = {
+aruco_marker_smbin_pos_default = {
     "trans_x": 0.0, # TODO: Change.
     "trans_y": 0.5,
     "trans_z": 1.1, # TODO: Change.
@@ -58,6 +60,7 @@ aruco_small_marker_bin_pos_default = {
     "rot_y": 0.0,
     "rot_z": 0.0,
 }
+smbin_pose = Pose()
 
 
 DEFAULT_CALIB_FILE = 'camera_a.yaml'
@@ -78,22 +81,27 @@ class ImageHandler:
         # markerSeparation = .006  # m; determine later
         ##
 
-        # tf listeners
+        # tf listener
         self.tf_buffer = tf2_ros.Buffer()
         self.tf_listener = tf2_ros.TransformListener(self.tf_buffer)
 
-        # markerNumber is 1 for the x-aruco, 2 for the big y-aruco
-        # and 3 for the small y-aruco
-        self.markerNumber = 1
+        # Get params to create Aruco boards
+        # south board
+        south_markers_x = 1
+        south_markers_y = 1
+        south_marker_len = 0.168
+        south_marker_sep = 0.0
+        # bin board
+        bin_markers_x = 2
+        bin_markers_y = 1
+        bin_marker_len = 0.168
+        bin_marker_sep = 0.048
+        # small bin board
+        smbin_markers_x = 5
+        smbin_markers_y = 1
+        smbin_marker_len = 0.067
+        smbin_marker_sep = 0.0135
 
-        # Get params to create Aruco board
-        self.numMarkersX = rospy.get_param("board_x_markers", 0)
-        self.numMarkersY = rospy.get_param("board_y_markers", 0)
-        self.markerLength = rospy.get_param("board_marker_length", 0)
-        self.markerSeparation = rospy.get_param("board_marker_separation", 0)
-        self.world_frame_id = rospy.get_param("pp_world_frame_id", default="world")
-        self.robot_frame_id = rospy.get_param("pp_robot_frame_id", default="robot_center")
-        self.aruco_frame_id = rospy.get_param("pp_aruco_frame_id", default="aruco_board_origin")
         # tf frame id's
         self.world_frame_id = rospy.get_param("pp_world_frame_id", default="world")
         self.robot_frame_id = rospy.get_param("pp_robot_frame_id", default="robot_center")
@@ -110,15 +118,64 @@ class ImageHandler:
             default = aruco_marker_bin_pos_default
         )
         # small aruco marker on the collecting bin (3)
-        self.aruco_marker_bin_pos = rospy.get_param(
+        self.aruco_marker_smbin_pos = rospy.get_param(
             "aruco_small_marker_bin_pos", 
-            default = aruco_small_marker_bin_pos_default
+            default = aruco_marker_smbin_pos_default
         )
 
-        # Set up aruco boards
+        # set the poses of the boards
+        south_pose.position.x = aruco_marker_south_pos["trans_x"]
+        south_pose.position.y = aruco_marker_south_pos["trans_y"]
+        south_pose.position.z = aruco_marker_south_pos["trans_z"]
+        south_pose.orientation.x = aruco_marker_south_pos["rot_x"]
+        south_pose.orientation.y = aruco_marker_south_pos["rot_y"]
+        south_pose.orientation.z = aruco_marker_south_pos["rot_z"]
+        south_pose.orientation.w = aruco_marker_south_pos["rot_w"]
+        bin_pose.position.x = aruco_marker_bin_pos["trans_x"]
+        bin_pose.position.y = aruco_marker_bin_pos["trans_y"]
+        bin_pose.position.z = aruco_marker_bin_pos["trans_z"]
+        bin_pose.orientation.x = aruco_marker_bin_pos["rot_x"]
+        bin_pose.orientation.y = aruco_marker_bin_pos["rot_y"]
+        bin_pose.orientation.z = aruco_marker_bin_pos["rot_z"]
+        bin_pose.orientation.w = aruco_marker_bin_pos["rot_w"]
+        smbin_pose.position.x = aruco_marker_smbin_pos["trans_x"]
+        smbin_pose.position.y = aruco_marker_smbin_pos["trans_y"]
+        smbin_pose.position.z = aruco_marker_smbin_pos["trans_z"]
+        smbin_pose.orientation.x = aruco_marker_smbin_pos["rot_x"]
+        smbin_pose.orientation.y = aruco_marker_smbin_pos["rot_y"]
+        smbin_pose.orientation.z = aruco_marker_smbin_pos["rot_z"]
+        smbin_pose.orientation.w = aruco_marker_smbin_pos["rot_w"]
+
+        # Create aruco boards
         self.aruco_dict = aruco.Dictionary_get(aruco.DICT_6X6_250)
         self.aruco_param = aruco.DetectorParameters_create()  # default parameters
-        self.aruco_board = aruco.GridBoard_create(self.numMarkersX, self.numMarkersY, self.markerLength, self.markerSeparation, self.aruco_dict)
+        self.south_board = aruco.GridBoard_create(
+            south_markers_x, 
+            south_markers_y, 
+            south_marker_len, 
+            south_marker_sep, 
+            self.aruco_dict
+        )
+        self.bin_board = aruco.GridBoard_create(
+            bin_markers_x, 
+            bin_markers_y, 
+            bin_marker_len, 
+            bin_marker_sep, 
+            self.aruco_dict
+        )
+        self.smbin_board = aruco.GridBoard_create(
+            smbin_markers_x, 
+            smbin_markers_y, 
+            smbin_marker_len, 
+            smbin_marker_sep, 
+            self.aruco_dict
+        )
+
+        # markerNumber is 1 for the x-aruco, 2 for the big y-aruco
+        # and 3 for the small y-aruco
+        self.marker_number = 1
+        # the aruco board will change depending on the marker number
+        self.active_board = south_board
 
         # Subscriber to images
         self.image_sub = rospy.Subscriber('camera/image_raw', Image, self.image_callback)
@@ -144,13 +201,13 @@ class ImageHandler:
 
         # Find corners and IDs of aruco markers
         corners, ids, rejectedImgPoints = aruco.detectMarkers(cv_image, self.aruco_dict, parameters=self.aruco_param)
-        aruco.refineDetectedMarkers(cv_image, self.aruco_board, corners, ids, rejectedImgPoints, self.cmatx, self.dist)
+        aruco.refineDetectedMarkers(cv_image, self.active_board, corners, ids, rejectedImgPoints, self.cmatx, self.dist)
         # rospy.loginfo(corners) # test
         # print(np.shape(corners))
 
         # If markers found, estimate pose
         if ids is not None:
-            retval, rvec, tvec = aruco.estimatePoseBoard(corners, ids, self.aruco_board, self.cmatx, self.dist)
+            retval, rvec, tvec = aruco.estimatePoseBoard(corners, ids, self.active_board, self.cmatx, self.dist)
             bool_msg.data = retval
 
 
@@ -192,6 +249,7 @@ class ImageHandler:
         self.bool_pub.publish(bool_msg)
 
 
+
     # Update which aruco marker we're looking for. Run every ~1 s.
     # Senses the robot's position and
     # 1) sets the target to the south marker if the position is far down
@@ -199,6 +257,48 @@ class ImageHandler:
     # 3) sets to the small bin marker if the robot is close to the bin
     def update_aruco_target(self):
 
+        robot_pose = self.tf_buffer.lookup_transform(
+            self.world_frame_id, 
+            self.robot_frame_id, 
+            rospy.Time()
+        )
+        x = robot_pose.transform.translation.x
+        y = robot_pose.transform.translation.y
+        pose_msg = Pose()
+
+        # switch depending on what aruco marker we're currently looking at
+        # TODO: this needs to be tested/debugged
+        if self.marker_number == 1:
+            if 0.8 * x + 2 > y and x < 1.9:
+                self.marker_number = 3  # small bin board takes priority
+                self.active_board = self.smbin_board
+            elif x > y:
+                self.marker_number = 2
+                self.active_board = self.bin_board
+
+        elif self.marker_number == 2:
+            if 0.8 * x + 2 > y and x < 1.9:
+                self.marker_number = 3  # small bin board takes priority
+                self.active_board = self.smbin_board
+            elif x + 2 < y:
+                self.marker_number = 1
+                self.active_board = self.south_board
+
+        elif self.marker_number == 3:
+            if x > y and x < 2.5:
+                self.marker_number = 2  # big bin board takes priority
+                self.active_board = self.bin_board
+            elif x + 2 < y:
+                self.marker_number = 1
+                self.active_board = self.south_board
+
+        # publish the pose of the active board
+        if self.marker_number == 1:
+            self.aruco_pos_pub.publish(south_pose)
+        elif self.marker_number == 2:
+            self.aruco_pos_pub.publish(bin_pose)
+        elif self.marker_number == 3:
+            self.aruco_pos_pub.publish(smbin_pose)
 
 
 if __name__ == "__main__":
@@ -215,4 +315,3 @@ if __name__ == "__main__":
     while not rospy.is_shutdown():
         handler.update_aruco_target()
         loop_rate.sleep()
-
