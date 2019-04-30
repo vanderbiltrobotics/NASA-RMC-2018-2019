@@ -1,117 +1,117 @@
 import numpy as np
+from is_clear_path import is_clear_path
 
-def is_clear_path(driveability_map, start_pos, end_pos):
-    # The map contains all the points we can move across; must avoid obstacles
+''' 
 
-    #Get two points, and find the straightest line possible between them. Store these points in another array.
-    #Raw inputs for ease of testing
-    #x1 = int(raw_input('X1 coordinate: '))
-    #y1 = int(raw_input('Y1 coordinate: '))
-    #x2 = int(raw_input('X2 coordinate: '))
-    #y2 = int(raw_input('Y2 coordinate: '))
+This program attempts to find an "easy" path through the field. It takes the driveability map,
+maximum and minimum y-coordinates, and maximum x-offset as parameters. The min and max y-coords are 
+the ideal start and end points, respectively. The algorithm first computes the path between the ideal 
+coords and checks if the path is clear. If it is not, it adds a predefined x-offset until either a clear 
+path is found, or the field boundary is reached. If there is no clear path, the original points are returned.
 
-    #Actual inputs
-    x1, y1 = start_pos
-    x2, y2 = end_pos
-    dif_x = x2 - x1
-    dif_y = y2 - y1
-
-    if dif_x == 0:
-        step = np.sign(dif_y)
-        ys = np.arange(0, dif_y + step, step)
-        xs = np.repeat(x1, ys.shape[0])
-
-    else:
-        m = dif_y/(dif_x+0.0)
-        b = y1 - m * x1
-
-        step = 1.0/(max(abs(dif_x),abs(dif_y)))
-        xs = np.arange(x1, x2, step * np.sign(x2 - x1))
-        ys = xs * m + b
-
-    xs = np.rint(xs)
-    ys = np.rint(ys)
-    pts_along_line = np.column_stack((xs, ys))
-
-    # Due to rounding (array elements must be int), this helps take care of
-    # redundant points and speed things up a bit
-
-    # Perform lex sort and get sorted data
-    sorted_idx = np.lexsort(pts_along_line.T)
-    sorted_data =  pts_along_line[sorted_idx,:]
-
-    # Get unique row mask
-    row_mask = np.append([True],np.any(np.diff(sorted_data,axis = 0),1))
-
-    # Get unique rows
-    pts_along_line = sorted_data[row_mask]
+'''
 
 
-    # If we find a value greater than a certain threshold, make a note of that.
-    # That means there's an obstacle in the way and we can drive directly through this line.
-    for pt in pts_along_line:
-        y, x = pt
-        x = int(x)
-        y = int(y)
-        occupied = driveability_map[x, y]
-        if occupied == 1:
-            return False # obstacle detected, can't cross here
+# Compute a simple path along the hypotenuse between the start and end points
+# Contains start point in path
+def compute_easy_path(start_pos, end_pos, step_size):
+    # calculating length of the straight line and the number of points
+    dy = end_pos[1] - start_pos[1]
+    dx = end_pos[0] - start_pos[0]
+    path_length = np.sqrt(dx ** 2 + dy ** 2)
+    matrix_len = int(path_length / step_size)
 
-    return True; # Safe to drive along this line
+    # creating matrices for calculations
+    points = [start_pos for i in range(matrix_len)]
+    steps = [[step_size * dx / path_length, step_size * dy / path_length] for i in range(matrix_len)]
+    nums = [[i + 1, i + 1] for i in range(matrix_len)]
 
-#driveability_map is in cm, y_min and y_max are in m, max_x_offset is in cm
+    # Calculating the path
+    path = np.add(points, np.multiply(steps, nums))
+
+    # Prepend starting point
+    path = np.insert(path, 0, start_pos, axis=0)
+    return path
+
+
+# driveability_map is in cm, y_min and y_max are in m, max_x_offset is in cm
 def compute_obs_region_endpoints(driveability_map, y_min, y_max, max_x_offset):
     field_width = driveability_map.shape[1]
 
-    #p1x, p2x, p1y, p2y are in cm
-    p2x = field_width/2
-    p1x = field_width/2
-    p1y = y_min
-    p2y = y_max
+    # Starting p1 and p2; Converted to cm
+    # Must retain original points in case no easy path is found
+    p1_orig = (y_min * 100.0, field_width / 2.0)
+    p2_orig = (y_max * 100.0, field_width / 2.0)
 
-    p1 = (p1x, p1y)
-    p2 = (p2x, p2y)
-    #check if p1 and p2 line up in a clear path
-    clear_path = is_clear_path(driveability_map, p1, p2)
+    # Rounded p1 and p2; Converted to cm
+    # In case occupancy grid is odd
+    p1 = (y_min * 100.0, np.rint(field_width / 2.0))
+    p2 = (y_max * 100.0, np.rint(field_width / 2.0))
 
-    offset = 5
-    while not clear_path and offset <= max_x_offset:
-        p1x_right = p1x + offset
-        p1x_left = p1x - offset
-        p2x_right = p1x_right
-        p2x_left = p1x_left
+    # Left and right p1 and p2
+    p1_left = (0, 0)
+    p2_left = (0, 0)
+    p1_right = (0, 0)
+    p2_right = (0, 0)
 
-        clear_path_left = is_clear_path(driveability_map, (p1x_left, p1y), (p2x_left, p2y))
-        clear_path_right = is_clear_path(driveability_map, (p1x_right, p1y), (p2x_right, p2y))
-        clear_path = clear_path_left or clear_path_right
+    # Initialize to first enter while loop
+    left_offset = -1  # cm; Becomes 0 right away in loop
+    right_offset = -1
+    clear_path_left = False  # Need two paths in case occupancy grid has odd width
+    clear_path_right = False
 
-        offset += offset
+    # Search until clear path is found or field boundaries are reached
+    while not clear_path_left and not clear_path_right and left_offset <= max_x_offset \
+            and right_offset <= max_x_offset+1:
+        # Increase offset
+        right_offset += 1
+        left_offset += 1
 
-    #set all x values to meters
-    p1x_left /= 100
-    p2x_left /= 100
-    p1x_right /= 100
-    p2x_right /= 100
-    p1x /= 100
-    p2x /= 100
+        # Add offset in both x-directions to avoid obstacles
+        p1_right = (p1[0], p1[1] + right_offset)
+        p1_left = (p1[0], p1[1] - left_offset)
+        p2_right = (p2[0], p2[1] + right_offset)
+        p2_left = (p2[0], p2[1] - left_offset)
 
-    if clear_path_left:
-        # numpy array has rows before columns
-        return [p1x_left, p1y], [p2x_left, p2y]
-    elif clear_path_right:
-        return [p1x_right, p1y], [p2x_right, p2y]
+        # Computes easy path in both directions
+        # Step size is the same as for driveability_map
+        # Points and step size in cm
+        path_right = compute_easy_path(p1_right, p2_right, step_size=1)
+        path_left = compute_easy_path(p1_left, p2_left, step_size=1)
+
+        # check if p1 and p2 line up in a clear path
+        # Path is sent in rounded cm to be compatible with driveability_map
+        clear_path_right = is_clear_path(driveability_map, (path_right+0.5).astype(int))
+        clear_path_left = is_clear_path(driveability_map, (path_left+0.5).astype(int))
+
+    # Return points in clear path, w/ preference to the right
+    # Return starting points if no path found
+    if clear_path_right:
+        return p1_right, p2_right
+    elif clear_path_left:
+        return p1_left, p2_left
     else:
-        return [p1x, p1y], [p2x, p2y]
+        return p1_orig, p2_orig
+
 
 if __name__ == "__main__":
-    test = np.array(
-        [[0, 0, 0, 0, 0, 1, 1],
-         [0, 0, 0, 0, 0, 0, 0],
-         [0, 0, 1, 1, 0, 0, 0],
-         [0, 0, 0, 0, 0, 1, 0],
-         [0, 1, 0, 0, 0, 0, 0],
-         [1, 0, 1, 0, 0, 0, 1]])
-    [p1x, p1y], [p2x, p2y] = compute_obs_region_endpoints(test, 0, 0, 3)
-    print("P1: " + p1x + p1y)
-    print("P2: " + p2x + p2y)
+    # Odd array to test
+    # test = np.array(
+    #     [[0, 0, 0, 0, 0, 1, 0],
+    #      [0, 0, 0, 0, 0, 0, 0],
+    #      [1, 0, 1, 1, 1, 0, 0],
+    #      [0, 0, 0, 0, 0, 0, 0],
+    #      [0, 1, 0, 0, 0, 0, 0],
+    #      [0, 0, 1, 0, 0, 0, 0]])
 
+    # Even array to test
+    test = np.array(
+        [[0, 0, 0, 0, 0, 1, 1, 1],
+         [0, 0, 0, 0, 0, 0, 0, 0],
+         [0, 0, 1, 1, 1, 0, 0, 0],
+         [0, 0, 0, 0, 0, 0, 0, 0],
+         [0, 1, 0, 0, 0, 0, 0, 0],
+         [0, 0, 1, 0, 0, 0, 0, 0]])
+    p1, p2 = compute_obs_region_endpoints(test, 0, .05, 3)
+    print(p1)
+    print (p2)

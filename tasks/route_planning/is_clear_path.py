@@ -1,64 +1,36 @@
 import numpy as np
-import cv2
 
-def is_clear_path(driveability_map, start_pos, end_pos):
-    # The map contains all the points we can move across; must avoid obstacles
+''' 
 
-    #Get two points, and find the straightest line possible between them. Store these points in another array.
-    #Raw inputs for ease of testing
-    #x1 = int(raw_input('X1 coordinate: '))
-    #y1 = int(raw_input('Y1 coordinate: '))
-    #x2 = int(raw_input('X2 coordinate: '))
-    #y2 = int(raw_input('Y2 coordinate: '))
+This program checks if a given path is clear of obstacles. It does so by checking the occupancy grid
+for each point along the path for obstacles. If none are found, it returns True, otherwise False.
 
-    #Actual inputs
-    x1, y1 = start_pos
-    x2, y2 = end_pos
-    dif_x = x2 - x1
-    dif_y = y2 - y1
-
-    if dif_x == 0:
-        step = np.sign(dif_y)
-        ys = np.arange(0, dif_y + step, step)
-        xs = np.repeat(x1, ys.shape[0])
-
-    else:
-        m = dif_y/(dif_x+0.0)
-        b = y1 - m * x1
-
-        step = 1.0/(max(abs(dif_x),abs(dif_y)))
-        xs = np.arange(x1, x2, step * np.sign(x2 - x1))
-        ys = xs * m + b
-
-    xs = np.rint(xs)
-    ys = np.rint(ys)
-    pts_along_line = np.column_stack((xs, ys))
-
-    # Due to rounding (array elements must be int), this helps take care of
-    # redundant points and speed things up a bit
-
-    # Perform lex sort and get sorted data
-    sorted_idx = np.lexsort(pts_along_line.T)
-    sorted_data =  pts_along_line[sorted_idx,:]
-
-    # Get unique row mask
-    row_mask = np.append([True],np.any(np.diff(sorted_data,axis = 0),1))
-
-    # Get unique rows
-    pts_along_line = sorted_data[row_mask]
+'''
 
 
-    # If we find a value greater than a certain threshold, make a note of that.
-    # That means there's an obstacle in the way and we can drive directly through this line.
-    for pt in pts_along_line:
-        y, x = pt
-        x = int(x)
-        y = int(y)
-        occupied = driveability_map[x, y]
+# Check if input point is within the field boundaries
+def is_in_field(driveability_map, pt):
+    return True if ((pt >= 0).all() and pt[0] < driveability_map.shape[0] and pt[1] < driveability_map.shape[1]) \
+        else False
+
+
+# Check occupancy grid for obstacles along calculated path
+# Takes path as type int to be compatible with driveability_map
+def is_clear_path(driveability_map, path):
+
+    # Check for obstacles
+    for pt in path:
+
+        # Check boundaries
+        if not is_in_field(driveability_map, pt):
+            return False
+
+        occupied = driveability_map[pt[0], pt[1]]
         if occupied == 1:
-            return False # obstacle detected, can't cross here
+            return False  # obstacle detected, can't cross here
 
-    return True; # Safe to drive along this line
+    return True  # Safe to drive along this line
+
 
 if __name__ == "__main__":
     # Just for testing this value in a vaccuum
@@ -69,4 +41,3 @@ if __name__ == "__main__":
          [0, 0, 0, 0, 0, 0],
          [0, 1, 0, 0, 0, 0],
          [1, 0, 0, 0, 1, 0]], np.int32)
-    print(is_clear_path(test, (2,0), (2,5)))
