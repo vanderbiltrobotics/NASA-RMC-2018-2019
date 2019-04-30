@@ -1,101 +1,85 @@
 import numpy as np
 
-class Node():
-    """A node class for A* Pathfinding"""
-
-    def __init__(self, parent=None, position=None):
-        self.parent = parent
-        self.position = position
-
-        self.g = 0
-        self.h = 0
-        self.f = 0
-
-    def __eq__(self, other):
-        return self.position == other.position
+from pathfinding.core.diagonal_movement import DiagonalMovement
+from pathfinding.core.grid import Grid
+from pathfinding.finder.a_star import AStarFinder
 
 
-def astar(maze, start, end):
-    """Returns a list of tuples as a path from the given start to the given end in the given maze"""
+def max_pool(map, K):
+    # First, trim the map down such that it can be divided evenly into K by K square sections.
+    # Try to keep the trimming as symmetric as possible: If we trim the bottom side, trim the top side next, etc.
+    H, W = map.shape
+    K = K
 
-    # Create start and end node
-    start_node = Node(None, start)
-    start_node.g = start_node.h = start_node.f = 0
-    end_node = Node(None, end)
-    end_node.g = end_node.h = end_node.f = 0
+    H_excess = H % K
+    W_excess = W % K
 
-    # Initialize both open and closed list
-    open_list = []
-    closed_list = []
+    start_x = H_excess / 2
+    end_x = H - (H_excess / 2)
 
-    # Add the start node
-    open_list.append(start_node)
+    start_y = W_excess / 2
+    end_y = W - (W_excess / 2)
 
-    # Loop until you find the end
-    while len(open_list) > 0:
+    # In the event that we only need to trim one edge to make that dimension divisible by K, we have over-adjusted
+    # in the above code. Rectify that here - is there a simple way to not make that mistake prior?
+    if (H_excess % 2 == 1):
+        end_x -= 1
 
-        # Get the current node
-        current_node = open_list[0]
-        current_index = 0
-        for index, item in enumerate(open_list):
-            if item.f < current_node.f:
-                current_node = item
-                current_index = index
+    if (W_excess % 2 == 1):
+        end_y -= 1
 
-        # Pop current off open list, add to closed list
-        open_list.pop(current_index)
-        closed_list.append(current_node)
+    map = map[start_x:end_x, start_y:end_y]  # Adjusted map that can now be divided into KxK sections
 
-        # Found the goal
-        if current_node == end_node:
-            path = []
-            current = current_node
-            while current is not None:
-                path.append(current.position)
-                current = current.parent
-            return path[::-1] # Return reversed path
+    # Divide the adjusted map into KxK sections, taking the max value of each section to be the value of that
+    # section.
+    # We can also take a running total of the number of 1's in each section, to determine which
+    # sections are least likely to be impassable.
+    HK = H // K
+    WK = W // K
 
-        # Generate children
-        children = []
-        for new_position in [(0, -1), (0, 1), (-1, 0), (1, 0), (-1, -1), (-1, 1), (1, -1), (1, 1)]: # Adjacent squares
+    weighted_map = (map[:HK * K, :WK * K].reshape(HK, K, WK, K).sum(axis=(1, 3)))
 
-            # Get node position
-            node_position = (current_node.position[0] + new_position[0], current_node.position[1] + new_position[1])
+    print 'Weighted reduced map:'
+    print weighted_map
 
-            # Make sure within range
-            if node_position[0] > (len(maze) - 1) or node_position[0] < 0 or node_position[1] > (len(maze[len(maze)-1]) -1) or node_position[1] < 0:
-                continue
+    weighted_map[weighted_map > 0] *= -1
+    weighted_map[weighted_map == 0] = 1
 
-            # Make sure walkable terrain
-            if maze[node_position[0]][node_position[1]] != 0:
-                continue
+    grid = Grid(matrix=weighted_map)
+    start = grid.node(2, 0)
+    end = grid.node(0, 2)
 
-            # Create new node
-            new_node = Node(current_node, node_position)
+    finder = AStarFinder(diagonal_movement=DiagonalMovement.always)
+    path, runs = finder.find_path(start, end, grid)
 
-            # Append
-            children.append(new_node)
+    path_found = (len(path) != 0)
+    threshold = 0
+    while not path_found:
+        threshold -= 1
+        weighted_map[weighted_map == threshold] = 1
+        grid = Grid(matrix=weighted_map)
+        start = grid.node(2, 0)
+        end = grid.node(0, 2)
 
-        # Loop through children
-        for child in children:
+        finder = AStarFinder(diagonal_movement=DiagonalMovement.always)
+        path, runs = finder.find_path(start, end, grid)
+        path_found = (len(path) != 0)
 
-            # Child is on the closed list
-            for closed_child in closed_list:
-                if child == closed_child:
-                    continue
+    print(path)
+    print('operations:', runs, 'path length:', len(path))
+    print(grid.grid_str(path=path, start=start, end=end))
+    print 'Highest weight allowed to drive over: ', threshold * -1
 
-            # Create the f, g, and h values
-            child.g = current_node.g + 1
-            child.h = ((child.position[0] - end_node.position[0]) ** 2) + ((child.position[1] - end_node.position[1]) ** 2)
-            child.f = child.g + child.h
+    adj_path = np.array(path)
+    adj_path = K * adj_path + 1
+    print adj_path
 
-            # Child is already in the open list
-            for open_node in open_list:
-                if child == open_node and child.g > open_node.g:
-                    continue
+    for pt in adj_path[:-1]:
+        # computeEasyPath(pt, pt + 1, stepSize?????)
+        print('hey') #placeholder so the red squiggly leaves me alone
 
-            # Add the child to the open list
-            open_list.append(child)
+    return weighted_map
+
 
 if __name__ == "__main__":
     map = np.array([[0, 1, 0, 0, 0, 0, 0, 0, 1],
@@ -108,38 +92,9 @@ if __name__ == "__main__":
                     [0, 0, 0, 0, 0, 1, 0, 0, 1],
                     [0, 0, 0, 1, 0, 0, 0, 0, 1]])
 
-    # we want a buffer of maybe 20 cm on each edge; then, cut map down until it's divisible by whatever
-    # dimension our zoom out will be.
-    M, N = map.shape
     K = 3
-    L = 3
 
-    # This is probably inefficient... But the idea is, we start with the map having a buffer of size one
-    # on each edge. Then, if this isn't properly divisible, we keep trimming the edges in a specific order until
-    # the dimensions are indeed divisible by the dimensions of the sections we want to put together.
-    i1 = 1
-    i2 = 1
-    while (M - i1 - i2) % K != 0:
-        if i1 <= i2:
-            i1 += 1
-        else:
-            i2 += 1
-
-    j1 = 1
-    j2 = 1
-    while (N - j1 - j2) % L != 0:
-        if j1 <= j2:
-            j1 += 1
-        else:
-            j2 += 1
-
-    new_map = np.zeros((M - i1 - i2, N - j1 - j2,))
-    new_map = np.maximum(new_map, map[i1: M - i1 - i2 + 2, j1: N - j1 - j2 + 2])
-
-    MK = (M - i1 - i2) / K
-    NL = (N - j1 - j2) / L
-
-    small_map = (new_map[:MK*K, :NL*L].reshape(MK, K, NL, L).max(axis=(1, 3)))
+    max_pool(map, K)
 
 
-    print(small_map)
+
