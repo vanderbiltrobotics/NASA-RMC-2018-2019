@@ -16,6 +16,7 @@ from geometry_msgs.msg import Pose
 from std_msgs.msg import Bool, Int32
 from cv_bridge import CvBridge
 import tf.transformations
+import tf2_ros
 
 # Import other required packages
 import cv2.aruco as aruco
@@ -33,10 +34,10 @@ aruco_marker_south_pos_default = {
     "trans_x": 1.5, # TODO: Change.
     "trans_y": 0.0,
     "trans_z": 1.0, # TODO: Change.
-    "rot_w": SQRT_2 / 2,
+    "rot_w": SQRT_2 / 2.0,
     "rot_x": 0.0,
     "rot_y": 0.0,
-    "rot_z": SQRT_2 / 2, # 90-degree rotation in z
+    "rot_z": SQRT_2 / 2.0,   # 90-degree rotation in z
 }
 south_pose = Pose()  # gets initialized in __init__
 #  aruco marker on the collection bin (2)
@@ -106,6 +107,7 @@ class ImageHandler:
         self.world_frame_id = rospy.get_param("pp_world_frame_id", default="world")
         self.robot_frame_id = rospy.get_param("pp_robot_frame_id", default="robot_center")
         self.aruco_frame_id = rospy.get_param("pp_aruco_frame_id", default="aruco_board_origin")
+
         # params for the posititions of the aruco markers
         # aruco marker on the short side of the field (1)
         self.aruco_marker_south_pos = rospy.get_param(
@@ -124,27 +126,27 @@ class ImageHandler:
         )
 
         # set the poses of the boards
-        south_pose.position.x = aruco_marker_south_pos["trans_x"]
-        south_pose.position.y = aruco_marker_south_pos["trans_y"]
-        south_pose.position.z = aruco_marker_south_pos["trans_z"]
-        south_pose.orientation.x = aruco_marker_south_pos["rot_x"]
-        south_pose.orientation.y = aruco_marker_south_pos["rot_y"]
-        south_pose.orientation.z = aruco_marker_south_pos["rot_z"]
-        south_pose.orientation.w = aruco_marker_south_pos["rot_w"]
-        bin_pose.position.x = aruco_marker_bin_pos["trans_x"]
-        bin_pose.position.y = aruco_marker_bin_pos["trans_y"]
-        bin_pose.position.z = aruco_marker_bin_pos["trans_z"]
-        bin_pose.orientation.x = aruco_marker_bin_pos["rot_x"]
-        bin_pose.orientation.y = aruco_marker_bin_pos["rot_y"]
-        bin_pose.orientation.z = aruco_marker_bin_pos["rot_z"]
-        bin_pose.orientation.w = aruco_marker_bin_pos["rot_w"]
-        smbin_pose.position.x = aruco_marker_smbin_pos["trans_x"]
-        smbin_pose.position.y = aruco_marker_smbin_pos["trans_y"]
-        smbin_pose.position.z = aruco_marker_smbin_pos["trans_z"]
-        smbin_pose.orientation.x = aruco_marker_smbin_pos["rot_x"]
-        smbin_pose.orientation.y = aruco_marker_smbin_pos["rot_y"]
-        smbin_pose.orientation.z = aruco_marker_smbin_pos["rot_z"]
-        smbin_pose.orientation.w = aruco_marker_smbin_pos["rot_w"]
+        south_pose.position.x = self.aruco_marker_south_pos["trans_x"]
+        south_pose.position.y = self.aruco_marker_south_pos["trans_y"]
+        south_pose.position.z = self.aruco_marker_south_pos["trans_z"]
+        south_pose.orientation.x = self.aruco_marker_south_pos["rot_x"]
+        south_pose.orientation.y = self.aruco_marker_south_pos["rot_y"]
+        south_pose.orientation.z = self.aruco_marker_south_pos["rot_z"]
+        south_pose.orientation.w = self.aruco_marker_south_pos["rot_w"]
+        bin_pose.position.x = self.aruco_marker_bin_pos["trans_x"]
+        bin_pose.position.y = self.aruco_marker_bin_pos["trans_y"]
+        bin_pose.position.z = self.aruco_marker_bin_pos["trans_z"]
+        bin_pose.orientation.x = self.aruco_marker_bin_pos["rot_x"]
+        bin_pose.orientation.y = self.aruco_marker_bin_pos["rot_y"]
+        bin_pose.orientation.z = self.aruco_marker_bin_pos["rot_z"]
+        bin_pose.orientation.w = self.aruco_marker_bin_pos["rot_w"]
+        smbin_pose.position.x = self.aruco_marker_smbin_pos["trans_x"]
+        smbin_pose.position.y = self.aruco_marker_smbin_pos["trans_y"]
+        smbin_pose.position.z = self.aruco_marker_smbin_pos["trans_z"]
+        smbin_pose.orientation.x = self.aruco_marker_smbin_pos["rot_x"]
+        smbin_pose.orientation.y = self.aruco_marker_smbin_pos["rot_y"]
+        smbin_pose.orientation.z = self.aruco_marker_smbin_pos["rot_z"]
+        smbin_pose.orientation.w = self.aruco_marker_smbin_pos["rot_w"]
 
         # Create aruco boards
         self.aruco_dict = aruco.Dictionary_get(aruco.DICT_6X6_250)
@@ -175,7 +177,7 @@ class ImageHandler:
         # and 3 for the small y-aruco
         self.marker_number = 1
         # the aruco board will change depending on the marker number
-        self.active_board = south_board
+        self.active_board = self.south_board
 
         # Subscriber to images
         self.image_sub = rospy.Subscriber('camera/image_raw', Image, self.image_callback)
