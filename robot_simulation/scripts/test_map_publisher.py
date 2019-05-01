@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 
 # Import ROS packages
 import rospy
@@ -18,8 +19,8 @@ def generate_map(length, width):
     upper_bound = length / 3
     lower_bound = upper_bound * 2
     num_obs = 5
-    min_obs_size = 10
-    max_obs_size = 75
+    min_obs_size = 50
+    max_obs_size = 150
 
     # Add obstacles randomly throughout grid
     for i in range(num_obs):

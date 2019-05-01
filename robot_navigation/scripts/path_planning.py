@@ -102,7 +102,7 @@ def compute_easy_path(start_pos, end_pos, step_size):
 # Computes a 'difficult' path between two points, provided with an obstacle map - does NOT assume
 # that there are no obstacles between the points.
 # K = resolution reduction factor to apply - reduces computation time significantly
-def compute_hard_path(map, start_pt, end_pt, K):
+def compute_hard_path(map, start_pt, end_pt, K, step_size):
 
     # First, trim the map down such that it can be divided evenly into K by K square sections.
     # Try to keep the trimming as symmetric as possible: If we trim the bottom side, trim the top side next, etc.
@@ -185,7 +185,7 @@ def compute_hard_path(map, start_pt, end_pt, K):
     for i in range(len(adj_path) - 1):
 
         # Compute 'easy' path for current segment
-        segment_path = compute_easy_path(adj_path[i], adj_path[i+1], 0.1)
+        segment_path = compute_easy_path(adj_path[i], adj_path[i+1], step_size)
 
         # Add segment to the full path
         full_path.poses = full_path.poses + segment_path.poses
@@ -235,29 +235,23 @@ class PathPlanner:
 
         if self.goal_point is not None and self.map is not None:
 
-            start_time = time.time()
-
             # Get latest pose from transform tree
-            #cur_pose = self.tf_buffer.lookup_transform(self.world_frame_id, self.robot_frame_id, rospy.Time())
-            position = [2.0, 1.0]
+            cur_pose = self.tf_buffer.lookup_transform(self.world_frame_id, self.robot_frame_id, rospy.Time())
 
             # Extract information from pose message
-            #position = [cur_pose.transform.translation.x, cur_pose.transform.translation.y]
+            position = [cur_pose.transform.translation.x, cur_pose.transform.translation.y]
             target = [self.goal_point.point.x, self.goal_point.point.y]
 
             # Check if the path is easy
             if is_clear_path(self.map, position, target):
-                new_path = compute_easy_path(position, target, 0.1)
+                new_path = compute_easy_path(position, target, 0.04)
 
             # Else, compute hard path
             else:
-                new_path = compute_hard_path(self.map, position, target, 10)
+                new_path = compute_hard_path(self.map, position, target, 10, 0.04)
 
             # Publish the path message
             self.route_pub.publish(new_path)
-
-            print str(len(new_path.poses)) + "\t" + str(time.time() - start_time)
-
 
 
 if __name__ == "__main__":
@@ -268,7 +262,7 @@ if __name__ == "__main__":
     # Read parameters from server
     goal_point_topic = rospy.get_param("goal_point_topic", "goal_point")
     path_topic = rospy.get_param("path_topic", "cur_path")
-    map_topic = rospy.get_param("map_topic", "test_map")
+    map_topic = rospy.get_param("map_topic", "cur_map")
     world_frame_id = rospy.get_param("pp_world_frame_id", "world")
     robot_frame_id = rospy.get_param("pp_robot_frame_id", "robot_center")
 

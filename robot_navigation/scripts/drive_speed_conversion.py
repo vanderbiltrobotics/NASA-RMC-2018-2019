@@ -134,10 +134,10 @@ class DriveController:
         motor_speed_br = Float64()
 
         # Set message values
-        motor_speed_fl.data = left_speeds
-        motor_speed_bl.data = left_speeds
-        motor_speed_fr.data = right_speeds
-        motor_speed_br.data = right_speeds
+        motor_speed_fl.data = left_speeds / 2.0
+        motor_speed_bl.data = left_speeds / 2.0
+        motor_speed_fr.data = -right_speeds / 2.0
+        motor_speed_br.data = -right_speeds / 2.0
 
         # Publish messages
         self.speed_bl = motor_speed_bl

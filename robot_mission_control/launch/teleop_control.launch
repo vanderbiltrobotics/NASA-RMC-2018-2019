@@ -11,7 +11,7 @@
     <param name="wheel_radius" type="double" value="0.108"/>
     <param name="max_in_lin_vel" type="double" value="1.0"/>
     <param name="max_in_ang_vel" type="double" value="1.0"/>
-    <param name="max_out_lin_vel" type="double" value="0.5"/>
+    <param name="max_out_lin_vel" type="double" value="0.2"/>
     <param name="max_out_ang_vel" type="double" value="1.0"/>
     <param name="output_mode" type="string" value="pwm"/>
     <param name="queue_size" type="int" value="25"/>
@@ -29,13 +29,12 @@
 
 
     <!-- Declare raspberry pi as a machine to run nodes on-->
-    <!--<machine name="rpi" address="192.168.0.105" user="vur" password="theswapbot"-->
-             <!--env-loader="~/catkin_ws/devel/robot_ros_env.sh"/>-->
+    <machine name="rpi" address="192.168.0.105" user="vur" password="theswapbot" env-loader="~/catkin_ws/devel/robot_ros_env.sh"/>
 
     <!-- Motor_control node - runs on raspberry pi -->
     <rosparam command="load" file="$(find robot_motor_control)/launch/full_system.yaml" />
-    <!--<node machine="rpi" pkg="robot_motor_control" type="motor_control_node" name="motor_control" respawn="false"/>-->
-    <node pkg="robot_motor_control" type="motor_control_node" name="motor_control" respawn="false"/>
+    <node machine="rpi" pkg="robot_motor_control" type="motor_control_node" name="motor_control" respawn="false"/>
+    <!--<node pkg="robot_motor_control" type="motor_control_node" name="motor_control" respawn="false"/>-->
 
 
 </launch>

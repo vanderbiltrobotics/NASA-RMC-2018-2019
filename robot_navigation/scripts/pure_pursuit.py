@@ -24,7 +24,7 @@ class PurePursuit:
         # Initialize path
         self.path = None
         self.path_len = 0
-        self.goal_tolerance = 0.03
+        self.goal_tolerance = 0.05
 
         # Create subscribers to pose, path topics
         self.path_sub = rospy.Subscriber("cur_path", Path, self.update_path)
@@ -81,7 +81,7 @@ class PurePursuit:
     def compute_new_twist(self):
 
         # Only move if we have a path to follow
-        if self.path_len > 0:
+        if self.path_len > 0 and not rospy.set_param("goal_reached", False):
 
             # Get latest pose from transform tree
             new_pose = self.tf_buffer.lookup_transform(self.world_frame_id, self.robot_frame_id, rospy.Time())
@@ -156,5 +156,14 @@ if __name__ == "__main__":
     pp = PurePursuit(lin_vel, max_lookahead, world_frame_id, robot_frame_id)
 
     # Spin indefinitely
-    rospy.spin()
+
+    loop_rate = rospy.Rate(10)
+
+    while not rospy.is_shutdown():
+
+        # Compute new twist
+        pp.compute_new_twist()
+
+        # Sleep at loop rate
+        loop_rate.sleep()
 

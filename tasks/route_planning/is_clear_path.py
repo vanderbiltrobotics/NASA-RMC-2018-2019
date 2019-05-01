@@ -14,9 +14,34 @@ def is_in_field(driveability_map, pt):
         else False
 
 
-# Check occupancy grid for obstacles along calculated path
-# Takes path as type int to be compatible with driveability_map
-def is_clear_path(driveability_map, path):
+# Checks if the path between two points is clear
+# Drivability map is in cm
+# Start / end pos are in meters
+def is_clear_path(driveability_map, start_pos, end_pos):
+
+    # Convert start and end positions to cm
+    start_pos = [int(i * 100) for i in start_pos]
+    end_pos = [int(i * 100) for i in end_pos]
+
+    # Set step size to 1 so we don' miss any obstacles
+    step_size = 1
+
+    # calculating length of the straight line and the number of points
+    dy = end_pos[1] - start_pos[1]
+    dx = end_pos[0] - start_pos[0]
+    path_length = np.sqrt(dx ** 2 + dy ** 2)
+    matrix_len = int(path_length / step_size)
+
+    # creating matrices for calculations
+    points = [start_pos for i in range(matrix_len)]
+    steps = [[step_size * dx / path_length, step_size * dy / path_length] for i in range(matrix_len)]
+    nums = [[i + 1, i + 1] for i in range(matrix_len)]
+
+    # Calculating the path
+    path = np.add(points, np.multiply(steps, nums))
+
+    # Prepend starting point
+    path = np.insert(path, 0, start_pos, axis=0)
 
     # Check for obstacles
     for pt in path:
