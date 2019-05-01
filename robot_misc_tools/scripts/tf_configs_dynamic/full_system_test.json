@@ -1,0 +1,14 @@
+{
+    "transforms" : [
+        {
+            "frame_id" : "world",
+            "child_id" : "aruco_board_origin",
+            "pose_topic" : "aruco/active_board_position"
+        },
+        {
+            "frame_id" : "aruco_board_origin",
+            "child_id" : "localization_camera",
+            "pose_topic" : "ekf/pose_filtered"
+        }
+    ]
+}
