@@ -91,16 +91,19 @@ class ImageHandler:
         south_markers_y = 1
         south_marker_len = 0.168
         south_marker_sep = 0.0
+        south_marker_idstart = 810
         # bin board
-        bin_markers_x = 2
+        bin_markers_x = 1
         bin_markers_y = 1
         bin_marker_len = 0.168
-        bin_marker_sep = 0.048
+        bin_marker_sep = 0.0
+        bin_marker_idstart = 800
         # small bin board
         smbin_markers_x = 5
         smbin_markers_y = 1
         smbin_marker_len = 0.067
         smbin_marker_sep = 0.0135
+        smbin_marker_idstart = 821
 
         # tf frame id's
         self.world_frame_id = rospy.get_param("pp_world_frame_id", default="world")
@@ -147,28 +150,31 @@ class ImageHandler:
         smbin_pose.orientation.w = aruco_marker_smbin_pos["rot_w"]
 
         # Create aruco boards
-        self.aruco_dict = aruco.Dictionary_get(aruco.DICT_6X6_250)
+        self.aruco_dict = aruco.Dictionary_get(aruco.DICT_6X6_1000)
         self.aruco_param = aruco.DetectorParameters_create()  # default parameters
         self.south_board = aruco.GridBoard_create(
-            south_markers_x, 
-            south_markers_y, 
-            south_marker_len, 
-            south_marker_sep, 
-            self.aruco_dict
+            south_markers_x,
+            south_markers_y,
+            south_marker_len,
+            south_marker_sep,
+            self.aruco_dict,
+            firstMarker=south_marker_idstart
         )
         self.bin_board = aruco.GridBoard_create(
             bin_markers_x, 
             bin_markers_y, 
             bin_marker_len, 
             bin_marker_sep, 
-            self.aruco_dict
+            self.aruco_dict,
+            firstMarker=bin_marker_idstart
         )
         self.smbin_board = aruco.GridBoard_create(
             smbin_markers_x, 
             smbin_markers_y, 
             smbin_marker_len, 
             smbin_marker_sep, 
-            self.aruco_dict
+            self.aruco_dict,
+            firstMarker=smbin_marker_idstart
         )
 
         # markerNumber is 1 for the x-aruco, 2 for the big y-aruco
