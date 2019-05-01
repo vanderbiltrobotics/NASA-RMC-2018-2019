@@ -280,25 +280,31 @@ class ImageHandler:
             if 0.8 * x + 2 > y and x < 1.9:
                 self.marker_number = 3  # small bin board takes priority
                 self.active_board = self.smbin_board
+                rospy.loginfo("changing to board 3")
             elif x > y:
                 self.marker_number = 2
                 self.active_board = self.bin_board
+                rospy.loginfo("changing to board 2")
 
         elif self.marker_number == 2:
             if 0.8 * x + 2 > y and x < 1.9:
                 self.marker_number = 3  # small bin board takes priority
                 self.active_board = self.smbin_board
+                rospy.loginfo("changing to board 2")
             elif x + 2 < y:
                 self.marker_number = 1
                 self.active_board = self.south_board
+                rospy.loginfo("changing to board 1")
 
         elif self.marker_number == 3:
             if x > y and x < 2.5:
                 self.marker_number = 2  # big bin board takes priority
                 self.active_board = self.bin_board
+                rospy.loginfo("changing to board 2")
             elif x + 2 < y:
                 self.marker_number = 1
                 self.active_board = self.south_board
+                rospy.loginfo("changing to board 1")
 
         # publish the pose of the active board
         if self.marker_number == 1:
