@@ -42,11 +42,11 @@ class ArucoCamera:
         
         # Camera sweep parameters
         self.sweepDirection = 1      # Controls the direction of sweep
-        self.deltaTheta = 3          # Servo angle change per loop during camera sweep
+        self.deltaTheta = 1          # Servo angle change per loop during camera sweep
 
         # Proportional gain; represents a transformation from the camera pixel subspace to servo angle. 
         # Vary the magnitude of k to change how much the servo angle should change based off the error
-        self.k = -0.0005 
+        self.k = -0.0125
 
         # Publish servo theta 
         self.servoThetaPub = rospy.Publisher("aruco/servo_theta", Int32, queue_size=0)
@@ -67,7 +67,6 @@ class ArucoCamera:
     def updatePosition(self):
         if self.markerDetected:
             self.error = self.markerCenter  # Find error relative to camera center
-            self.k = -0.0005
         else:
             # Will increment servo by deltaTheta in the sweep direction
             # Divides by P gain so that the P gain will cancel out in new theta calculation

@@ -91,13 +91,13 @@ class ImageHandler:
         south_markers_x = 1
         south_markers_y = 1
         south_marker_len = 0.168
-        south_marker_sep = 0.0
+        south_marker_sep = 0.1
         south_marker_idstart = 810
         # bin board
         bin_markers_x = 1
         bin_markers_y = 1
         bin_marker_len = 0.168
-        bin_marker_sep = 0.0
+        bin_marker_sep = 0.1
         bin_marker_idstart = 800
         # small bin board
         smbin_markers_x = 5
@@ -215,6 +215,9 @@ class ImageHandler:
 
         # If markers found, estimate pose
         if ids is not None:
+
+            rospy.loginfo("Detected Board")
+
             retval, rvec, tvec = aruco.estimatePoseBoard(corners, ids, self.active_board, self.cmatx, self.dist)
             bool_msg.data = retval
 
@@ -265,14 +268,18 @@ class ImageHandler:
     # 3) sets to the small bin marker if the robot is close to the bin
     def update_aruco_target(self):
 
-        robot_pose = self.tf_buffer.lookup_transform(
-            self.world_frame_id, 
-            self.robot_frame_id, 
-            rospy.Time()
-        )
-        x = robot_pose.transform.translation.x
-        y = robot_pose.transform.translation.y
-        pose_msg = Pose()
+        try:
+            robot_pose = self.tf_buffer.lookup_transform(
+                self.world_frame_id,
+                self.robot_frame_id,
+                rospy.Time()
+            )
+            x = robot_pose.transform.translation.x
+            y = robot_pose.transform.translation.y
+        except:
+            self.marker_number = 1  # default to the south marker if transform does not exist yet
+            self.aruco_pos_pub.publish(south_pose)
+            return
 
         # switch depending on what aruco marker we're currently looking at
         # TODO: this needs to be tested/debugged
