@@ -18,6 +18,7 @@ int main(int argc, char **argv) {
         XmlRpc::XmlRpcValue& v(p.second);
         if(v.getType() == XmlRpc::XmlRpcValue::TypeStruct){
             robot_motor_control::TalonConfig config;
+            dynamic_reconfigure::Server<robot_motor_control::TalonConfig>().getConfigDefault(config);
             if(v.hasMember("id"))
                 config.id = (int&)v["id"];
             if(v.hasMember("inverted"))

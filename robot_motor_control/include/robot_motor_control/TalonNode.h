@@ -31,6 +31,7 @@ namespace robot_motor_control{
         ros::Publisher busVoltagePub;
         ros::Publisher outputPercentPub;
         ros::Publisher outputVoltagePub;
+        ros::Publisher outputCurrentPub;
         ros::Publisher posPub;
         ros::Publisher velPub;
 
@@ -42,7 +43,7 @@ namespace robot_motor_control{
         double _output;
 
     public:
-        TalonNode(ros::NodeHandle parent, std::string name, const TalonConfig &config);
+        TalonNode(const ros::NodeHandle& parent, const std::string& name, const TalonConfig& config);
 
         TalonNode& operator=(const TalonNode&) = delete;
 
@@ -55,6 +56,9 @@ namespace robot_motor_control{
         void setVelocity(std_msgs::Float64 output);
 
         void update();
+
+        static void configureStatusPeriod(TalonSRX& talon);
+
     };
 
 }

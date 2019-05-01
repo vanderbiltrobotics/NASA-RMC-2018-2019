@@ -70,14 +70,14 @@ if __name__ == "__main__":
     while not rospy.is_shutdown():
 
         # Create and publish message
-        text = "BR: {0:.1f}  BL: {1:.1f}  FR: {2:.1f}  FL: {3:.1f}".format(
+        text = "BR: {0:.2f}  BL: {1:.2f}  FR: {2:.2f}  FL: {3:.2f}".format(
             handler.drive_br,
             handler.drive_bl,
             handler.drive_fr,
             handler.drive_fl
         )
 
-        text += "    ||    HNG: {0:.1f}  LSC: {1:.1f}  BKT: {2:.1f}  CNV: {3:.1f}".format(
+        text += "    ||    HNG: {0:.2f}  LSC: {1:.2f}  BKT: {2:.2f}  CNV: {3:.2f}".format(
             handler.dig_hng,
             handler.dig_lsc,
             handler.dig_bkt,

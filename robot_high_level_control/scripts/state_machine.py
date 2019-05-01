@@ -1,38 +1,41 @@
+#!/usr/bin/env python
+
 import rospy
-from geometry_msgs.msg import Twist, Pose
+from geometry_msgs.msg import Twist, Pose, PointStamped
+from nav_msgs.msg import OccupancyGrid
 from std_msgs.msg import Bool
 import numpy as np
 from math import radians
 
 class HighLevelController:
 
-    def __init__(self, starting_state="idle"):
+    def __init__(self, starting_state="drive_to_p0"):
 
         # Initialize current state to the starting state
         self.current_state = starting_state
 
         # Publishers that need to be accessible by some state or function
         self.publishers = {
-            "enable_pub_mot": rospy.Publisher("enable/motor_control", Bool, queue_size=1),
-            "enable_pub_nav": rospy.Publisher("enable/navigation", Bool, queue_size=1),
-            "enable_pub_loc": rospy.Publisher("enable/localization", Bool, queue_size=1),
-            "enable_pub_obs": rospy.Publisher("enable/obstacles", Bool, queue_size=1),
-            "enable_pub_top": rospy.Publisher("enable/teleop", Bool, queue_size=1),
-            "drive_cmd": rospy.Publisher('drive_cmd', Twist, queue_size=1),
-            "pub_goal_pose": rospy.Publisher('goal_pos', Pose, queue_size=1)
+            "enable_pub_mot": rospy.Publisher("enable/motor_control", Bool, queue_size=0),
+            "enable_pub_nav": rospy.Publisher("enable/navigation", Bool, queue_size=0),
+            "enable_pub_loc": rospy.Publisher("enable/localization", Bool, queue_size=0),
+            "enable_pub_obs": rospy.Publisher("enable/obstacles", Bool, queue_size=0),
+            "enable_pub_top": rospy.Publisher("enable/teleop", Bool, queue_size=0),
+            "drive_cmd": rospy.Publisher('drive_cmd', Twist, queue_size=0),
+            "pub_goal_point": rospy.Publisher('goal_point', PointStamped, queue_size=0)
         }
 
         # Variables to use for
         self.state_vars = {
             "outbound": True,
-            "P0": (1.5, 1.2),
+            "P0": (2.0, 1.0),
             "P1": (1.5, 2.0),
             "P2": (1.5, 4.0),
             "P3": (1.5, 5.0),
-            "drivability_map": np.zeros(shape=(500, 500)),
+            "drivability_map": None,
             "max_x_offset": 1.5,
-            "P1_y": 2.0,
-            "P2_y": 4.0,
+            "P1_y": 2.5,
+            "P2_y": 5.5,
             "pass_num": 1,
             "marker_detected": False
         }
@@ -50,13 +53,34 @@ class HighLevelController:
         return
 
     def advance_state(self):
-        # Considering the curren state and other info (such as elapsed time), advance to the correct next state
+
+        # Handle navigation steps  (these are all straightforward)
+        if self.current_state == "drive_to_p0":
+            if self.state_vars["outbound"]:
+                self.current_state = "drive_to_p1"
+            else:
+                self.current_state = "idle"
+        elif self.current_state == "drive_to_p1":
+            if self.state_vars["outbound"]:
+                self.current_state = "drive_to_p2"
+            else:
+                self.current_state = "drive_to_p0"
+        elif self.current_state == "drive_to_p2":
+            if self.state_vars["outbound"]:
+                self.current_state = "drive_to_p3"
+            else:
+                self.current_state = "drive_to_p1"
+        elif self.current_state == "drive_to_p3":
+            self.current_state = "drive_to_p2"
+
         return
 
     def run_states(self):
 
         # Continue running states until we're done
         while not rospy.is_shutdown():
+
+            rospy.loginfo("advanced to state: " + self.current_state)
 
             if self.current_state == "idle":
                 self.state_idle()
@@ -152,7 +176,7 @@ class HighLevelController:
         loop_rate = rospy.Rate(10)
 
         # Wait for further instruction
-        while self.current_state == "idle":
+        while self.current_state == "idle" and not rospy.is_shutdown():
 
             # Sleep at loop rate
             loop_rate.sleep()
@@ -229,16 +253,20 @@ class HighLevelController:
         # Change the pure pursuit lookahead distance
 
         # Send P0 as a goal position
-        pose_msg = Pose()
-        pose_msg.position.x = self.state_vars["P0"][0]
-        pose_msg.position.y = self.state_vars["P0"][1]
-        self.publishers["pub_goal_pose"].publish(pose_msg)
+        point_msg = PointStamped()
+        point_msg.header.frame_id = "world"
+        point_msg.point.x = self.state_vars["P0"][0]
+        point_msg.point.y = self.state_vars["P0"][1]
+        self.publishers["pub_goal_point"].publish(point_msg)
 
         # Set loop rate
-        loop_rate = rospy.Rate(10)
+        loop_rate = rospy.Rate(5)
 
         # Wait for robot to reach goal pos or for other interrupt
-        while self.current_state == "drive_to_p0" and self.reached_goal(reset_if_true=True):
+        while self.current_state == "drive_to_p0" and not self.reached_goal(reset_if_true=True) and not rospy.is_shutdown():
+
+            # Keep publishing in case we missed it
+            self.publishers["pub_goal_point"].publish(point_msg)
 
             # Sleep at loop rate
             loop_rate.sleep()
@@ -263,8 +291,19 @@ class HighLevelController:
             obstacles=True
         )
 
+        # Set loop rate
+        loop_rate = rospy.Rate(10)
+
         # If outbound, compute P1 and P2
         if self.state_vars["outbound"]:
+
+            # Make sure map has been received
+            while self.state_vars["drivability_map"] is None:
+
+                # Wait for map to be received
+                loop_rate.sleep()
+
+            rospy.loginfo("Map received!!!")
 
             pts = compute_obs_region_endpoints(
                 self.state_vars["drivability_map"],
@@ -276,20 +315,26 @@ class HighLevelController:
             self.state_vars["P1"] = pts[0]
             self.state_vars["P2"] = pts[1]
 
+            rospy.loginfo(pts[0])
+            rospy.loginfo(pts[1])
+
         # Change the pure pursuit lookahead distance
 
 
         # Send P1 as a goal position
-        pose_msg = Pose()
-        pose_msg.position.x = self.state_vars["P1"][0]
-        pose_msg.position.y = self.state_vars["P1"][1]
-        self.publishers["pub_goal_pose"].publish(pose_msg)
+        point_msg = PointStamped()
 
-        # Set loop rate
-        loop_rate = rospy.Rate(10)
+        point_msg.point.x = self.state_vars["P1"][0]
+        point_msg.point.y = self.state_vars["P1"][1]
+        self.publishers["pub_goal_point"].publish(point_msg)
+
+
 
         # Wait for robot to reach goal pos or for other interrupt
-        while self.current_state == "drive_to_p1" and self.reached_goal(reset_if_true=True):
+        while self.current_state == "drive_to_p1" and not self.reached_goal(reset_if_true=True) and not rospy.is_shutdown():
+
+            # Keep publishing in case we missed it
+            self.publishers["pub_goal_point"].publish(point_msg)
 
             # Sleep at loop rate
             loop_rate.sleep()
@@ -315,7 +360,7 @@ class HighLevelController:
         )
 
         # If inbound, compute P1 and P2
-        if self.state_vars["outbound"]:
+        if not self.state_vars["outbound"]:
 
             # Get P1 and P2
             pts = compute_obs_region_endpoints(
@@ -332,16 +377,20 @@ class HighLevelController:
         # Change the pure pursuit lookahead distance
 
         # Send P2 as a goal position
-        pose_msg = Pose()
-        pose_msg.position.x = self.state_vars["P2"][0]
-        pose_msg.position.y = self.state_vars["P2"][1]
-        self.publishers["pub_goal_pose"].publish(pose_msg)
+        point_msg = PointStamped()
+        point_msg.header.frame_id = "world"
+        point_msg.point.x = self.state_vars["P2"][0]
+        point_msg.point.y = self.state_vars["P2"][1]
+        self.publishers["pub_goal_point"].publish(point_msg)
 
         # Set loop rate
         loop_rate = rospy.Rate(10)
 
         # Wait for robot to reach goal pos or for other interrupt
-        while self.current_state == "drive_to_p2" and self.reached_goal(reset_if_true=True):
+        while self.current_state == "drive_to_p2" and not self.reached_goal(reset_if_true=True) and not rospy.is_shutdown():
+
+            # Keep publishing in case we missed it
+            self.publishers["pub_goal_point"].publish(point_msg)
 
             # Sleep at loop rate
             loop_rate.sleep()
@@ -360,7 +409,7 @@ class HighLevelController:
 
         # Compute P3
         p3_x = self.state_vars["P2"][0]
-        p3_y = self.params["init_dig_y_loc"] - (self.params["dig_y_loc_delta"] * self.state_vars["pass_num"])
+        p3_y = self.params["init_dig_y_loc"] - (self.params["dig_y_loc_delta"] * (self.state_vars["pass_num"] - 1))
 
         # Update P3 state var
         self.state_vars["P3"] = (p3_x, p3_y)
@@ -368,22 +417,29 @@ class HighLevelController:
         # Change the pure pursuit lookahead distance
 
         # Send P3 as a goal position
-        pose_msg = Pose()
-        pose_msg.position.x = p3_x
-        pose_msg.position.y = p3_y
-        self.publishers["pub_goal_pose"].publish(pose_msg)
+        point_msg = PointStamped()
+        point_msg.header.frame_id = "world"
+        point_msg.point.x = p3_x
+        point_msg.point.y = p3_y
+        self.publishers["pub_goal_point"].publish(point_msg)
 
         # Set loop rate
         loop_rate = rospy.Rate(10)
 
         # Wait for robot to reach goal pos or for other interrupt
-        while self.current_state == "drive_to_p3" and self.reached_goal(reset_if_true=True):
+        while self.current_state == "drive_to_p3" and not self.reached_goal(reset_if_true=True) and not rospy.is_shutdown():
+
+            # Keep publishing in case we missed it
+            self.publishers["pub_goal_point"].publish(point_msg)
 
             # Sleep at loop rate
             loop_rate.sleep()
 
             # Process any commands we may have received
             self.process_state_changes()
+
+        # No longer outbound
+        self.state_vars["outbound"] = False
 
         # Advance to the next state
         self.advance_state()
@@ -427,6 +483,19 @@ class HighLevelController:
     def state_deposit_gravel(self):
         return
 
+    # ------------------------------------- #
+    # CALLBACK FUNCTIONS FOR UPDATING STATE #
+    # ------------------------------------- #
+
+    def update_map(self, new_map_msg):
+
+        # Get new map, make sure dimensions are correct
+        map_length = new_map_msg.info.height
+        map_width = new_map_msg.info.width
+
+        # Convert to numpy array and store
+        self.state_vars["drivability_map"] = np.reshape(np.array(new_map_msg.data), (map_length, map_width))
+
 
 # ----------------------------------------------- #
 # HELPER FUNCTIONS FOR DETERMINING GOAL POSITIONS #
@@ -434,31 +503,21 @@ class HighLevelController:
 
 # Check if input point is within the field boundaries
 def is_in_field(driveability_map, pt):
-    return True if ((pt >= 0).all() and pt[0] < driveability_map.shape[0] and pt[1] < driveability_map.shape[1]) \
+    return True if ((pt >= 0).all() and pt[0] < driveability_map.shape[1] and pt[1] < driveability_map.shape[0]) \
         else False
 
 
-# Check occupancy grid for obstacles along calculated path
-# Takes path as type int to be compatible with driveability_map
-def is_clear_path(driveability_map, path):
+# Checks if the path between two points is clear
+# Drivability map is in cm
+# Start / end pos are in meters
+def is_clear_path(driveability_map, start_pos, end_pos):
 
-    # Check for obstacles
-    for pt in path:
+    # Convert start and end positions to cm
+    start_pos = [int(i * 100) for i in start_pos]
+    end_pos = [int(i * 100) for i in end_pos]
 
-        # Check boundaries
-        if not is_in_field(driveability_map, pt):
-            return False
-
-        occupied = driveability_map[pt[0], pt[1]]
-        if occupied == 1:
-            return False  # obstacle detected, can't cross here
-
-    return True  # Safe to drive along this line
-
-
-# Compute a simple path along the hypotenuse between the start and end points
-# Contains start point in path
-def compute_easy_path(start_pos, end_pos, step_size):
+    # Set step size to 1 so we don' miss any obstacles
+    step_size = 1
 
     # calculating length of the straight line and the number of points
     dy = end_pos[1] - start_pos[1]
@@ -476,7 +535,18 @@ def compute_easy_path(start_pos, end_pos, step_size):
 
     # Prepend starting point
     path = np.insert(path, 0, start_pos, axis=0)
-    return path
+
+    # Check for obstacles
+    for pt in path:
+
+        # Check boundaries
+        if not is_in_field(driveability_map, pt):
+            return False
+
+        if driveability_map[int(pt[1]), int(pt[0])] == 1:
+            return False  # obstacle detected, can't cross here
+
+    return True  # Safe to drive along this line
 
 
 # driveability_map is in cm, y_min and y_max are in m, max_x_offset is in cm
@@ -487,49 +557,40 @@ def compute_obs_region_endpoints(driveability_map, y_min, y_max, max_x_offset):
 
     # Starting p1 and p2; Converted to cm
     # Must retain original points in case no easy path is found
-    p1_orig = (y_min * 100.0, field_width / 2.0)
-    p2_orig = (y_max * 100.0, field_width / 2.0)
+    p1_orig = [field_width / 2.0 / 100, y_min]
+    p2_orig = [field_width / 2.0 / 100, y_max]
 
     # Rounded p1 and p2; Converted to cm
     # In case occupancy grid is odd
-    p1 = (y_min * 100.0, np.rint(field_width / 2.0))
-    p2 = (y_max * 100.0, np.rint(field_width / 2.0))
+    p1 = [field_width / 2.0 / 100.0, y_min]
+    p2 = [field_width / 2.0 / 100.0, y_max]
 
     # Left and right p1 and p2
-    p1_left = (0, 0)
-    p2_left = (0, 0)
-    p1_right = (0, 0)
-    p2_right = (0, 0)
+    p1_left = np.array([0, 0])
+    p2_left = np.array([0, 0])
+    p1_right = np.array([0, 0])
+    p2_right = np.array([0, 0])
 
     # Initialize to first enter while loop
-    left_offset = -1  # cm; Becomes 0 right away in loop
-    right_offset = -1
+    offset = -0.05  # cm; Becomes 0 right away in loop
     clear_path_left = False  # Need two paths in case occupancy grid has odd width
     clear_path_right = False
 
     # Search until clear path is found or field boundaries are reached
-    while not clear_path_left and not clear_path_right and left_offset <= max_x_offset \
-            and right_offset <= max_x_offset+1:
+    while not clear_path_left and not clear_path_right and offset <= max_x_offset + 0.05:
         # Increase offset
-        right_offset += 1
-        left_offset += 1
+        offset += 0.05
 
         # Add offset in both x-directions to avoid obstacles
-        p1_right = (p1[0], p1[1] + right_offset)
-        p1_left = (p1[0], p1[1] - left_offset)
-        p2_right = (p2[0], p2[1] + right_offset)
-        p2_left = (p2[0], p2[1] - left_offset)
-
-        # Computes easy path in both directions
-        # Step size is the same as for driveability_map
-        # Points and step size in cm
-        path_right = compute_easy_path(p1_right, p2_right, step_size=1)
-        path_left = compute_easy_path(p1_left, p2_left, step_size=1)
+        p1_right = (p1 + np.array([offset, 0])).tolist()
+        p1_left = (p1 - np.array([offset, 0])).tolist()
+        p2_right = (p2 + np.array([offset, 0])).tolist()
+        p2_left = (p2 - np.array([offset, 0])).tolist()
 
         # check if p1 and p2 line up in a clear path
         # Path is sent in rounded cm to be compatible with driveability_map
-        clear_path_right = is_clear_path(driveability_map, (path_right+0.5).astype(int))
-        clear_path_left = is_clear_path(driveability_map, (path_left+0.5).astype(int))
+        clear_path_right = is_clear_path(driveability_map, p1_right, p2_right)
+        clear_path_left = is_clear_path(driveability_map, p1_left, p2_left)
 
     # Return points in clear path, w/ preference to the right
     # Return starting points if no path found
@@ -539,3 +600,19 @@ def compute_obs_region_endpoints(driveability_map, y_min, y_max, max_x_offset):
         return [p1_left, p2_left]
     else:
         return [p1_orig, p2_orig]
+
+
+# Create the controller and run ROS node
+if __name__ == "__main__":
+
+    # Initialize ROS node
+    rospy.init_node("high_level_controller")
+
+    # Create state machine
+    state_machine = HighLevelController()
+
+    # Attach subscribers
+    rospy.Subscriber("test_map", OccupancyGrid, state_machine.update_map)
+
+    # Run state machine
+    state_machine.run_states()
