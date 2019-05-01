@@ -22,7 +22,7 @@ class AngleListener:
     def setCameraAngle(self, theta):
 
         # Convert from range -90 to 90 to range 2.22 to 10.0 (this is the good range for the servo)
-        duty_cycle = ((theta.data + 90) / 180.0) * (7.88) + 2.22
+        duty_cycle = ((theta.data + 65) / 130.0) * (7.88) + 2.22
 
         # Send new duty cycle to servo
         self.p.ChangeDutyCycle(duty_cycle)

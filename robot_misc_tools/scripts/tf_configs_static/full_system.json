@@ -1,7 +1,18 @@
 {
     "transforms" : [
         {
-            "frame_id" : "aruco_camera",
+            "frame_id" : "camera_mount_base",
+            "child_id" : "robot_frame_BL",
+            "trans_x" : 0,
+            "trans_y" : 0,
+            "trans_z" : 0,
+            "rot_x" : 0,
+            "rot_y" : 0,
+            "rot_z" : 0,
+            "rot_w" : 1
+        },
+        {
+            "frame_id" : "robot_frame_BL",
             "child_id" : "robot_center",
             "trans_x" : 0,
             "trans_y" : 0,
@@ -12,10 +23,10 @@
             "rot_w" : 1
         },
         {
-            "frame_id" : "robot_center",
-            "child_id" : "robot_front_left",
-            "trans_x" : 0.3,
-            "trans_y" : 0.2,
+            "frame_id" : "robot_frame_BL",
+            "child_id" : "robot_center_BR",
+            "trans_x" : 0,
+            "trans_y" : 0,
             "trans_z" : 0,
             "rot_x" : 0,
             "rot_y" : 0,
@@ -23,10 +34,10 @@
             "rot_w" : 1
         },
         {
-            "frame_id" : "robot_center",
-            "child_id" : "robot_front_right",
-            "trans_x" : 0.3,
-            "trans_y" : -0.2,
+            "frame_id" : "robot_frame_BL",
+            "child_id" : "robot_center_FL",
+            "trans_x" : 0,
+            "trans_y" : 0,
             "trans_z" : 0,
             "rot_x" : 0,
             "rot_y" : 0,
@@ -34,10 +45,10 @@
             "rot_w" : 1
         },
         {
-            "frame_id" : "robot_center",
-            "child_id" : "robot_back_left",
-            "trans_x" : -0.3,
-            "trans_y" : 0.2,
+            "frame_id" : "robot_frame_BR",
+            "child_id" : "robot_center_FR",
+            "trans_x" : 0,
+            "trans_y" : 0,
             "trans_z" : 0,
             "rot_x" : 0,
             "rot_y" : 0,
@@ -45,10 +56,10 @@
             "rot_w" : 1
         },
         {
-            "frame_id" : "robot_center",
-            "child_id" : "robot_back_right",
-            "trans_x" : -0.3,
-            "trans_y" : -0.2,
+            "frame_id" : "robot_frame_FL",
+            "child_id" : "kinect_mount_base",
+            "trans_x" : 0,
+            "trans_y" : 0,
             "trans_z" : 0,
             "rot_x" : 0,
             "rot_y" : 0,
@@ -56,7 +67,18 @@
             "rot_w" : 1
         },
         {
-            "frame_id" : "robot_center",
+            "frame_id" : "kinect_mount_base",
+            "child_id" : "kinect_base",
+            "trans_x" : 0,
+            "trans_y" : 0,
+            "trans_z" : 0,
+            "rot_x" : 0,
+            "rot_y" : 0,
+            "rot_z" : 0,
+            "rot_w" : 1
+        },
+        {
+            "frame_id" : "kinect_base",
             "child_id" : "camera_link",
             "trans_x" : 0,
             "trans_y" : 0,

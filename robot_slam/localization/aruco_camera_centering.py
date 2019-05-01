@@ -15,6 +15,7 @@ from geometry_msgs.msg import Pose
 from std_msgs.msg import Bool, Int32
 from cv_bridge import CvBridge
 import tf.transformations
+from math import radians
 
 # Import other required packages
 import cv2.aruco as aruco
@@ -32,8 +33,8 @@ class ArucoCamera:
         # Servo state
         self.theta = Int32()         # ROS object that stores current servo theta orientation
         self.error = 0               # Error between current theta and where the camera should be 
-        self.minTheta = -90          # Minimum servo bound
-        self.maxTheta = 90           # Maximum servo bound
+        self.minTheta = -65         # Minimum servo bound
+        self.maxTheta = 65           # Maximum servo bound
 
         # Marker paramters
         self.markerDetected = False  # True if an AruCo marker is in view
@@ -49,6 +50,9 @@ class ArucoCamera:
 
         # Publish servo theta 
         self.servoThetaPub = rospy.Publisher("aruco/servo_theta", Int32, queue_size=0)
+
+        # Publish the pose transform
+        self.lensPosePub = rospy.Publisher("camera_mount_pose", Pose, queue_size=0)
 
     # Update if there is an AruCo marker in the camera's FOV
     def updateMarkerDetected(self,detected):
@@ -83,6 +87,15 @@ class ArucoCamera:
 
         # Update servo position
         self.servoThetaPub.publish(self.theta)
+
+        # Update pose transform
+        camera_to_mount = Pose()
+        # TODO Change vals
+        camera_to_mount.position.x = 0
+        camera_to_mount.position.y = 0
+        camera_to_mount.position.z = 0
+        camera_to_mount.orientation = tf.transformations.quaternion_from_euler(0, 0, radians(self.theta.data))
+        self.lensPosePub.publish(camera_to_mount)
 
 
 if __name__ == "__main__":
