@@ -5,7 +5,7 @@
 # sweeps the servo when the aruco marker is missing for an extended 
 # period of time.
 
-# Created by Jacob Gloudemans and Josh Petrin
+# Created by Alex Barnett, Jacob Gloudemans, and Josh Petrin
 
 
 # Import ROS packages
@@ -27,6 +27,11 @@ import yaml
 
 # constant(s)
 SQRT_2 = math.sqrt(2)
+
+# marker enum designations
+SOUTH_MARKER = 1
+BIN_MARKER = 2
+SMALL_BIN_MARKER = 3
 
 # default locations of the aruco markers -- 
 #  aruco marker on the short wall of the arena (1)
@@ -179,9 +184,8 @@ class ImageHandler:
             firstMarker=smbin_marker_idstart
         )
 
-        # markerNumber is 1 for the x-aruco, 2 for the big y-aruco
-        # and 3 for the small y-aruco
-        self.marker_number = 1
+        # marker_number determines which marker we will be searching for 
+        self.marker_number = SOUTH_MARKER
         # the aruco board will change depending on the marker number
         self.active_board = self.south_board
 
@@ -277,48 +281,49 @@ class ImageHandler:
             x = robot_pose.transform.translation.x
             y = robot_pose.transform.translation.y
         except:
-            self.marker_number = 1  # default to the south marker if transform does not exist yet
+            # default to the south marker if transform does not exist yet
+            self.marker_number = SOUTH_MARKER
             self.aruco_pos_pub.publish(south_pose)
             return
 
         # switch depending on what aruco marker we're currently looking at
         # TODO: this needs to be tested/debugged
-        if self.marker_number == 1:
+        if self.marker_number == SOUTH_MARKER:
             if 0.8 * x + 2 > y and x < 1.9:
-                self.marker_number = 3  # small bin board takes priority
+                self.marker_number = SMALL_BIN_MARKER  # small bin board takes priority
                 self.active_board = self.smbin_board
                 rospy.loginfo("changing to board 3")
             elif x > y:
-                self.marker_number = 2
+                self.marker_number = BIN_MARKER
                 self.active_board = self.bin_board
                 rospy.loginfo("changing to board 2")
 
-        elif self.marker_number == 2:
+        elif self.marker_number == BIN_MARKER:
             if 0.8 * x + 2 > y and x < 1.9:
-                self.marker_number = 3  # small bin board takes priority
+                self.marker_number = SMALL_BIN_MARKER  # small bin board takes priority
                 self.active_board = self.smbin_board
-                rospy.loginfo("changing to board 2")
+                rospy.loginfo("changing to board 3")
             elif x + 2 < y:
-                self.marker_number = 1
+                self.marker_number = SOUTH_MARKER
                 self.active_board = self.south_board
                 rospy.loginfo("changing to board 1")
 
-        elif self.marker_number == 3:
+        elif self.marker_number == SMALL_BIN_MARKER:
             if x > y and x < 2.5:
-                self.marker_number = 2  # big bin board takes priority
+                self.marker_number = BIN_MARKER  # big bin board takes priority
                 self.active_board = self.bin_board
                 rospy.loginfo("changing to board 2")
             elif x + 2 < y:
-                self.marker_number = 1
+                self.marker_number = SOUTH_MARKER
                 self.active_board = self.south_board
                 rospy.loginfo("changing to board 1")
 
         # publish the pose of the active board
-        if self.marker_number == 1:
+        if self.marker_number == SOUTH_MARKER:
             self.aruco_pos_pub.publish(south_pose)
-        elif self.marker_number == 2:
+        elif self.marker_number == BIN_MARKER:
             self.aruco_pos_pub.publish(bin_pose)
-        elif self.marker_number == 3:
+        elif self.marker_number == SMALL_BIN_MARKER:
             self.aruco_pos_pub.publish(smbin_pose)
 
 
