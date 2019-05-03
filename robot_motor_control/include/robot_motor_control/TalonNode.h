@@ -44,13 +44,15 @@ namespace robot_motor_control{
         bool disabled;
 
     public:
-        TalonNode(const ros::NodeHandle& parent, const std::string& name, const TalonConfig& config);
+        TalonNode(const ros::NodeHandle& parent, const std::string& name);
 
         TalonNode& operator=(const TalonNode&) = delete;
 
         ~TalonNode() = default;
 
         void reconfigure(const TalonConfig &config, uint32_t level);
+
+        void updateConfig(const TalonConfig &config);
 
         void setPercentOutput(std_msgs::Float64 output);
 

@@ -10,8 +10,8 @@ using namespace ctre::phoenix::motorcontrol::can;
 
 namespace robot_motor_control {
 
-    TalonNode::TalonNode(const ros::NodeHandle& parent, const std::string& name, const TalonConfig& config) :
-            nh(parent), _name(name), server(nh), talon(new TalonSRX(config.id)),
+    TalonNode::TalonNode(const ros::NodeHandle& parent, const std::string& name) :
+            nh(parent), _name(name), server(nh), talon(new TalonSRX(0)),
             tempPub(nh.advertise<std_msgs::Float64>("temperature", 1)),
             busVoltagePub(nh.advertise<std_msgs::Float64>("bus_voltage", 1)),
             outputPercentPub(nh.advertise<std_msgs::Float64>("output_percent", 1)),
@@ -23,7 +23,6 @@ namespace robot_motor_control {
             setVelSub(nh.subscribe("set_velocity", 1, &TalonNode::setVelocity, this)),
             lastUpdate(ros::Time::now()), _controlMode(ControlMode::PercentOutput), _output(0.0), disabled(false){
         server.setCallback(boost::bind(&TalonNode::reconfigure, this, _1, _2));
-        server.updateConfig(config);
         talon->Set(ControlMode::PercentOutput, 0);
         configureStatusPeriod(*talon);
     }
@@ -62,6 +61,10 @@ namespace robot_motor_control {
         talon->SelectProfileSlot(0,0);
         talon->SetInverted(config.inverted);
         talon->EnableVoltageCompensation(true);
+    }
+
+    void TalonNode::updateConfig(const TalonConfig &config){
+        server.updateConfig(config);
     }
 
     void TalonNode::update(){
