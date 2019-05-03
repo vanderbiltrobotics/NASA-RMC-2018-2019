@@ -41,6 +41,7 @@ namespace robot_motor_control{
         ros::Time lastUpdate;
         ControlMode _controlMode;
         double _output;
+        bool disabled;
 
     public:
         TalonNode(const ros::NodeHandle& parent, const std::string& name, const TalonConfig& config);

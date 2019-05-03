@@ -21,7 +21,7 @@ namespace robot_motor_control {
             velPub(nh.advertise<std_msgs::Int32>("velocity", 1)),
             setPercentSub(nh.subscribe("set_percent_output", 1, &TalonNode::setPercentOutput, this)),
             setVelSub(nh.subscribe("set_velocity", 1, &TalonNode::setVelocity, this)),
-            lastUpdate(ros::Time::now()), _controlMode(ControlMode::PercentOutput), _output(0.0){
+            lastUpdate(ros::Time::now()), _controlMode(ControlMode::PercentOutput), _output(0.0), disabled(false){
         server.setCallback(boost::bind(&TalonNode::reconfigure, this, _1, _2));
         server.updateConfig(config);
         talon->Set(ControlMode::PercentOutput, 0);
@@ -46,6 +46,7 @@ namespace robot_motor_control {
             talon = std::make_unique<TalonSRX>(config.id);
             configureStatusPeriod(*talon);
         }
+        ROS_INFO("Reconfiguring Talon: %s", _name.c_str());
 
         TalonSRXConfiguration c;
         SlotConfiguration slot;
@@ -66,10 +67,12 @@ namespace robot_motor_control {
     void TalonNode::update(){
         if(ros::Time::now()-lastUpdate > ros::Duration(0.2)){
             // Disable the Talon if we aren't getting commands
+            if(!this->disabled) ROS_INFO("Talon disabled for not receiving updates: %s", _name.c_str());
+            this->disabled = true;
             this->_controlMode = ControlMode::PercentOutput;
             this->_output = 0.0;
-            this->lastUpdate = ros::Time::now();
-            ROS_INFO("Talon disabled for not receiving updates: %s", _name.c_str());
+        }else{
+            this->disabled = false;
         }
         talon->Set(this->_controlMode, this->_output);
 
