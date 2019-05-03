@@ -14,15 +14,15 @@ int main(int argc, char **argv) {
     XmlRpc::XmlRpcValue v;
     nh.getParam("talons", v);
     std::for_each(v.begin(), v.end(), [&nh, &talons](auto p){
-        const std::string& name(p.first);
-        XmlRpc::XmlRpcValue& v(p.second);
+        const std::string name(p.first);
+        XmlRpc::XmlRpcValue v(p.second);
         if(v.getType() == XmlRpc::XmlRpcValue::TypeStruct){
             robot_motor_control::TalonConfig config;
             dynamic_reconfigure::Server<robot_motor_control::TalonConfig>().getConfigDefault(config);
             if(v.hasMember("id"))
-                config.id = (int&)v["id"];
+                config.id = (int)v["id"];
             if(v.hasMember("inverted"))
-                config.inverted = (bool&)v["inverted"];
+                config.inverted = (bool)v["inverted"];
             if(v.hasMember("peak_voltage"))
                 config.peak_voltage = (double)v["peak_voltage"];
             if(v.hasMember("P"))
@@ -36,6 +36,7 @@ int main(int argc, char **argv) {
 
             auto node = ros::NodeHandle(nh, name);
             talons.push_back(std::make_unique<TalonNode>(node, name, config));
+            ROS_INFO("Created Talon with name '%s' and id '%d'", name.c_str(), config.id);
        }else{
            ROS_INFO("Unrecognized Talon XML member: %s", v.toXml().c_str());
        }
