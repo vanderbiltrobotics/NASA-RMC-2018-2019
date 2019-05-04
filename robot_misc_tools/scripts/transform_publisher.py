@@ -82,8 +82,11 @@ class PoseToTF():
         self.tf_msg.transform.rotation.z = pose_msg.orientation.z
         self.tf_msg.transform.rotation.w = pose_msg.orientation.w
 
-        # Publish transform
-        self.broadcaster.sendTransform(self.tf_msg)
+        if sum ([self.tf_msg.transform.rotation.x, self.tf_msg.transform.rotation.y,
+                self.tf_msg.transform.rotation.z, self.tf_msg.transform.rotation.w]) != 0.0:
+
+            # Publish transform
+            self.broadcaster.sendTransform(self.tf_msg)
 
 
 if __name__ == "__main__":

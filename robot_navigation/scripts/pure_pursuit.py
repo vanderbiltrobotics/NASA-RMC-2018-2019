@@ -24,7 +24,7 @@ class PurePursuit:
         # Initialize path
         self.path = None
         self.path_len = 0
-        self.goal_tolerance = 0.03
+        self.goal_tolerance = 0.05
 
         # Create subscribers to pose, path topics
         self.path_sub = rospy.Subscriber("cur_path", Path, self.update_path)
@@ -81,7 +81,7 @@ class PurePursuit:
     def compute_new_twist(self):
 
         # Only move if we have a path to follow
-        if self.path_len > 0:
+        if self.path_len > 0 and not rospy.set_param("goal_reached", False):
 
             # Get latest pose from transform tree
             new_pose = self.tf_buffer.lookup_transform(self.world_frame_id, self.robot_frame_id, rospy.Time())
@@ -128,7 +128,11 @@ class PurePursuit:
 
             # If close enough to final point, path is finished
             if np.linalg.norm(position - self.path[-1]) < self.goal_tolerance:
-                print "Reached the end of the path"
+
+                # Notify HLP that goal has been reached
+                rospy.set_param("goal_reached", True)
+
+                # Remove current path and wait for new one
                 self.path = None
                 self.path_len = 0
 
@@ -142,6 +146,9 @@ if __name__ == "__main__":
     # Initialize ROS node
     rospy.init_node("pure_pursuit")
 
+    #
+    rospy.sleep(3.0)
+
     # Read parameters off server
     lin_vel = rospy.get_param("pp_base_lin_vel", default=0.1)
     max_lookahead = rospy.get_param("pp_max_lookahead", default=1.0)
@@ -152,5 +159,14 @@ if __name__ == "__main__":
     pp = PurePursuit(lin_vel, max_lookahead, world_frame_id, robot_frame_id)
 
     # Spin indefinitely
-    rospy.spin()
+
+    loop_rate = rospy.Rate(10)
+
+    while not rospy.is_shutdown():
+
+        # Compute new twist
+        pp.compute_new_twist()
+
+        # Sleep at loop rate
+        loop_rate.sleep()
 

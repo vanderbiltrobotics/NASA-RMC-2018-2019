@@ -4,6 +4,9 @@
           DECLARE EACH MACHINE
          ###################### -->
 
+    <!-- Declare raspberry pi as a machine to run nodes on-->
+    <machine name="rpi" address="192.168.0.105" user="vur" password="theswapbot" env-loader="~/catkin_ws/devel/robot_ros_env.sh"/>
+    <machine name="jetson" address="192.168.0.103" user="vur" password="theswapbot" env-loader="~/catkin_ws/deve_isolatedl/robot_ros_env.sh"/>
 
     <!-- #####################
           LAUNCH JETSON NODES
@@ -12,60 +15,63 @@
     <group>
 
         <!--Transform publisher -->
-        <param name="tf_file_static" value="full_system.json"/>
-        <param name="tf_file_dynamic" value="full_system.json"/>
+        <param name="tf_file_static" value="one_board_only.json"/>
+        <param name="tf_file_dynamic" value="one_board_only.json"/>
         <node name="transform_publisher" pkg="robot_misc_tools" type="transform_publisher.py"/>
 
-        <!--&lt;!&ndash; Drive motor control node - translates twist message into individual motor speeds &ndash;&gt;-->
-        <!--<param name="wheel_separation" type="double" value="0.31"/>-->
-        <!--<param name="wheel_radius" type="double" value="0.108"/>-->
-        <!--<param name="max_in_lin_vel" type="double" value="1.0"/>-->
-        <!--<param name="max_in_ang_vel" type="double" value="1.0"/>-->
-        <!--<param name="max_out_lin_vel" type="double" value="0.5"/>-->
-        <!--<param name="max_out_ang_vel" type="double" value="1.0"/>-->
-        <!--<param name="output_mode" type="string" value="pwm"/>-->
-        <!--<param name="queue_size" type="int" value="50"/>-->
-        <!--<node name="drive_speed_conversion" pkg="robot_navigation" type="drive_speed_conversion.py"/>-->
+        <!-- Drive motor control node - translates twist message into individual motor speeds -->
+        <param name="wheel_separation" type="double" value="0.305"/>
+        <param name="wheel_radius" type="double" value="0.1525"/>
+        <param name="max_in_lin_vel" type="double" value="1.0"/>
+        <param name="max_in_ang_vel" type="double" value="1.0"/>
+        <param name="max_out_lin_vel" type="double" value="1.0"/>
+        <param name="max_out_ang_vel" type="double" value="1.0"/>
+        <param name="output_mode" type="string" value="vel"/>
+        <param name="queue_size" type="int" value="15"/>
+        <node name="drive_speed_conversion" pkg="robot_navigation" type="drive_speed_conversion.py"/>
 
-        <!-- EKF for improved robot pose estimation -->
-        <param name="unfiltered_pose_topic" value="/aruco/pose_raw"/>
-        <node name="robot_pose_ekf" pkg="robot_slam" type="robot_pose_ekf.py"/>
+        <!-- Path following -->
+        <param name="pp_base_lin_vel" value="0.25"/>
+        <param name="pp_max_lookahead" value="0.3"/>
+        <param name="pp_world_frame_id" value="world"/>
+        <param name="pp_robot_frame_id" value="robot_center"/>
+        <param name="pp_aruco_frame_id" value="aruco_board_origin"/>
+        <node name="path_following" pkg="robot_navigation" type="pure_pursuit.py"/>
 
-        <!--&lt;!&ndash; Path following &ndash;&gt;-->
-        <!--<param name="pp_base_lin_vel" value="0.1"/>-->
-        <!--<param name="pp_max_lookahead" value="1.0"/>-->
-        <!--<param name="pp_world_frame_id" value="world"/>-->
-        <!--<param name="pp_robot_frame_id" value="robot_center"/>-->
-        <!--<node name="path_following" pkg="robot_navigation" type="pure_pursuit.py"/>-->
-
-        <!--&lt;!&ndash; Path planning &ndash;&gt;-->
-        <!--<param name="goal_pose_topic" value="goal_pose"/>-->
-        <!--<param name="path_topic" value="cur_path"/>-->
-        <!--<param name="map_topic" value="test_map"/>-->
-        <!--<node name="path_planning" pkg="robot_navigation" type="path_planning.py"/>-->
+        <!-- Path planning -->
+        <param name="goal_point_topic" value="goal_point"/>
+        <param name="path_topic" value="cur_path"/>
+        <param name="map_topic" value="test_map"/>
+        <node name="path_planning" pkg="robot_navigation" type="path_planning.py"/>
 
 
         <!-- Update node - reads mission control messages and updates them at a slower rate -->
         <!--<param name="update_rate" type="int" value="1"/>-->
         <!--<node name="update_publisher" pkg="robot_misc_tools" type="update_publisher.py"/>-->
 
-
-        <!-- Parameters to define Aruco Board length & separation values -->
-        <param name="board_x_markers" type="int" value="5"/>
-        <param name="board_y_markers" type="int" value="7"/>
-        <param name="board_marker_length" type="double" value=".025"/>
-        <param name="board_marker_separation" type="double" value=".005"/>
+        <!--&lt;!&ndash; Run all the nodes required for localization &ndash;&gt;-->
 
         <!-- parameters for image_publisher node -->
-        <param name="device_id" value="1"/>
+        <param name="device_id" value="0"/>
         <param name="calibration_file" value="camera_a.yaml"/>
-        <param name="publish_rate" value="3"/>
+        <param name="publish_rate" value="10"/>
         <param name="image_width" value="640"/>
         <param name="image_height" value="480"/>
 
-        <!-- Run all the nodes required for the ekf test -->
-        <node name="image_publisher" pkg="robot_sensors" type="image_publisher.py"/>
-        <node name="aruco" pkg="robot_slam" type="aruco_localization.py"/>
+        <!--<node name="image_publisher" pkg="robot_sensors" type="image_publisher.py"/>-->
+        <!--<node name="aruco" pkg="robot_slam" type="aruco_localization.py"/>-->
+
+        <!-- EKF for improved robot pose estimation -->
+        <param name="unfiltered_pose_topic" value="robot_pose_sim"/>
+        <node name="robot_pose_ekf" pkg="robot_slam" type="robot_pose_ekf.py"/>
+
+        <!-- Start state machine -->
+        <param name="goal_reached" value="false"/>
+        <node name="high_level_controller" pkg="robot_high_level_control" type="state_machine.py" />
+
+        <!-- Nodes for simulation / debugging purposes only -->
+        <node name="path_tracking_sim" pkg="robot_simulation" type="path_tracking_sim.py" />
+        <node name="test_map_publisher" pkg="robot_simulation" type="test_map_publisher.py" />
 
     </group>
 
@@ -77,12 +83,9 @@
 
     <group>
 
-        <!--Motor Control node - controls motor speeds via the CAN Bus -->
-        <!--<rosparam command="load" file="$(find motor_control)/launch/example.yaml" />-->
-        <!--<node machine="rpi" pkg="motor_control" type="motor_control_node" name="motor_control" respawn="false" />-->
-
-        <!--<rosparam command="load" file="$(find motor_control)/launch/example.yaml" />-->
-        <!--<node pkg="robot_motor_control" type="motor_control_node" name="motor_control" respawn="false" />-->
+        <!-- Motor_control node - runs on raspberry pi -->
+        <rosparam command="load" file="$(find robot_motor_control)/launch/full_system.yaml" />
+        <node machine="rpi" pkg="robot_motor_control" type="motor_control_node" name="motor_control" respawn="false"/>
 
     </group>
 
@@ -101,7 +104,7 @@
         <!--<node name="teleop_control" pkg="robot_mission_control" type="teleop_control.py"/>-->
 
         <!-- Field Visualization -->
-        <!--<node name="field_visualization" pkg="robot_simulation" type="field_visualization.py"/>-->
+        <node name="field_visualization" pkg="robot_simulation" type="field_visualization.py"/>
         <node type="rviz" name="rviz" pkg="rviz" args="-d $(find robot_simulation)/rviz/competition_config.rviz"/>
 
     </group>

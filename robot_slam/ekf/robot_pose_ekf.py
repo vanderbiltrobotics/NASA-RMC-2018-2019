@@ -12,6 +12,7 @@
 # Import ROS packages
 import rospy
 from geometry_msgs.msg import Pose, PoseWithCovarianceStamped
+from std_msgs.msg import Bool
 
 # Import other required packages
 from filterpy.kalman import EKF
@@ -20,7 +21,6 @@ from math import sqrt
 
 
 class ArucoExtendedKalmanFilter:
-
 
     def __init__(self):
 
@@ -39,7 +39,7 @@ class ArucoExtendedKalmanFilter:
         '''
 
         # Define the measurement noise covariance matrix
-        self.arucoEKF.R = np.eye(7) * 0.01
+        self.arucoEKF.R = np.eye(7) * np.array([0.05, 0.05, 0.05, 0.01, 0.01, 0.01, 0.01])
 
         # Define the process noise covariance matrix
         #arucoEKF.Q = 
@@ -47,21 +47,28 @@ class ArucoExtendedKalmanFilter:
         # Consecutively increasing ID for header in pose with covariance stamped
         self.seqID = 0
 
+        self.acuroDetected = False
+
+
+    def arucoDetected(self, msg):
+        self.arucoDetected = msg.data
+
+
     def update(self,pose):
-        #Initialize empty np array
-        z = np.empty((7,1))
-
         #Convert Pose object into a 7x1 numpy array to pass to 
-        z[0][0] = pose.position.x
-        z[1][0] = pose.position.y
-        z[2][0] = pose.position.z
-        z[3][0] = pose.orientation.x
-        z[4][0] = pose.orientation.y
-        z[5][0] = pose.orientation.z
-        z[6][0] = pose.orientation.w
+        z = np.concatenate((
+            [pose.position.x], 
+            [pose.position.y], 
+            [pose.position.z], 
+            [pose.orientation.x], 
+            [pose.orientation.y], 
+            [pose.orientation.z],
+            [pose.orientation.w]
+        )).reshape((7,1))
 
-        if pose.orientation.w != 0:
+        if self.arucoDetected:
             self.arucoEKF.predict_update(z, self.HJacobian, self.hx)
+
 
     def getPose(self):
         pose = Pose()
@@ -125,11 +132,26 @@ if(__name__ == "__main__"):
     unfiltered_pose_topic = rospy.get_param("unfiltered_pose_topic")
 
     # Create subscriber to pose updates from aruco node
-    poseSubscriber = rospy.Subscriber(unfiltered_pose_topic, Pose, robot_pose_ekf.update)
+    poseSubscriber = rospy.Subscriber(
+        unfiltered_pose_topic, 
+        Pose, 
+        robot_pose_ekf.update
+    )
+
+    # subscribe to the marker_detected topic
+    markerDetectedSubscriber = rospy.Subscriber(
+        'aruco/marker_detected', 
+        Bool, 
+        robot_pose_ekf.arucoDetected
+    )
 
     # Create publishers for filtered pose messages
     posePublisher = rospy.Publisher('ekf/pose_filtered', Pose, queue_size=1)
-    poseCovStampPublisher = rospy.Publisher('ekf/pose_filtered_covariance', PoseWithCovarianceStamped, queue_size=1)
+    poseCovStampPublisher = rospy.Publisher(
+        'ekf/pose_filtered_covariance', 
+        PoseWithCovarianceStamped, 
+        queue_size=1
+    )
 
     # Set loop rate
     r = rospy.Rate(10)  # 10hz

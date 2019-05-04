@@ -9,11 +9,6 @@
             "frame_id" : "aruco_board_origin",
             "child_id" : "localization_camera",
             "pose_topic" : "ekf/pose_filtered"
-        },
-        {
-            "frame_id" : "localization_camera",
-            "child_id" : "camera_mount_base",
-            "pose_topic" : "camera_mount_pose"
         }
     ]
 }

@@ -12,9 +12,9 @@ import numpy as np
 import sys
 
 # Configuration params
-DEFAULT_DEVICE_ID = 1
+DEFAULT_DEVICE_ID = 0
 DEFAULT_CALIB_FILE = 'camera_a.yaml'
-DEFAULT_PUB_RATE = 3
+DEFAULT_PUB_RATE = 10
 DEFAULT_IMG_WIDTH = 640
 DEFAULT_IMG_HEIGHT = 480
 DEFAULT_ALPHA = 1
