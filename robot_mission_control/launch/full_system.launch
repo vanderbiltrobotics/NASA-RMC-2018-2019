@@ -75,6 +75,9 @@
 
         <!-- Start state machine -->
         <!-- param name="dig_angle" value="unkown"/ -->
+        <!-- param name="dig_velocity" value="unknown"/ -->
+        <!-- param name="dig_complete" value="false"/ -->
+
         <!-- node name="DIG CONTROLLER" pkg="DIG CONTROLLER" type="DIG CONTROLLER" / -->
 
 
