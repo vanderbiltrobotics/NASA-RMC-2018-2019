@@ -46,6 +46,8 @@ namespace robot_motor_control{
         bool configured;
         bool not_configured_warned;
 
+        boost::mutex mutex;
+
     public:
         TalonNode(const ros::NodeHandle& parent, const std::string& name, const TalonConfig& config);
 

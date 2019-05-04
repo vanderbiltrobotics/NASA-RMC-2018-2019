@@ -29,21 +29,23 @@ namespace robot_motor_control {
     }
 
     void TalonNode::setPercentOutput(std_msgs::Float64 output) {
+        boost::mutex::scoped_lock scoped_lock(mutex);
         this->_controlMode = ControlMode::PercentOutput;
         this->_output = output.data;
         this->lastUpdate = ros::Time::now();
     }
 
     void TalonNode::setVelocity(std_msgs::Float64 output) {
+        boost::mutex::scoped_lock scoped_lock(mutex);
         this->_controlMode = ControlMode::Velocity;
         this->_output = output.data;
         this->lastUpdate = ros::Time::now();
     }
 
     void TalonNode::reconfigure(const TalonConfig &config, uint32_t level) {
+        boost::mutex::scoped_lock scoped_lock(mutex);
         this->_config = config;
         this->configured = false;
-        this->configure();
     }
 
     void TalonNode::configure(){
@@ -51,8 +53,6 @@ namespace robot_motor_control {
             ROS_INFO("Resetting TalonNode to new id: %d", _config.id);
             talon = std::make_unique<TalonSRX>(_config.id);
         }
-
-        configureStatusPeriod(*talon);
 
         TalonSRXConfiguration c;
         SlotConfiguration slot;
@@ -65,16 +65,6 @@ namespace robot_motor_control {
         c.pulseWidthPeriod_EdgesPerRot = 4096;
         ErrorCode error = talon->ConfigAllSettings(c, 50);
 
-        if(_config.pot){
-            talon->ConfigSelectedFeedbackSensor(FeedbackDevice::Analog);
-        }else{
-            talon->ConfigSelectedFeedbackSensor(FeedbackDevice::CTRE_MagEncoder_Relative);
-        }
-
-        talon->SelectProfileSlot(0,0);
-        talon->SetInverted(_config.inverted);
-        talon->EnableVoltageCompensation(true);
-
         if(error != ErrorCode::OK){
             if(!this->not_configured_warned){
                 ROS_WARN("Reconfiguring Talon %s %d failed!", _name.c_str(), talon->GetDeviceID());
@@ -82,6 +72,18 @@ namespace robot_motor_control {
             }
             this->configured = false;
         }else{
+            configureStatusPeriod(*talon);
+
+            if(_config.pot){
+                talon->ConfigSelectedFeedbackSensor(FeedbackDevice::Analog);
+            }else{
+                talon->ConfigSelectedFeedbackSensor(FeedbackDevice::CTRE_MagEncoder_Relative);
+            }
+
+            talon->SelectProfileSlot(0,0);
+            talon->SetInverted(_config.inverted);
+            talon->EnableVoltageCompensation(true);
+
             ROS_INFO("Reconfigured Talon: %s with %d %f %f %f", _name.c_str(), talon->GetDeviceID(),
                      _config.P, _config.I, _config.D);
             this->not_configured_warned = false;
@@ -90,6 +92,7 @@ namespace robot_motor_control {
     }
 
     void TalonNode::update(){
+        boost::mutex::scoped_lock scoped_lock(mutex);
         if(!this->configured){
             this->configure();
         }
@@ -137,12 +140,12 @@ namespace robot_motor_control {
         talon.SetStatusFramePeriod(StatusFrameEnhanced::Status_1_General, 20);
         talon.SetStatusFramePeriod(StatusFrameEnhanced::Status_2_Feedback0, 20);
         talon.SetStatusFramePeriod(StatusFrameEnhanced::Status_3_Quadrature, 20);
-        talon.SetStatusFramePeriod(StatusFrameEnhanced::Status_4_AinTempVbat, 200);
-        talon.SetStatusFramePeriod(StatusFrameEnhanced::Status_8_PulseWidth, 200);
-        talon.SetStatusFramePeriod(StatusFrameEnhanced::Status_12_Feedback1, 200);
-        talon.SetStatusFramePeriod(StatusFrameEnhanced::Status_13_Base_PIDF0, 200);
-        talon.SetStatusFramePeriod(StatusFrameEnhanced::Status_14_Turn_PIDF1, 200);
-        talon.SetStatusFramePeriod(StatusFrameEnhanced::Status_15_FirmareApiStatus, 200);
+        talon.SetStatusFramePeriod(StatusFrameEnhanced::Status_4_AinTempVbat, 250);
+        talon.SetStatusFramePeriod(StatusFrameEnhanced::Status_8_PulseWidth, 250);
+        talon.SetStatusFramePeriod(StatusFrameEnhanced::Status_12_Feedback1, 250);
+        talon.SetStatusFramePeriod(StatusFrameEnhanced::Status_13_Base_PIDF0, 250);
+        talon.SetStatusFramePeriod(StatusFrameEnhanced::Status_14_Turn_PIDF1, 250);
+        talon.SetStatusFramePeriod(StatusFrameEnhanced::Status_15_FirmareApiStatus, 250);
     }
 
 }
