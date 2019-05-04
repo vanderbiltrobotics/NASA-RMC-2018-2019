@@ -10,8 +10,8 @@ using namespace ctre::phoenix::motorcontrol::can;
 
 namespace robot_motor_control {
 
-    TalonNode::TalonNode(const ros::NodeHandle& parent, const std::string& name) :
-            nh(parent), _name(name), server(nh), talon(new TalonSRX(0)),
+    TalonNode::TalonNode(const ros::NodeHandle& parent, const std::string& name, const TalonConfig& config):
+            nh(parent), _name(name), server(nh), _config(config), talon(new TalonSRX(_config.id)),
             tempPub(nh.advertise<std_msgs::Float64>("temperature", 1)),
             busVoltagePub(nh.advertise<std_msgs::Float64>("bus_voltage", 1)),
             outputPercentPub(nh.advertise<std_msgs::Float64>("output_percent", 1)),
@@ -21,10 +21,11 @@ namespace robot_motor_control {
             velPub(nh.advertise<std_msgs::Int32>("velocity", 1)),
             setPercentSub(nh.subscribe("set_percent_output", 1, &TalonNode::setPercentOutput, this)),
             setVelSub(nh.subscribe("set_velocity", 1, &TalonNode::setVelocity, this)),
-            lastUpdate(ros::Time::now()), _controlMode(ControlMode::PercentOutput), _output(0.0), disabled(false){
+            lastUpdate(ros::Time::now()), _controlMode(ControlMode::PercentOutput), _output(0.0), disabled(false),
+            configured(false), not_configured_warned(false){
         server.setCallback(boost::bind(&TalonNode::reconfigure, this, _1, _2));
+        server.updateConfig(config);
         talon->Set(ControlMode::PercentOutput, 0);
-        configureStatusPeriod(*talon);
     }
 
     void TalonNode::setPercentOutput(std_msgs::Float64 output) {
@@ -40,37 +41,61 @@ namespace robot_motor_control {
     }
 
     void TalonNode::reconfigure(const TalonConfig &config, uint32_t level) {
-        if (config.id != 0 && talon->GetDeviceID() != config.id) {
-            ROS_INFO("Resetting TalonNode to new id: %d", config.id);
-            talon = std::make_unique<TalonSRX>(config.id);
-            configureStatusPeriod(*talon);
+        this->_config = config;
+        this->configured = false;
+        this->configure();
+    }
+
+    void TalonNode::configure(){
+        if (talon->GetDeviceID() != _config.id) {
+            ROS_INFO("Resetting TalonNode to new id: %d", _config.id);
+            talon = std::make_unique<TalonSRX>(_config.id);
         }
-        ROS_INFO("Reconfiguring Talon: %s", _name.c_str());
+
+        configureStatusPeriod(*talon);
 
         TalonSRXConfiguration c;
         SlotConfiguration slot;
-        slot.kP = config.P;
-        slot.kI = config.I;
-        slot.kD = config.D;
-        slot.kF = config.F;
+        slot.kP = _config.P;
+        slot.kI = _config.I;
+        slot.kD = _config.D;
+        slot.kF = _config.F;
         c.slot0 = slot;
-        c.voltageCompSaturation = config.peak_voltage;
+        c.voltageCompSaturation = _config.peak_voltage;
         c.pulseWidthPeriod_EdgesPerRot = 4096;
-        talon->ConfigAllSettings(c);
+        ErrorCode error = talon->ConfigAllSettings(c, 50);
+
+        if(_config.pot){
+            talon->ConfigSelectedFeedbackSensor(FeedbackDevice::Analog);
+        }else{
+            talon->ConfigSelectedFeedbackSensor(FeedbackDevice::CTRE_MagEncoder_Relative);
+        }
 
         talon->SelectProfileSlot(0,0);
-        talon->SetInverted(config.inverted);
+        talon->SetInverted(_config.inverted);
         talon->EnableVoltageCompensation(true);
-    }
 
-    void TalonNode::updateConfig(const TalonConfig &config){
-        server.updateConfig(config);
+        if(error != ErrorCode::OK){
+            if(!this->not_configured_warned){
+                ROS_WARN("Reconfiguring Talon %s %d failed!", _name.c_str(), talon->GetDeviceID());
+                this->not_configured_warned = true;
+            }
+            this->configured = false;
+        }else{
+            ROS_INFO("Reconfigured Talon: %s with %d %f %f %f", _name.c_str(), talon->GetDeviceID(),
+                     _config.P, _config.I, _config.D);
+            this->not_configured_warned = false;
+            this->configured = true;
+        }
     }
 
     void TalonNode::update(){
+        if(!this->configured){
+            this->configure();
+        }
         if(ros::Time::now()-lastUpdate > ros::Duration(0.2)){
             // Disable the Talon if we aren't getting commands
-            if(!this->disabled) ROS_INFO("Talon disabled for not receiving updates: %s", _name.c_str());
+            if(!this->disabled) ROS_WARN("Talon disabled for not receiving updates: %s", _name.c_str());
             this->disabled = true;
             this->_controlMode = ControlMode::PercentOutput;
             this->_output = 0.0;
