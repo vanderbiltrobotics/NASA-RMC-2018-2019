@@ -33,8 +33,8 @@ class ArucoCamera:
         # Servo state
         self.theta = Int32()         # ROS object that stores current servo theta orientation
         self.error = 0               # Error between current theta and where the camera should be 
-        self.minTheta = -65         # Minimum servo bound
-        self.maxTheta = 65           # Maximum servo bound
+        self.minTheta = -90          # Minimum servo bound
+        self.maxTheta = 90           # Maximum servo bound
 
         # Marker paramters
         self.markerDetected = False  # True if an AruCo marker is in view

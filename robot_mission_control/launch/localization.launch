@@ -1,6 +1,9 @@
 <launch>
 
     <machine name="jetson" address="192.168.0.103" user="vur" password="theswapbot" env-loader="~/catkin_ws/devel_isolated/robot_ros_env.sh"/>
+    <machine name="rpi" address="192.168.0.105" user="vur" password="theswapbot" env-loader="~/catkin_ws/devel/robot_ros_env.sh"/>
+
+    <!-- JETSON NODES -->
 
     <!--Transform publisher -->
     <param name="tf_file_static" value="full_system_test.json"/>
@@ -25,6 +28,13 @@
     <!-- EKF for improved robot pose estimation -->
     <param name="unfiltered_pose_topic" value="aruco/pose_raw"/>
     <node machine="jetson" name="robot_pose_ekf" pkg="robot_slam" type="robot_pose_ekf.py"/>
+
+    <!-- RASPBERRY PI NODES -->
+
+    <!-- Camera mount servo control node -->
+    <node machine="rpi" name="camera_motor_control" pkg="robot_motor_control" type="camera_motor_control.py"/>
+
+    <!-- LAPTOP NODES -->
 
     <!-- Field Visualization -->
     <node name="field_visualization" pkg="robot_simulation" type="field_visualization.py"/>

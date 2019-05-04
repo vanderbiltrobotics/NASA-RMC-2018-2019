@@ -6,23 +6,22 @@ import RPi.GPIO as GPIO
 
 class AngleListener:
 
-    def __init__(self, pinNumber):
-
-        # Configure GPIO stuff
-        GPIO.setmode(GPIO.BOARD)
-        GPIO.setwarnings(False)
+    def __init__(self, pinNumber, max_angle):
 
         # Set the pin as an output
         self.p = GPIO.setup(pinNumber, GPIO.OUT)
-        self.p = GPIO.PWM(pinNumber, 50)
+        self.p = GPIO.PWM(pinNumber, 1000)
+
+        # Store max angle to use for scaling
+        self.max_angle = max_angle
 
         # Start
-        self.p.start(2.5)
+        self.p.start(50)
 
     def setCameraAngle(self, theta):
 
-        # Convert from range -90 to 90 to range 2.22 to 10.0 (this is the good range for the servo)
-        duty_cycle = ((theta.data + 65) / 130.0) * (7.88) + 2.22
+        # Convert from range -90 to 90 to range 0 to 100
+        duty_cycle = ((theta.data + self.max_angle / (self.max_angle / 2))) * 100
 
         # Send new duty cycle to servo
         self.p.ChangeDutyCycle(duty_cycle)
@@ -30,11 +29,15 @@ class AngleListener:
 
 if __name__ == '__main__':
 
+    # Initialize GPIO
+    GPIO.setmode(GPIO.BOARD)
+    GPIO.setwarnings(False)
+
     # Initialize ROS node
     rospy.init_node('camera_control_node', anonymous=True)
 
     # Create listener object
-    listener = AngleListener(5)
+    listener = AngleListener(18, 90.0)
 
     # Attach subscriber to servo angle topic
     rospy.Subscriber("aruco/servo_theta", Int32, listener.setCameraAngle)

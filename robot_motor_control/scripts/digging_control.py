@@ -6,7 +6,7 @@ from std_msgs.msg import Float64, String
 
 class DigManager:
 
-    def __init__(self):
+    def __init__(self, ):
 
         # Current dig mode - can be "teleop" or "auto"
         self.dig_mode = "teleop"
