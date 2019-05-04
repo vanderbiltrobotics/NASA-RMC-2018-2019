@@ -235,7 +235,7 @@ class ImageHandler:
             # If succesful, convert rvec from rpy to quaternion, fill pose message
             if retval:
 
-                quat = tf.transformations.quaternion_from_euler(rvec[1], rvec[0], rvec[2])
+                quat = tf.transformations.quaternion_from_euler(-rvec[1], rvec[0], -rvec[2])
 
                 # Store pose and quaternion information of Aruco Board
                 pose_msg.position.x = tvec[2]
