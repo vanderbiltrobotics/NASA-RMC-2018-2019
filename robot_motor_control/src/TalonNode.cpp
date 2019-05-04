@@ -51,8 +51,6 @@ namespace robot_motor_control {
             ROS_INFO("Resetting TalonNode to new id: %d", _config.id);
             talon = std::make_unique<TalonSRX>(_config.id);
         }
-        ROS_INFO("Reconfiguring Talon: %s with %d %f %f %f", _name.c_str(), talon->GetDeviceID(),
-                 _config.P, _config.I, _config.D);
 
         configureStatusPeriod(*talon);
 
@@ -78,6 +76,8 @@ namespace robot_motor_control {
             }
             this->configured = false;
         }else{
+            ROS_INFO("Reconfigured Talon: %s with %d %f %f %f", _name.c_str(), talon->GetDeviceID(),
+                     _config.P, _config.I, _config.D);
             this->not_configured_warned = false;
             this->configured = true;
         }
