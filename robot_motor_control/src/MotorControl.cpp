@@ -35,8 +35,7 @@ int main(int argc, char **argv) {
                 config.F = (double)v["F"];
 
             auto node = ros::NodeHandle(nh, name);
-            std::shared_ptr<TalonNode> talon = std::make_shared<TalonNode>(node, name, config.id);
-            talon->updateConfig(config);
+            std::shared_ptr<TalonNode> talon = std::make_shared<TalonNode>(node, name, config);
             talons.push_back(talon);
             ROS_INFO("Created Talon with name '%s' and id '%d'", name.c_str(), config.id);
        }else{
