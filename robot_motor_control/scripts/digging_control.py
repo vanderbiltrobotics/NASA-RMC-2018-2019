@@ -78,8 +78,19 @@ class DigManager:
         if self.dig_mode == "auto":
             self.run_dig_operation(dig_cmd_msg.data)
 
+
+    # Moves hinge to a specific angle
+    def set_hinge_angle():
+        return
+
+    def move_to_digging_angle():
+        # Read in the desired digging angle from the parameter server
+        # Use set_hinge_angle function to move to desired location
+        return
+
     # Runs one of the primary digging operations
     def run_dig_operation(self, operation):
+
 
         # Motors off
         if self.dig_mode == "off":
@@ -87,6 +98,9 @@ class DigManager:
 
         # Raise hinge angle (make more vertical)
         if self.dig_mode == "raise_hinge":
+
+            ##TODO switch to hinge_to_dig_position()
+            # hinge_to_dig_position()
 
             # Run hinge motor until correect upright angle achieved
             start_time = rospy.Time.now()

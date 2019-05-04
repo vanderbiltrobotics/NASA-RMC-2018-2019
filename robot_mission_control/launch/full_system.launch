@@ -73,6 +73,11 @@
         <node name="path_tracking_sim" pkg="robot_simulation" type="path_tracking_sim.py" />
         <node name="test_map_publisher" pkg="robot_simulation" type="test_map_publisher.py" />
 
+        <!-- Start state machine -->
+        <!-- param name="dig_angle" value="unkown"/ -->
+        <!-- node name="DIG CONTROLLER" pkg="DIG CONTROLLER" type="DIG CONTROLLER" / -->
+
+
     </group>
 
 
