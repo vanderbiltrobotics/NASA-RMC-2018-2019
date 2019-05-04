@@ -36,19 +36,20 @@ SMALL_BIN_MARKER = 3
 # default locations of the aruco markers -- 
 #  aruco marker on the short wall of the arena (1)
 aruco_marker_south_pos_default = {
-    "trans_x": 1.5, # TODO: Change.
-    "trans_y": 0.0,
+    "trans_x": 0.0, # TODO: Change.
+    "trans_y": 0.5,
     "trans_z": 1.0, # TODO: Change.
-    "rot_w": SQRT_2 / 2.0,
+    "rot_w": 1.0, # SQRT_2 / 2.0,
     "rot_x": 0.0,
     "rot_y": 0.0,
-    "rot_z": SQRT_2 / 2.0,   # 90-degree rotation in z
+    "rot_z": 0.0, #SQRT_2 / 2.0,   # 90-degree rotation in z
 }
 south_pose = Pose()  # gets initialized in __init__
+
 #  aruco marker on the collection bin (2)
 aruco_marker_bin_pos_default = {
     "trans_x": 0.0, # TODO: Change.
-    "trans_y": 0.6,
+    "trans_y": 0.715,
     "trans_z": 1.0, # TODO: Change.
     "rot_w": 1.0,
     "rot_x": 0.0,
@@ -56,11 +57,12 @@ aruco_marker_bin_pos_default = {
     "rot_z": 0.0,
 }
 bin_pose = Pose()
+
 #  small aruco marker on the collection bin (3)
 aruco_marker_smbin_pos_default = {
     "trans_x": 0.0, # TODO: Change.
     "trans_y": 0.5,
-    "trans_z": 1.1, # TODO: Change.
+    "trans_z": 0.915, # TODO: Change.
     "rot_w": 1.0,
     "rot_x": 0.0,
     "rot_y": 0.0,
@@ -98,12 +100,14 @@ class ImageHandler:
         south_marker_len = 0.168
         south_marker_sep = 0.1
         south_marker_idstart = 810
+
         # bin board
         bin_markers_x = 1
         bin_markers_y = 1
         bin_marker_len = 0.168
         bin_marker_sep = 0.1
         bin_marker_idstart = 800
+
         # small bin board
         smbin_markers_x = 5
         smbin_markers_y = 1
@@ -202,6 +206,8 @@ class ImageHandler:
 
     # Callback for received image frames
     def image_callback(self, data):
+
+        self.update_aruco_target()
 
         # Define variables for messages to publish
         pose_msg = Pose()
@@ -309,7 +315,7 @@ class ImageHandler:
                 rospy.loginfo("changing to board 1")
 
         elif self.marker_number == SMALL_BIN_MARKER:
-            if x > y and x < 2.5:
+            if x > y and x > 2.5:
                 self.marker_number = BIN_MARKER  # big bin board takes priority
                 self.active_board = self.bin_board
                 rospy.loginfo("changing to board 2")
@@ -335,9 +341,4 @@ if __name__ == "__main__":
     # Create subscriber for aruco image frames
     handler = ImageHandler()
 
-    # update the aruco target every once in a while
-    loop_rate = rospy.Rate(1)
-    # Run indefinitely
-    while not rospy.is_shutdown():
-        handler.update_aruco_target()
-        loop_rate.sleep()
+    rospy.spin()

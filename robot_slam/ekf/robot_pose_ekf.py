@@ -154,7 +154,7 @@ if(__name__ == "__main__"):
     )
 
     # Set loop rate
-    r = rospy.Rate(10)  # 10hz
+    r = rospy.Rate(20)  # 10hz
 
     while not rospy.is_shutdown():
         posePublisher.publish(robot_pose_ekf.getPose())
