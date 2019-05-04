@@ -44,7 +44,7 @@ namespace robot_motor_control{
         bool disabled;
 
     public:
-        TalonNode(const ros::NodeHandle& parent, const std::string& name);
+        TalonNode(const ros::NodeHandle& parent, const std::string& name, int id);
 
         TalonNode& operator=(const TalonNode&) = delete;
 

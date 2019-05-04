@@ -10,8 +10,8 @@ using namespace ctre::phoenix::motorcontrol::can;
 
 namespace robot_motor_control {
 
-    TalonNode::TalonNode(const ros::NodeHandle& parent, const std::string& name) :
-            nh(parent), _name(name), server(nh), talon(new TalonSRX(0)),
+    TalonNode::TalonNode(const ros::NodeHandle& parent, const std::string& name, int id) :
+            nh(parent), _name(name), server(nh), talon(new TalonSRX(id)),
             tempPub(nh.advertise<std_msgs::Float64>("temperature", 1)),
             busVoltagePub(nh.advertise<std_msgs::Float64>("bus_voltage", 1)),
             outputPercentPub(nh.advertise<std_msgs::Float64>("output_percent", 1)),
@@ -45,7 +45,8 @@ namespace robot_motor_control {
             talon = std::make_unique<TalonSRX>(config.id);
             configureStatusPeriod(*talon);
         }
-        ROS_INFO("Reconfiguring Talon: %s", _name.c_str());
+        ROS_INFO("Reconfiguring Talon: %s with %d %f %f %f", _name.c_str(), talon->GetDeviceID(),
+                config.P, config.I, config.D);
 
         TalonSRXConfiguration c;
         SlotConfiguration slot;
@@ -56,7 +57,7 @@ namespace robot_motor_control {
         c.slot0 = slot;
         c.voltageCompSaturation = config.peak_voltage;
         c.pulseWidthPeriod_EdgesPerRot = 4096;
-        talon->ConfigAllSettings(c);
+        talon->ConfigAllSettings(c, 50);
 
         talon->SelectProfileSlot(0,0);
         talon->SetInverted(config.inverted);
