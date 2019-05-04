@@ -17,6 +17,7 @@ namespace robot_motor_control {
             outputPercentPub(nh.advertise<std_msgs::Float64>("output_percent", 1)),
             outputVoltagePub(nh.advertise<std_msgs::Float64>("output_voltage", 1)),
             outputCurrentPub(nh.advertise<std_msgs::Float64>("output_current", 1)),
+            analogPub(nh.advertise<std_msgs::Float64>("analog_input", 1)),
             posPub(nh.advertise<std_msgs::Int32>("position", 1)),
             velPub(nh.advertise<std_msgs::Int32>("velocity", 1)),
             setPercentSub(nh.subscribe("set_percent_output", 1, &TalonNode::setPercentOutput, this)),
@@ -126,6 +127,10 @@ namespace robot_motor_control {
         std_msgs::Float64 outputCurrent;
         outputCurrent.data = talon->GetOutputCurrent();
         outputCurrentPub.publish(outputCurrent);
+
+        std_msgs::Float64 analogInput;
+        analogInput.data = talon->GetSensorCollection().GetAnalogIn();
+        analogPub.publish(analogInput);
 
         std_msgs::Int32 position;
         position.data = talon->GetSelectedSensorPosition();

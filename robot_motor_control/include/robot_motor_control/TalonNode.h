@@ -33,6 +33,7 @@ namespace robot_motor_control{
         ros::Publisher outputPercentPub;
         ros::Publisher outputVoltagePub;
         ros::Publisher outputCurrentPub;
+        ros::Publisher analogPub;
         ros::Publisher posPub;
         ros::Publisher velPub;
 
