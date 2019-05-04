@@ -4,6 +4,9 @@
           DECLARE EACH MACHINE
          ###################### -->
 
+    <!-- Declare raspberry pi as a machine to run nodes on-->
+    <machine name="rpi" address="192.168.0.105" user="vur" password="theswapbot" env-loader="~/catkin_ws/devel/robot_ros_env.sh"/>
+    <machine name="jetson" address="192.168.0.103" user="vur" password="theswapbot" env-loader="~/catkin_ws/deve_isolatedl/robot_ros_env.sh"/>
 
     <!-- #####################
           LAUNCH JETSON NODES
@@ -16,19 +19,19 @@
         <param name="tf_file_dynamic" value="one_board_only.json"/>
         <node name="transform_publisher" pkg="robot_misc_tools" type="transform_publisher.py"/>
 
-        <!--&lt;!&ndash; Drive motor control node - translates twist message into individual motor speeds &ndash;&gt;-->
-        <!--<param name="wheel_separation" type="double" value="0.31"/>-->
-        <!--<param name="wheel_radius" type="double" value="0.108"/>-->
-        <!--<param name="max_in_lin_vel" type="double" value="1.0"/>-->
-        <!--<param name="max_in_ang_vel" type="double" value="1.0"/>-->
-        <!--<param name="max_out_lin_vel" type="double" value="0.5"/>-->
-        <!--<param name="max_out_ang_vel" type="double" value="1.0"/>-->
-        <!--<param name="output_mode" type="string" value="pwm"/>-->
-        <!--<param name="queue_size" type="int" value="50"/>-->
-        <!--<node name="drive_speed_conversion" pkg="robot_navigation" type="drive_speed_conversion.py"/>-->
+        <!-- Drive motor control node - translates twist message into individual motor speeds -->
+        <param name="wheel_separation" type="double" value="0.305"/>
+        <param name="wheel_radius" type="double" value="0.1525"/>
+        <param name="max_in_lin_vel" type="double" value="1.0"/>
+        <param name="max_in_ang_vel" type="double" value="1.0"/>
+        <param name="max_out_lin_vel" type="double" value="1.0"/>
+        <param name="max_out_ang_vel" type="double" value="1.0"/>
+        <param name="output_mode" type="string" value="vel"/>
+        <param name="queue_size" type="int" value="15"/>
+        <node name="drive_speed_conversion" pkg="robot_navigation" type="drive_speed_conversion.py"/>
 
         <!-- Path following -->
-        <param name="pp_base_lin_vel" value="0.15"/>
+        <param name="pp_base_lin_vel" value="0.25"/>
         <param name="pp_max_lookahead" value="0.3"/>
         <param name="pp_world_frame_id" value="world"/>
         <param name="pp_robot_frame_id" value="robot_center"/>
@@ -80,12 +83,9 @@
 
     <group>
 
-        <!--Motor Control node - controls motor speeds via the CAN Bus -->
-        <!--<rosparam command="load" file="$(find motor_control)/launch/example.yaml" />-->
-        <!--<node machine="rpi" pkg="motor_control" type="motor_control_node" name="motor_control" respawn="false" />-->
-
-        <!--<rosparam command="load" file="$(find motor_control)/launch/example.yaml" />-->
-        <!--<node pkg="robot_motor_control" type="motor_control_node" name="motor_control" respawn="false" />-->
+        <!-- Motor_control node - runs on raspberry pi -->
+        <rosparam command="load" file="$(find robot_motor_control)/launch/full_system.yaml" />
+        <node machine="rpi" pkg="robot_motor_control" type="motor_control_node" name="motor_control" respawn="false"/>
 
     </group>
 

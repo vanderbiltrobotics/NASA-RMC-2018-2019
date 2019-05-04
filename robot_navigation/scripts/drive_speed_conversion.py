@@ -19,6 +19,8 @@ from std_msgs.msg import Float64
 # Import other required packages
 from collections import deque
 
+from math import pi
+
 
 class DriveController:
 
@@ -55,6 +57,9 @@ class DriveController:
 
         # Initialize subscriber
         self.cmd_sub = rospy.Subscriber('drive_cmd', Twist, self.process_drive_cmd)
+
+        # Value to check if command was received this time through the cycle
+        self.received_command = False
 
     # Remap linear velocity from input range to output range
     def remap_lin_vel(self, vel):
@@ -108,6 +113,9 @@ class DriveController:
     # Callback function for new drive commands
     def process_drive_cmd(self, data):
 
+        # Indicate that we received a command
+        self.received_command = True
+
         # Extract the relevant values from the incoming message
         linear, angular = self.avg_queue_vel(data)
 
@@ -115,13 +123,16 @@ class DriveController:
         linear = self.remap_lin_vel(linear)
         angular = self.remap_ang_vel(angular)
 
+        # Value to scale units to what talons are expecting
+        scale = 2048.0 / (10.0 * pi)
+
         # Compute linear and angular velocity components
-        linear_component = linear / self.wheel_radius
-        angular_component = (angular * self.wheel_separation) / self.wheel_radius
+        linear_component = (linear / self.wheel_radius) * scale
+        angular_component = ((angular * self.wheel_separation) / self.wheel_radius) * scale
 
         # Compute speed for left and right motor (for ang. vel., clockwise = negative, cc = positive)
-        right_speeds = linear_component - angular_component
-        left_speeds = linear_component + angular_component
+        right_speeds = linear_component + angular_component
+        left_speeds = linear_component - angular_component
 
         # If out_format = pwm, convert velocities back to pwm
         if self.out_format == "pwm":
@@ -134,10 +145,10 @@ class DriveController:
         motor_speed_br = Float64()
 
         # Set message values
-        motor_speed_fl.data = left_speeds / 2.0
-        motor_speed_bl.data = left_speeds / 2.0
-        motor_speed_fr.data = -right_speeds / 2.0
-        motor_speed_br.data = -right_speeds / 2.0
+        motor_speed_fl.data = left_speeds
+        motor_speed_bl.data = left_speeds
+        motor_speed_fr.data = right_speeds
+        motor_speed_br.data = right_speeds
 
         # Publish messages
         self.speed_bl = motor_speed_bl
@@ -183,5 +194,13 @@ if __name__ == '__main__':
     # Publish updates at loop rate
     while not rospy.is_shutdown():
 
+        # Check if we received a command
+        if not controller.received_command:
+            controller.process_drive_cmd(Twist())
+
+        # Reset received_command tracker
+        controller.received_command = False
+
+        # Pulish message and sleep
         controller.publish_speeds()
         loop_rate.sleep()

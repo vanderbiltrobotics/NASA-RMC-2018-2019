@@ -146,6 +146,9 @@ if __name__ == "__main__":
     # Initialize ROS node
     rospy.init_node("pure_pursuit")
 
+    #
+    rospy.sleep(3.0)
+
     # Read parameters off server
     lin_vel = rospy.get_param("pp_base_lin_vel", default=0.1)
     max_lookahead = rospy.get_param("pp_max_lookahead", default=1.0)
