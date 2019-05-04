@@ -5,7 +5,6 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /Global Options1
-        - /TF1/Status1
       Splitter Ratio: 0.5
     Tree Height: 719
   - Class: rviz/Selection
@@ -99,13 +98,13 @@ Visualization Manager:
       Unreliable: false
       Value: true
     - Class: rviz/MarkerArray
-      Enabled: true
+      Enabled: false
       Marker Topic: /vizualization/arena_markers
       Name: MarkerArray
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
-      Value: true
+      Value: false
     - Class: rviz/TF
       Enabled: true
       Frame Timeout: 15
@@ -113,19 +112,27 @@ Visualization Manager:
         All Enabled: true
         aruco_board_origin:
           Value: true
-        aruco_camera:
-          Value: true
         camera_link:
           Value: true
-        robot_back_left:
+        camera_mount_base:
           Value: true
-        robot_back_right:
+        kinect_base:
+          Value: true
+        kinect_mount_base:
+          Value: true
+        localization_camera:
           Value: true
         robot_center:
           Value: true
-        robot_front_left:
+        robot_frame_BL:
           Value: true
-        robot_front_right:
+        robot_frame_BR:
+          Value: true
+        robot_frame_FL:
+          Value: true
+        robot_frame_FLJ:
+          Value: true
+        robot_frame_FR:
           Value: true
         world:
           Value: true
@@ -137,18 +144,21 @@ Visualization Manager:
       Tree:
         world:
           aruco_board_origin:
-            aruco_camera:
-              robot_center:
-                camera_link:
-                  {}
-                robot_back_left:
-                  {}
-                robot_back_right:
-                  {}
-                robot_front_left:
-                  {}
-                robot_front_right:
-                  {}
+            localization_camera:
+              camera_mount_base:
+                robot_frame_BL:
+                  robot_center:
+                    {}
+                  robot_frame_BR:
+                    robot_frame_FR:
+                      {}
+                  robot_frame_FL:
+                    kinect_mount_base:
+                      kinect_base:
+                        camera_link:
+                          {}
+                  robot_frame_FLJ:
+                    {}
       Update Interval: 0
       Value: true
     - Alpha: 0.300000012

@@ -24,6 +24,7 @@ namespace robot_motor_control{
         ros::NodeHandle nh;
         std::string _name;
         dynamic_reconfigure::Server<robot_motor_control::TalonConfig> server;
+        TalonConfig _config;
 
         std::unique_ptr<TalonSRX> talon;
 
@@ -42,9 +43,11 @@ namespace robot_motor_control{
         ControlMode _controlMode;
         double _output;
         bool disabled;
+        bool configured;
+        bool not_configured_warned;
 
     public:
-        TalonNode(const ros::NodeHandle& parent, const std::string& name);
+        TalonNode(const ros::NodeHandle& parent, const std::string& name, const TalonConfig& config);
 
         TalonNode& operator=(const TalonNode&) = delete;
 
@@ -52,7 +55,7 @@ namespace robot_motor_control{
 
         void reconfigure(const TalonConfig &config, uint32_t level);
 
-        void updateConfig(const TalonConfig &config);
+        void configure();
 
         void setPercentOutput(std_msgs::Float64 output);
 

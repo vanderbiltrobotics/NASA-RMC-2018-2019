@@ -33,8 +33,8 @@ class ArucoCamera:
         # Servo state
         self.theta = Int32()         # ROS object that stores current servo theta orientation
         self.error = 0               # Error between current theta and where the camera should be 
-        self.minTheta = -65         # Minimum servo bound
-        self.maxTheta = 65           # Maximum servo bound
+        self.minTheta = -(135.0 / 2)          # Minimum servo bound
+        self.maxTheta = (135.0 / 2)           # Maximum servo bound
 
         # Marker paramters
         self.markerDetected = False  # True if an AruCo marker is in view
@@ -93,7 +93,11 @@ class ArucoCamera:
         camera_to_mount.position.x = 0
         camera_to_mount.position.y = 0
         camera_to_mount.position.z = 0
-        camera_to_mount.orientation = tf.transformations.quaternion_from_euler(0, 0, radians(self.theta.data))
+        quaternion = tf.transformations.quaternion_from_euler(0, 0, -radians(self.theta.data))
+        camera_to_mount.orientation.x = quaternion[0]
+        camera_to_mount.orientation.y = quaternion[1]
+        camera_to_mount.orientation.z = quaternion[2]
+        camera_to_mount.orientation.w = quaternion[3]
         self.lensPosePub.publish(camera_to_mount)
 
 

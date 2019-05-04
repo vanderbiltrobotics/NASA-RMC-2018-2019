@@ -25,6 +25,8 @@ int main(int argc, char **argv) {
                 config.inverted = (bool)v["inverted"];
             if(v.hasMember("peak_voltage"))
                 config.peak_voltage = (double)v["peak_voltage"];
+            if(v.hasMember("pot"))
+                config.pot = (bool)v["pot"];
             if(v.hasMember("P"))
                 config.P = (double)v["P"];
             if(v.hasMember("I"))
@@ -35,8 +37,7 @@ int main(int argc, char **argv) {
                 config.F = (double)v["F"];
 
             auto node = ros::NodeHandle(nh, name);
-            std::shared_ptr<TalonNode> talon = std::make_shared<TalonNode>(node, name);
-            talon->updateConfig(config);
+            std::shared_ptr<TalonNode> talon = std::make_shared<TalonNode>(node, name, config);
             talons.push_back(talon);
             ROS_INFO("Created Talon with name '%s' and id '%d'", name.c_str(), config.id);
        }else{

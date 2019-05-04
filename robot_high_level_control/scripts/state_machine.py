@@ -28,10 +28,13 @@ class HighLevelController:
         # Variables to use for
         self.state_vars = {
             "outbound": True,
-            "P0": (2.0, 1.0),
+            "P0": (1.75, 1.0),
             "P1": (1.5, 2.0),
             "P2": (1.5, 4.0),
             "P3": (1.5, 5.0),
+            "PA1": (1.0, 1.0),
+            "PA2": (0.5, 1.0),
+            "PA3": (0.4, 1.0),
             "drivability_map": None,
             "max_x_offset": 1.5,
             "P1_y": 2.5,

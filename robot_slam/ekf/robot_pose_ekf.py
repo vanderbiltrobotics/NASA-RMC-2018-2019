@@ -39,7 +39,7 @@ class ArucoExtendedKalmanFilter:
         '''
 
         # Define the measurement noise covariance matrix
-        self.arucoEKF.R = np.eye(7) * np.array([0.05, 0.05, 0.05, 0.01, 0.01, 0.01, 0.01])
+        self.arucoEKF.R = np.eye(7) * np.array([0.05, 0.05, 0.05, 0.20, 0.20, 0.20, 0.20])
 
         # Define the process noise covariance matrix
         #arucoEKF.Q = 
@@ -154,7 +154,7 @@ if(__name__ == "__main__"):
     )
 
     # Set loop rate
-    r = rospy.Rate(10)  # 10hz
+    r = rospy.Rate(20)  # 10hz
 
     while not rospy.is_shutdown():
         posePublisher.publish(robot_pose_ekf.getPose())
