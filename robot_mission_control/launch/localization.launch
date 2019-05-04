@@ -6,8 +6,8 @@
     <!-- JETSON NODES -->
 
     <!--Transform publisher -->
-    <param name="tf_file_static" value="full_system_test.json"/>
-    <param name="tf_file_dynamic" value="full_system_test.json"/>
+    <param name="tf_file_static" value="full_system.json"/>
+    <param name="tf_file_dynamic" value="full_system.json"/>
     <node machine="jetson" name="transform_publisher" pkg="robot_misc_tools" type="transform_publisher.py"/>
 
     <!-- Image publisher -->
