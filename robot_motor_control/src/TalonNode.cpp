@@ -40,7 +40,7 @@ namespace robot_motor_control {
     }
 
     void TalonNode::reconfigure(const TalonConfig &config, uint32_t level) {
-        if (config.id != 0 && talon->GetDeviceID() != config.id) {
+        if (talon->GetDeviceID() != config.id) {
             ROS_INFO("Resetting TalonNode to new id: %d", config.id);
             talon = std::make_unique<TalonSRX>(config.id);
             configureStatusPeriod(*talon);
