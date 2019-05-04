@@ -41,11 +41,9 @@ namespace robot_motor_control {
     }
 
     void TalonNode::reconfigure(const TalonConfig &config, uint32_t level) {
-        if(this->configured){
-            this->_config = config;
-            this->configured = false;
-            this->configure();
-        }
+        this->_config = config;
+        this->configured = false;
+        this->configure();
     }
 
     void TalonNode::configure(){
