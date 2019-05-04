@@ -25,6 +25,8 @@ int main(int argc, char **argv) {
                 config.inverted = (bool)v["inverted"];
             if(v.hasMember("peak_voltage"))
                 config.peak_voltage = (double)v["peak_voltage"];
+            if(v.hasMember("pot"))
+                config.pot = (bool)v["pot"];
             if(v.hasMember("P"))
                 config.P = (double)v["P"];
             if(v.hasMember("I"))

@@ -65,6 +65,12 @@ namespace robot_motor_control {
         c.pulseWidthPeriod_EdgesPerRot = 4096;
         ErrorCode error = talon->ConfigAllSettings(c, 50);
 
+        if(_config.pot){
+            talon->ConfigSelectedFeedbackSensor(FeedbackDevice::Analog);
+        }else{
+            talon->ConfigSelectedFeedbackSensor(FeedbackDevice::CTRE_MagEncoder_Relative);
+        }
+
         talon->SelectProfileSlot(0,0);
         talon->SetInverted(_config.inverted);
         talon->EnableVoltageCompensation(true);
