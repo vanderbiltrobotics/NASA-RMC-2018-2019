@@ -16,6 +16,7 @@
 #include <ros/ros.h>
 #include <std_msgs/Float64.h>
 #include <std_msgs/Int32.h>
+#include <std_msgs/Bool.h>
 #include <dynamic_reconfigure/server.h>
 
 namespace robot_motor_control{
@@ -36,6 +37,8 @@ namespace robot_motor_control{
         ros::Publisher analogPub;
         ros::Publisher posPub;
         ros::Publisher velPub;
+        ros::Publisher fwdPub;
+        ros::Publisher revPub;
 
         ros::Subscriber setPercentSub;
         ros::Subscriber setVelSub;

@@ -20,6 +20,8 @@ namespace robot_motor_control {
             analogPub(nh.advertise<std_msgs::Float64>("analog_input", 1)),
             posPub(nh.advertise<std_msgs::Int32>("position", 1)),
             velPub(nh.advertise<std_msgs::Int32>("velocity", 1)),
+            fwdPub(nh.advertise<std_msgs::Bool>("forward_limit", 1)),
+            revPub(nh.advertise<std_msgs::Bool>("reverse_limit", 1)),
             setPercentSub(nh.subscribe("set_percent_output", 1, &TalonNode::setPercentOutput, this)),
             setVelSub(nh.subscribe("set_velocity", 1, &TalonNode::setVelocity, this)),
             lastUpdate(ros::Time::now()), _controlMode(ControlMode::PercentOutput), _output(0.0), disabled(false),
@@ -131,6 +133,14 @@ namespace robot_motor_control {
         std_msgs::Float64 analogInput;
         analogInput.data = talon->GetSensorCollection().GetAnalogIn();
         analogPub.publish(analogInput);
+
+        std_msgs::Bool forward_limit;
+        forward_limit.data = talon->GetSensorCollection().IsFwdLimitSwitchClosed();
+        fwdPub.publish(forward_limit);
+
+        std_msgs::Bool reverse_limit;
+        reverse_limit.data = talon->GetSensorCollection().IsRevLimitSwitchClosed();
+        fwdPub.publish(reverse_limit);
 
         std_msgs::Int32 position;
         position.data = talon->GetSelectedSensorPosition();
