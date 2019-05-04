@@ -24,7 +24,7 @@ namespace robot_motor_control {
             lastUpdate(ros::Time::now()), _controlMode(ControlMode::PercentOutput), _output(0.0), disabled(false),
             configured(false), not_configured_warned(false){
         server.setCallback(boost::bind(&TalonNode::reconfigure, this, _1, _2));
-        this->configure();
+        server.updateConfig(config);
         talon->Set(ControlMode::PercentOutput, 0);
     }
 
