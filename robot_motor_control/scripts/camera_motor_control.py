@@ -20,8 +20,10 @@ class AngleListener:
 
     def setCameraAngle(self, theta):
 
+        rospy.loginfo(theta.data)
+
         # Convert from range -90 to 90 to range 0 to 100
-        duty_cycle = ((theta.data + self.max_angle / (self.max_angle / 2))) * 100
+        duty_cycle = ((theta.data + self.max_angle) / (self.max_angle * 2)) * (7.5) + 2.5
 
         # Send new duty cycle to servo
         self.p.ChangeDutyCycle(duty_cycle)
@@ -37,7 +39,7 @@ if __name__ == '__main__':
     rospy.init_node('camera_control_node', anonymous=True)
 
     # Create listener object
-    listener = AngleListener(18, 90.0)
+    listener = AngleListener(18, 135.0 / 2)
 
     # Attach subscriber to servo angle topic
     rospy.Subscriber("aruco/servo_theta", Int32, listener.setCameraAngle)
