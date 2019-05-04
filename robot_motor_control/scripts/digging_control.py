@@ -80,33 +80,33 @@ class DigManager:
 
 
     # Moves hinge to a specific angle
-    def set_hinge_angle():
+    def set_hinge_angle(self):
         return
 
-    def move_to_digging_angle():
+    def move_to_digging_angle(self):
         # Read in the desired digging angle from the parameter server
         # Use set_hinge_angle function to move to desired location
         return
 
-    def set_lead_screw_position():
+    def set_lead_screw_position(self):
         # Read in the desired lead screw position
         return
 
-    def set_lead_screw_velocity():
+    def set_lead_screw_velocity(self):
         # Read in the desired lead screw velocity
         return
 
-    def set_bucket_chain_velocity():
+    def set_bucket_chain_velocity(self):
         # Read in the desired bucket chain velocity
         return
 
 
     # Motors off
-    def dig_op_off():
+    def dig_op_off(self):
         self.update_speeds()
 
     # Raise hinge angle (make more vertical)
-    def dig_op_raise_hinge():
+    def dig_op_raise_hinge(self):
 
         ##TODO switch to hinge_to_dig_position()
         # hinge_to_dig_position()
@@ -130,7 +130,7 @@ class DigManager:
         self.update_speeds()
 
     # Lower bucket chain and dig - not collecting material yet
-    def dig_op_dig():
+    def dig_op_dig(self):
 
         # Run bucket chain motor and lead screw motor
         start_time = rospy.Time.now()
@@ -193,7 +193,7 @@ class DigManager:
         self.update_speeds()
 
     # Raise bucket chain, don't dig
-    def dig_op_raise_bucket_chain():
+    def dig_op_raise_bucket_chain(self):
 
         # Run bucket chain motor and lead screw motor
         start_time = rospy.Time.now()
@@ -217,7 +217,7 @@ class DigManager:
         self.update_speeds()
 
     # Lower hinge angle (make less vertical)
-    def dig_op_lower_hinge():
+    def dig_op_lower_hinge(self):
 
         # Run hinge motor until correect upright angle achieved
         start_time = rospy.Time.now()
@@ -238,7 +238,7 @@ class DigManager:
         self.update_speeds()
 
     # Depositing material - conveyor only
-    def dig_op_deposit_material():
+    def dig_op_deposit_material(self):
 
         # Run conveyor for 5 seconds to empty all material
         start_time = rospy.Time.now()
