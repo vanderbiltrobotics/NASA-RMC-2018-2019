@@ -93,7 +93,7 @@ class ArucoCamera:
         camera_to_mount.position.x = 0
         camera_to_mount.position.y = 0
         camera_to_mount.position.z = 0
-        quaternion = tf.transformations.quaternion_from_euler(0, 0, radians(self.theta.data))
+        quaternion = tf.transformations.quaternion_from_euler(0, 0, -radians(self.theta.data))
         camera_to_mount.orientation.x = quaternion[0]
         camera_to_mount.orientation.y = quaternion[1]
         camera_to_mount.orientation.z = quaternion[2]
