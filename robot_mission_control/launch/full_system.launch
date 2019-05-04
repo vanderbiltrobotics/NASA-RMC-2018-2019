@@ -67,6 +67,7 @@
 
         <!-- Start state machine -->
         <param name="goal_reached" value="false"/>
+        <param name="digging_complete" value="false"/>
         <node name="high_level_controller" pkg="robot_high_level_control" type="state_machine.py" />
 
         <!-- Nodes for simulation / debugging purposes only -->

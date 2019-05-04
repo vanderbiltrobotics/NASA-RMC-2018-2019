@@ -492,7 +492,8 @@ class HighLevelController:
         loop_rate = rospy.Rate(10)
 
         # Wait for robot to reach goal pos or for other interrupt
-        while self.current_state == "mine_gravel" and not self.reached_goal(
+        #TODO Add measurement update
+        while self.current_state == "mine_gravel" and not self.digging_complete(
                 reset_if_true=True) and not rospy.is_shutdown():
             # Keep publishing in case we missed it
             self.publishers['dig_cmd'].publish(dig_now)
@@ -508,7 +509,6 @@ class HighLevelController:
         # TODO advance_state has only has path planning state rn
         self.advance_state()
 
-        # Return
         return
 
     def state_approach_bin(self):
