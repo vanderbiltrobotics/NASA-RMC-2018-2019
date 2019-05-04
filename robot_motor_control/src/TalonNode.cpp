@@ -24,7 +24,7 @@ namespace robot_motor_control {
             lastUpdate(ros::Time::now()), _controlMode(ControlMode::PercentOutput), _output(0.0), disabled(false),
             configured(false), not_configured_warned(false){
         server.setCallback(boost::bind(&TalonNode::reconfigure, this, _1, _2));
-        server.updateConfig(config);
+        this->configure();
         talon->Set(ControlMode::PercentOutput, 0);
     }
 
@@ -41,9 +41,11 @@ namespace robot_motor_control {
     }
 
     void TalonNode::reconfigure(const TalonConfig &config, uint32_t level) {
-        this->_config = config;
-        this->configured = false;
-        this->configure();
+        if(this->configured){
+            this->_config = config;
+            this->configured = false;
+            this->configure();
+        }
     }
 
     void TalonNode::configure(){
