@@ -28,6 +28,9 @@ talons:
     inverted: False
     pot: True
     peak_voltage: 4.0
+    P: 6.0
+    I: 0.0015
+    D: 0.0
   lead_screw_motor:
     id: 4
     inverted: False
