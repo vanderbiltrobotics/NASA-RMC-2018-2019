@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 
 import rospy
-from std_msgs.msg import Float64, String
+from std_msgs.msg import Float64, String, Int32, Bool
 
 
 class DigManager:
 
     def __init__(self):
 
-        # Current dig mode - "pct_out", "vel_pos", "operation"
+        # Current dig mode - "pct_out" or "vel_pos"
         self.control_mode = "pct_out"
 
         # Publishers for each dig motor
@@ -23,6 +23,14 @@ class DigManager:
             "pub_pos_hng": rospy.Publisher("hinge_motor/set_position", Float64, queue_size=0),
         }
 
+        # Lead screw limit switch and encoder information
+        self.lsc_enc_pos = None
+        self.lsc_bkd_lim = False
+
+        # Create subscribers for relevant encoder data
+        rospy.Subscriber("lead_screw/position", Int32, self.update_lsc_enc_pos)
+        rospy.Subscriber("lead_screw/reverse_limit", Bool, self.update_lsc_bkd_lim)
+
         # Max velocity parameters for various motors
         self.max_vel_lsc = 16000.0
         self.max_vel_bkt = 700.0
@@ -30,9 +38,15 @@ class DigManager:
         self.min_pos_hng = -725.0    # Digging point
         self.max_pos_lsc = 10000000
         self.min_pos_lsc = 0.0
+        self.max_vel_cnv = 500.0
         self.cnv_vel_dig = 100.0
         self.cnv_vel_collect = 10.0
         self.cnv_vel_deposit = 450.0
+
+        # Lead screw position parameters
+        self.gravel_depth = 0.6
+        self.max_depth = 0.95
+        self.lsc_home_pos = 0.1
 
         # Messages storing current percent outputs for each motor
         self.hng_pct_msg = Float64()
@@ -45,6 +59,14 @@ class DigManager:
         self.lsc_vel_msg = Float64()
         self.bkt_vel_msg = Float64()
         self.cnv_vel_msg = Float64()
+
+    # Callback for lead screw encoder position
+    def update_lsc_enc_pos(self, msg):
+        self.lsc_enc_pos = msg.data
+
+    # Callback for lead screw limit switch
+    def update_lsc_bkd_lim(self, msg):
+        self.lsc_bkd_lim = msg.data
 
     # Callback for dig mode changes
     def update_control_mode(self, mode):
@@ -75,7 +97,7 @@ class DigManager:
 
     # --- UPDATE INDIVIDUAL MOTOR PCT OUTPUTS --- #
 
-    # these callbacks will only do something if control mode is "teleop"
+    # these callbacks will only do something if control mode is "pct_out"
 
     def update_pct_out_hng(self, new_pct_output):
         if self.control_mode == "pct_out":
@@ -95,19 +117,49 @@ class DigManager:
 
     # --- UPDATE INDIVIDUAL MOTOR VELOCITIES OR POSITIONS --- #
 
+    # Publish messages to set speed of each digging motor
+    def publish_vel_pos(self):
+
+        # Publish messages
+        self.publishers["pub_pos_hng"].publish(self.hng_pos_msg)
+        self.publishers["pub_vel_lsc"].publish(self.lsc_vel_msg)
+        self.publishers["pub_vel_bkt"].publish(self.bkt_vel_msg)
+        self.publishers["pub_vel_cnv"].publish(self.cnv_vel_msg)
+
+    # Contiues publishing the specified motor velocities for a given duration
+    def continue_for_duration(self, duration, loop_rate):
+
+        # Get loop rate, store start time
+        loop_rate = rospy.Rate(loop_rate)
+        start_time = rospy.Time.now()
+
+        # Continue for specified duration
+        while rospy.Time.now() - start_time < duration:
+
+            # Publish current speed settings and loop
+            self.publish_vel_pos()
+            loop_rate.sleep()
+
     # Moves hinge to a specific angle
-    def set_hinge_position(self):
-        return
-
-    # Send a value from 0 to 1
-    def set_lead_screw_position(self, pos, vel):
-
-
-        pass
-
-    def set_lead_screw_velocity(self, vel):
+    def set_hinge_position(self, pos):
 
         # Limit value from 0.0 to 1.0
+        pos = min(1.0, max(0.0, pos))
+
+        # Scale value to correct range
+        pos = pos * (self.max_pos_hng - self.min_pos_hng) + self.min_pos_hng
+
+        # Create message
+        msg = Float64()
+        msg.data = pos
+
+        # Update message
+        self.hng_pos_msg = msg
+
+    # Set the velocity of the lead screw
+    def set_lead_screw_velocity(self, vel):
+
+        # Limit value from -1.0 to 1.0
         vel = min(1.0, max(-1.0, vel))
 
         # Scale value to correct range
@@ -118,9 +170,43 @@ class DigManager:
         msg.data = vel
 
         # Publish message
-        if self.control_mode == "vel_pos":
-            self.publishers["pub_vel_lsc"].publish(msg)
+        self.lsc_vel_msg = msg
 
+    # Scale lead screw encoder position to range 0 to 1
+    def get_lsc_pos_scaled(self):
+        return (self.lsc_enc_pos - self.min_pos_lsc) / self.max_pos_lsc
+
+    # Move the lead screw to a specific position at a specific velocity
+    def set_lead_screw_position(self, pos, vel):
+
+        # Scale encoder value to range 0.0 to 1.0
+        encoder_pos = self.get_lsc_pos_scaled()
+
+        # Determine the direction we need to move
+        direction = 1.0 if encoder_pos - pos > 0.0 else -1.0
+
+        # Limit velocity from -1.0 to 1.0
+        vel = min(1.0, max(-1.0, vel))
+        vel = abs(vel) * direction
+
+        # Set loop rate
+        loop_rate = rospy.Rate(30)
+
+        # Velocity command
+        msg = Float64()
+        msg.data = vel
+        self.lsc_vel_msg = msg
+
+        while self.get_lsc_pos_scaled() - pos > 0.01:
+
+            # Publish the message and loop
+            self.publish_vel_pos()
+            loop_rate.sleep()
+
+        # Set velocity to zero
+        self.lsc_vel_msg = Float64()
+
+    # Set the velocity of the bucket chain
     def set_bucket_chain_velocity(self, vel):
 
         # Limit value from 0.0 to 1.0
@@ -134,13 +220,23 @@ class DigManager:
         msg.data = vel
 
         # Publish message
-        if self.control_mode == "vel_pos":
-            self.publishers["pub_vel_bkt"].publish(msg)
+        self.bkt_vel_msg = msg
 
+    # Set the velocity of the bucket chain
+    def set_conveyor_velocity(self, vel):
 
-    def set_conveyor_velocity(self):
-        # Read in the desired bucket chain velocity
-        return
+        # Limit value from 0.0 to 1.0
+        vel = min(1.0, max(-1.0, vel))
+
+        # Scale value to correct range
+        vel = vel * self.max_vel_cnv
+
+        # Create message
+        msg = Float64()
+        msg.data = vel
+
+        # Publish message
+        self.cnv_vel_msg = msg
 
     # --- PROCESS DIGGING COMMANDS --- #
 
@@ -152,189 +248,123 @@ class DigManager:
         if dig_cmd_msg.data == "off":
             self.dig_op_off()
 
-        # Raise hinge angle (make more vertical)
-        elif dig_cmd_msg.data == "raise_hinge":
-            self.dig_op_raise_hinge()
+        # Zero the lead screw
+        elif dig_cmd_msg.data == "zero_lsc":
+            self.dig_op_zero_lsc()
 
         # Lower bucket chain and dig - not collecting material yet
         elif dig_cmd_msg.data == "dig":
             self.dig_op_dig()
 
-        # Raise bucket chain, don't dig
-        elif dig_cmd_msg.data == "raise_bucket_chain":
-            self.dig_op_raise_bucket_chain()
-
-        # Lower hinge angle (make less vertical)
-        elif dig_cmd_msg.data == "lower_hinge":
-            self.dig_op_lower_hinge()
-
         # Depositing material - conveyor only
-        elif dig_cmd_msg.data == "deposit_material":
-            self.dig_op_deposit_material()
+        elif dig_cmd_msg.data == "deposit":
+            self.dig_op_deposit()
 
+        # Operation complete
+        rospy.set_param("dig_operation_complete", True)
 
-    # Motors off
+    # Set all dig motors to zero velocity
     def dig_op_off(self):
-        self.update_pct_output()
 
+        self.set_bucket_chain_velocity(0.0)
+        self.set_conveyor_velocity(0.0)
+        self.set_lead_screw_velocity(0.0)
+
+    # Zero the lead screw position by running it to the backwards limit switch
     def dig_op_zero_lsc(self):
 
+        # Make sure everything but the hinge is off
+        self.set_lead_screw_velocity(0.0)
+        self.set_conveyor_velocity(0.0)
+        self.set_bucket_chain_velocity(0.0)
 
+        # Move the hinge to forward position
+        self.set_hinge_position(0.0)
 
-    # Raise hinge angle (make more vertical)
-    def dig_op_raise_hinge(self):
+        # Wait for the hinge to get there
+        self.continue_for_duration(3.0, 30)
 
-        ##TODO switch to hinge_to_dig_position()
-        # hinge_to_dig_position()
+        # Run the lead screw backwards until the limit switch is triggered
+        self.set_lead_screw_velocity(-0.75)
 
-        # Run hinge motor until correect upright angle achieved
-        start_time = rospy.Time.now()
+        # Wait until we hit limit switch
+        while not self.lsc_bkd_lim:
+            self.publish_vel_pos()
+            rospy.Rate(30).sleep()
 
-        # Turn hinge motor on
-        self.update_pct_output(
-            hng=0.2
-        )
-
-        # Define loop rate
-        loop_rate = rospy.Rate(10)
-
-        # Spin motors for the specified duration
-        while rospy.Time.now() - start_time < 3.0:
-            loop_rate.sleep()
-
-        # Turn motors off
-        self.update_pct_output()
-
-    # Lower bucket chain and dig - not collecting material yet
+    # Dig and collect material
     def dig_op_dig(self):
 
-        # Run bucket chain motor and lead screw motor
-        start_time = rospy.Time.now()
+        # --- PREPARE TO DIG --- #
 
-        # Define loop rate
-        loop_rate = rospy.Rate(10)
+        # Make sure everything but the hinge is off
+        self.set_lead_screw_velocity(0.0)
+        self.set_conveyor_velocity(0.0)
+        self.set_bucket_chain_velocity(0.0)
 
-        # --- LOWER BUCKET CHAIN TO GRAVEL DEPTH --- #
-        # Use set_bucket_chain_velocity()
+        # Command the hinge to the correct digging position
+        self.set_hinge_position(0.0)
 
-        # Turn bucket chain motor, lead screw motor, conveyor motors on
-        self.update_pct_output(
-            lsc=0.2,
-            bkt=0.2,
-            cnv=0.2
-        )
+        # Wait for the hinge to get there
+        self.continue_for_duration(3.0, 30)
 
-        # Wait until gravel depth reached
-        while rospy.Time.now() - start_time < 3.0:
-            loop_rate.sleep()
+        # --- DIG THROUGH BP1 - DON'T COLLECT --- #
 
-        # --- COLLECT MATERIAL --- #
+        # Conveyor and bucket chain ON
+        self.set_conveyor_velocity(0.2)
+        self.set_bucket_chain_velocity(0.8)
 
-        collection_steps = 10
-        pulse_conveyor_time = 1.0
-        pulse_collect_time = 2.0
+        # Command lead screw to gravel depth
+        self.set_lead_screw_position(self.gravel_depth, 0.75)
 
-        # Advance conveyor in 10 steps
-        for i in range(collection_steps):
+        # --- COLLECT GRAVEL --- #
 
-            # Turn conveyor on
-            self.update_pct_output(
-                lsc=0.1,
-                bkt=0.2,
-                cnv=0.2
-            )
+        # Slow down conveyor
+        self.set_conveyor_velocity(0.02)
 
-            # Wait for specified pulse duration
-            pulse_start = rospy.Time.now()
+        # Command lead screw to maximum depth
+        self.set_lead_screw_position(self.max_depth, 0.75)
 
-            while rospy.Time.now() - pulse_start < pulse_conveyor_time:
-                loop_rate.sleep()
+        # --- RETRACT DIGGING MECHANISM --- #
 
-            # Turn conveyor off
-            self.update_pct_output(
-                lsc=0.1,
-                bkt=0.2
-            )
+        # Conveyor and bucket chain off
+        self.set_conveyor_velocity(0.0)
+        self.set_bucket_chain_velocity(0.0)
 
-            # Collect material for specified collect duration
-            pulse_start = rospy.Time.now()
+        # Retract lead screw
+        self.set_lead_screw_position(self.lsc_home_pos, 0.75)
 
-            while rospy.Time.now() - pulse_start < pulse_collect_time:
-                loop_rate.sleep()
+        # Command the hinge to driving position
+        self.set_hinge_position(1.0)
 
-            # Turn motors off
-            self.update_pct_output()
+        # Wait for the hinge to get there
+        self.continue_for_duration(3.0, 30)
 
-        # Turn motors off
-        self.update_pct_output()
+    # Deposit material into the collection bin
+    def dig_op_deposit(self):
 
-    # Raise bucket chain, don't dig
-    def dig_op_raise_bucket_chain(self):
+        # Make sure everything but the hinge is off
+        self.set_lead_screw_velocity(0.0)
+        self.set_conveyor_velocity(0.0)
+        self.set_bucket_chain_velocity(0.0)
 
-        # Run bucket chain motor and lead screw motor
-        start_time = rospy.Time.now()
+        # Command the hinge out of the way of the conveyor
+        self.set_hinge_position(0.0)
 
-        # Define loop rate
-        loop_rate = rospy.Rate(10)
+        # Wait for hinge to get there
+        self.continue_for_duration(3.0, 30)
 
-        # --- LOWER BUCKET CHAIN TO GRAVEL DEPTH --- #
-        # Use set_bucket_chain_velocity
+        # Turn on conveyor at high speed (and bucket chain ??)
+        self.set_conveyor_velocity(0.9)
 
-        # Retract bucket chain by running lead screw motor backwards
-        self.update_pct_output(
-            lsc=-0.2
-        )
+        # Wait for all material to be deposited
+        self.set_conveyor_velocity(0.0)
 
-        # Wait until we've reached retracted position
-        while rospy.Time.now() - start_time < 3.0:
-            loop_rate.sleep()
+        # Move hinge back to driving position
+        self.set_hinge_position(1.0)
 
-        # Turn motors off
-        self.update_pct_output()
-
-    # Lower hinge angle (make less vertical)
-    def dig_op_lower_hinge(self):
-
-        # Run hinge motor until correect upright angle achieved
-        start_time = rospy.Time.now()
-
-        # Turn hinge motor on
-        self.update_pct_output(
-            hng=-0.2
-        )
-
-        # Define loop rate
-        loop_rate = rospy.Rate(10)
-
-        # Spin motors for the specified duration
-        while rospy.Time.now() - start_time < 3.0:
-            loop_rate.sleep()
-
-        # Turn motors off
-        self.update_pct_output()
-
-    # Depositing material - conveyor only
-    def dig_op_deposit_material(self):
-
-        # Run conveyor for 5 seconds to empty all material
-        start_time = rospy.Time.now()
-
-        # Turn motors on
-        self.update_pct_output(
-            cnv=0.2
-        )
-
-        # Define loop rate
-        loop_rate = rospy.Rate(10)
-
-        # Spin motors for the specified duration
-        while rospy.Time.now() - start_time < 5.0:
-
-            loop_rate.sleep()
-
-        # Turn motors off
-        self.update_pct_output()
-
+        # Wait for hinge to get there
+        self.continue_for_duration(3.0, 30)
 
 
 if __name__ == "__main__":
@@ -367,7 +397,7 @@ if __name__ == "__main__":
         if dig_manager.control_mode == "pct_out":
             dig_manager.publish_pct_output()
         if dig_manager.control_mode == "vel_pos":
-            pass
+            dig_manager.publish_vel_pos()
 
         loop_rate.sleep()
 
