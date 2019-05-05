@@ -27,6 +27,7 @@ talons:
     id: 9
     inverted: False
     pot: True
+    peak_voltage: 4.0
   lead_screw_motor:
     id: 4
     inverted: False
