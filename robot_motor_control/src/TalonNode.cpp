@@ -26,8 +26,8 @@ namespace robot_motor_control {
             setVelSub(nh.subscribe("set_velocity", 1, &TalonNode::setVelocity, this)),
             lastUpdate(ros::Time::now()), _controlMode(ControlMode::PercentOutput), _output(0.0), disabled(false),
             configured(false), not_configured_warned(false){
+        server.updateConfig(_config);
         server.setCallback(boost::bind(&TalonNode::reconfigure, this, _1, _2));
-        server.updateConfig(config);
         talon->Set(ControlMode::PercentOutput, 0);
     }
 
@@ -46,6 +46,7 @@ namespace robot_motor_control {
     }
 
     void TalonNode::reconfigure(const TalonConfig &config, uint32_t level) {
+        ROS_INFO("Reconfigure called on %d with id %d", talon->GetDeviceID(), config.id);
         boost::mutex::scoped_lock scoped_lock(mutex);
         this->_config = config;
         this->configured = false;

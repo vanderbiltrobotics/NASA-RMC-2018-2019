@@ -6,7 +6,7 @@ using namespace robot_motor_control;
 int main(int argc, char **argv) {
     ros::init(argc, argv, "motor_control");
     ros::NodeHandle nh;
-    std::vector<std::shared_ptr<TalonNode>> talons;
+    std::vector<std::unique_ptr<TalonNode>> talons;
 
     std::string interface = "can0";
     ctre::phoenix::platform::can::SetCANInterface(interface.c_str());
@@ -39,8 +39,7 @@ int main(int argc, char **argv) {
                 config.F = (double)v["F"];
 
             auto node = ros::NodeHandle(nh, name);
-            std::shared_ptr<TalonNode> talon = std::make_shared<TalonNode>(node, name, config);
-            talons.push_back(talon);
+            talons.push_back(std::make_unique<TalonNode>(node, name, config));
             ROS_INFO("Created Talon with name '%s' and id '%d'", name.c_str(), config.id);
        }else{
            ROS_INFO("Unrecognized Talon XML member: %s", v.toXml().c_str());
@@ -51,7 +50,7 @@ int main(int argc, char **argv) {
     while(ros::ok()){
         ctre::phoenix::unmanaged::FeedEnable(50);
 
-        std::for_each(talons.begin(), talons.end(), [](std::shared_ptr<TalonNode>& talon){
+        std::for_each(talons.begin(), talons.end(), [](std::unique_ptr<TalonNode>& talon){
            talon->update();
         });
 
