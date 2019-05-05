@@ -26,6 +26,7 @@ talons:
   hinge_motor:
     id: 9
     inverted: False
+    invert_sensor: True
     pot: True
     peak_voltage: 4.0
     P: 6.0
