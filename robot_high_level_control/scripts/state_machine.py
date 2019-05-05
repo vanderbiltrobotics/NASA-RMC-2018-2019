@@ -10,10 +10,11 @@ from math import radians
 
 class HighLevelController:
 
-    def __init__(self, starting_state="drive_to_p0"):
+    def __init__(self, starting_state="idle"):
 
         # Initialize current state to the starting state
         self.current_state = starting_state
+        self.saved_state = None
 
         # Publishers that need to be accessible by some state or function
         self.publishers = {
@@ -42,7 +43,8 @@ class HighLevelController:
             "P1_y": 2.5,
             "P2_y": 5.5,
             "pass_num": 1,
-            "marker_detected": False
+            "marker_detected": False,
+            "no_marker_count": 0
         }
 
         # Parameters to configure
@@ -54,32 +56,79 @@ class HighLevelController:
         }
 
     def process_state_changes(self):
-        # Check for any control commands, loss of localization, etc.
-        return
+
+        # Determine if localization has been lost - if so, switch to localizing
+        if not self.state_vars["marker_detected"]:
+            self.state_vars["no_marker_count"] += 1
+            if self.state_vars["no_marker_count"] > 10 and self.current_state not in ["localizing", "dig", "deposit"]:
+                self.saved_state = self.current_state
+                self.current_state = "localizing"
+        else:
+            self.state_vars["no_marker_count"] = 0
+
+        # Check for forced state change
+
+
 
     def advance_state(self):
 
-        # Handle navigation steps  (these are all straightforward)
+        # When startup command received, try to localize
+        if self.current_state == "start":
+            self.current_state = "localize"
+
+        # Finished localizing
+        if self.current_state == "localize":
+
+            # If we just started, advance to next state
+            if self.saved_state is None:
+                self.current_state = "drive_to_p0"
+
+            # Otherwise, return to the state we came from
+            else:
+                self.current_state = self.saved_state
+
+        # Finished driving to p0
         if self.current_state == "drive_to_p0":
+
+            # If outbound, advance to p1
             if self.state_vars["outbound"]:
                 self.current_state = "drive_to_p1"
+
+            # Otherwise, approach the bin
             else:
-                self.current_state = "idle"
+                self.current_state = "approach_bin"
+
+        # Finished driving to p1
         elif self.current_state == "drive_to_p1":
+
+            # If outbound, onnward to p2
             if self.state_vars["outbound"]:
                 self.current_state = "drive_to_p2"
+
+            # Else, back to p0
             else:
                 self.current_state = "drive_to_p0"
+
+        # Finished driving to p2
         elif self.current_state == "drive_to_p2":
+
+            # If outbound, onward to p3
             if self.state_vars["outbound"]:
                 self.current_state = "drive_to_p3"
+
+            # Otherwise, back to p1
             else:
                 self.current_state = "drive_to_p1"
-        elif self.current_state == "drive_to_p3":
-            self.current_state = "drive_to_p2"
-        # TODO include digging
 
-        return
+        # Reached p3 - begin digging
+        elif self.current_state == "drive_to_p3":
+            self.current_state = "dig"
+
+        # Finished digging, back to p2
+        elif self.current_state == "dig":
+            self.current_state = "drive_to_p2"
+
+        # TODO include approach, deposit, error states
 
     def run_states(self):
 
@@ -100,11 +149,11 @@ class HighLevelController:
                 self.state_drive_to_P2()
             elif self.current_state == "drive_to_p3":
                 self.state_drive_to_P3()
-            elif self.current_state == "mine_gravel":
+            elif self.current_state == "dig":
                 self.state_mine_gravel()
             elif self.current_state == "approach_bin":
                 self.state_approach_bin()
-            elif self.current_state == "deposit_gravel":
+            elif self.current_state == "deposit":
                 self.state_deposit_gravel()
             elif self.current_state == "teleop_control":
                 self.state_teleop_control()
@@ -164,7 +213,18 @@ class HighLevelController:
         # Return the value
         return val
 
-    ## TODO DEFINE BEHAVIORS FOR EACH STATE ##
+    # Checks the "goal_reached" command - resets the param if True
+    def dig_operation_complete(self, reset_if_true=True):
+
+        # Check param
+        val = rospy.get_param("dig_operation_complete", default=False)
+
+        # If goal reached, reset param to False
+        if val and reset_if_true:
+            rospy.set_param("dig_operation_complete", False)
+
+        # Return the value
+        return val
 
     # Idle state - robot does nothing, waits for further command
     def state_idle(self):
@@ -183,6 +243,7 @@ class HighLevelController:
 
         # Wait for further instruction
         while self.current_state == "idle" and not rospy.is_shutdown():
+
             # Sleep at loop rate
             loop_rate.sleep()
 
@@ -473,9 +534,16 @@ class HighLevelController:
         # We only leave this state if a command was recieved. No need to advance state
         return
 
-    def state_mine_gravel(self):
+    # Loops and processes state changes until a dig operation completes
+    def wait_for_dig_op(self):
 
-        # TODO confirm vals
+        while self.current_state == "dig" and not self.dig_operation_complete and not rospy.is_shutdown():
+            rospy.Rate(10).sleep()
+            self.process_state_changes()
+
+    # Mine gravel
+    def state_dig(self):
+
         self.set_enables(
             motors=True,
             nav=False,
@@ -483,30 +551,36 @@ class HighLevelController:
             obstacles=False
         )
 
-        # Publish the digging val
-        dig_now = 'dig'
-        self.publishers['dig_cmd'].publish(dig_now)
+        # Make sure the 'dig_operation_complete' param is set to false
+        rospy.set_param("dig_operation_complete", False)
 
-        # Set loop rate
-        # TODO confirm the rate
-        loop_rate = rospy.Rate(10)
+        # Create a string message to send commands
+        dig_cmd_msg = String()
 
-        # Wait for robot to reach goal pos or for other interrupt
-        #TODO Add measurement update
-        while self.current_state == "mine_gravel" and not self.digging_complete(
-                reset_if_true=True) and not rospy.is_shutdown():
-            # Keep publishing in case we missed it
-            self.publishers['dig_cmd'].publish(dig_now)
+        # If this is our first pass, zero the lead screw motor
+        if self.state_vars["pass_num"] == 1:
 
-            # Sleep at loop rate
-            loop_rate.sleep()
+            dig_cmd_msg.data = "zero_lsc"
+            self.publishers["dig_cmd"].publish(dig_cmd_msg)
 
-            # Process any commands we may have received
-            # TODO no function defn
-            self.process_state_changes()
+            # Wait for the command to complete
+            self.wait_for_dig_op()
 
-        # Advance to the next state
-        # TODO advance_state has only has path planning state rn
+            # Set param to false again
+            rospy.set_param("dig_operation_complete", False)
+
+        # Send the command to dig
+        dig_cmd_msg.data = "dig"
+        self.publishers["dig_cmd"].publish(dig_cmd_msg)
+
+        # Wait for the operation to finish
+        self.wait_for_dig_op()
+
+        # Send the stop command
+        dig_cmd_msg.data = "stop"
+        self.publishers["dig_cmd"].publish(dig_cmd_msg)
+
+        # Advance states
         self.advance_state()
 
         return
@@ -514,8 +588,26 @@ class HighLevelController:
     def state_approach_bin(self):
         return
 
+    # Deposit collected gravel into the collection bin
     def state_deposit_gravel(self):
-        return
+
+        # Make sure the 'dig_operation_complete' param is set to false
+        rospy.set_param("dig_operation_complete", False)
+
+        # Create a string message to send commands
+        dig_cmd_msg = String()
+        dig_cmd_msg.data = "deposit"
+
+        # Send the command and wait for the operation to finish
+        self.publishers["dig_cmd"].publish(dig_cmd_msg)
+        self.wait_for_dig_op()
+
+        # Send the stop command
+        dig_cmd_msg.data = "stop"
+        self.publishers["dig_cmd"].publish(dig_cmd_msg)
+
+        # Adavance states
+        self.advance_state()
 
     # ------------------------------------- #
     # CALLBACK FUNCTIONS FOR UPDATING STATE #
@@ -529,6 +621,9 @@ class HighLevelController:
 
         # Convert to numpy array and store
         self.state_vars["drivability_map"] = np.reshape(np.array(new_map_msg.data), (map_length, map_width))
+
+    def update_marker_detected(self, new_msg):
+        self.state_vars["marker_detected"] = new_msg.data
 
 
 # ----------------------------------------------- #
@@ -644,6 +739,7 @@ if __name__ == "__main__":
 
     # Attach subscribers
     rospy.Subscriber("test_map", OccupancyGrid, state_machine.update_map)
+    rospy.Subscriber("/aruco/marker_detected", Bool, state_machine.update_marker_detected)
 
     # Run state machine
     state_machine.run_states()
