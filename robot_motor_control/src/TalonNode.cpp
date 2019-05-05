@@ -83,6 +83,7 @@ namespace robot_motor_control {
                 talon->ConfigSelectedFeedbackSensor(FeedbackDevice::CTRE_MagEncoder_Relative);
             }
 
+            talon->SetSensorPhase(_config.invert_sensor);
             talon->SelectProfileSlot(0,0);
             talon->SetInverted(_config.inverted);
             talon->EnableVoltageCompensation(true);

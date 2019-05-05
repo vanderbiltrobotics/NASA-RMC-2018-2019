@@ -27,6 +27,8 @@ int main(int argc, char **argv) {
                 config.peak_voltage = (double)v["peak_voltage"];
             if(v.hasMember("pot"))
                 config.pot = (bool)v["pot"];
+            if(v.hasMember("invert_sensor"))
+                config.invert_sensor = (bool)v["invert_sensor"];
             if(v.hasMember("P"))
                 config.P = (double)v["P"];
             if(v.hasMember("I"))
