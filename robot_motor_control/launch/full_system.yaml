@@ -26,12 +26,20 @@ talons:
   hinge_motor:
     id: 9
     inverted: False
+    pot: True
   lead_screw_motor:
     id: 4
     inverted: False
+    P: 0.15
+    I: 0.001
+    D: 10.0
   bucket_motor:
     id: 2
     inverted: False
+    invert_sensor: True
+    P: 8.0
+    I: 0.025
+    D: 550.0
   conveyor_motor:
     id: 7
     inverted: False

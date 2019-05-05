@@ -24,10 +24,11 @@ namespace robot_motor_control {
             revPub(nh.advertise<std_msgs::Bool>("reverse_limit", 1)),
             setPercentSub(nh.subscribe("set_percent_output", 1, &TalonNode::setPercentOutput, this)),
             setVelSub(nh.subscribe("set_velocity", 1, &TalonNode::setVelocity, this)),
+            setPosSub(nh.subscribe("set_position", 1, &TalonNode::setPosition, this)),
             lastUpdate(ros::Time::now()), _controlMode(ControlMode::PercentOutput), _output(0.0), disabled(false),
             configured(false), not_configured_warned(false){
+        server.updateConfig(_config);
         server.setCallback(boost::bind(&TalonNode::reconfigure, this, _1, _2));
-        server.updateConfig(config);
         talon->Set(ControlMode::PercentOutput, 0);
     }
 
@@ -45,7 +46,15 @@ namespace robot_motor_control {
         this->lastUpdate = ros::Time::now();
     }
 
+    void TalonNode::setPosition(std_msgs::Float64 output) {
+        boost::mutex::scoped_lock scoped_lock(mutex);
+        this->_controlMode = ControlMode::Position;
+        this->_output = output.data;
+        this->lastUpdate = ros::Time::now();
+    }
+
     void TalonNode::reconfigure(const TalonConfig &config, uint32_t level) {
+        ROS_INFO("Reconfigure called on %d with id %d", talon->GetDeviceID(), config.id);
         boost::mutex::scoped_lock scoped_lock(mutex);
         this->_config = config;
         this->configured = false;
@@ -83,6 +92,7 @@ namespace robot_motor_control {
                 talon->ConfigSelectedFeedbackSensor(FeedbackDevice::CTRE_MagEncoder_Relative);
             }
 
+            talon->SetSensorPhase(_config.invert_sensor);
             talon->SelectProfileSlot(0,0);
             talon->SetInverted(_config.inverted);
             talon->EnableVoltageCompensation(true);

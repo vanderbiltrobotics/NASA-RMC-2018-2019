@@ -42,6 +42,7 @@ namespace robot_motor_control{
 
         ros::Subscriber setPercentSub;
         ros::Subscriber setVelSub;
+        ros::Subscriber setPosSub;
 
         ros::Time lastUpdate;
         ControlMode _controlMode;
@@ -66,6 +67,8 @@ namespace robot_motor_control{
         void setPercentOutput(std_msgs::Float64 output);
 
         void setVelocity(std_msgs::Float64 output);
+
+        void setPosition(std_msgs::Float64 output);
 
         void update();
 
