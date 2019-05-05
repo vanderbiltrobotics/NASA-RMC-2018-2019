@@ -35,7 +35,7 @@ class DigManager:
         self.max_vel_lsc = 16000.0
         self.max_vel_bkt = 700.0
         self.max_pos_hng = -881.0    # Fully retracted
-        self.min_pos_hng = -725.0    # Digging point
+        self.min_pos_hng = -730.0    # Digging point
         self.max_pos_lsc = 10000000
         self.min_pos_lsc = 0.0
         self.max_vel_cnv = 500.0
@@ -47,6 +47,12 @@ class DigManager:
         self.gravel_depth = 0.6
         self.max_depth = 0.95
         self.lsc_home_pos = 0.1
+
+        # Digging speeds
+        self.dig_spd_bkt = 0.75
+        self.dig_spd_lsc = 0.50
+        self.dig_spd_cnv_1 = 0.2
+        self.dig_spd_cv2_2 = 0.02
 
         # Messages storing current percent outputs for each motor
         self.hng_pct_msg = Float64()
@@ -312,28 +318,31 @@ class DigManager:
         # --- DIG THROUGH BP1 - DON'T COLLECT --- #
 
         # Conveyor and bucket chain ON
-        self.set_conveyor_velocity(0.2)
-        self.set_bucket_chain_velocity(0.8)
+        self.set_conveyor_velocity(self.dig_spd_cnv_1)
+        self.set_bucket_chain_velocity(self.dig_spd_bkt)
 
         # Command lead screw to gravel depth
-        self.set_lead_screw_position(self.gravel_depth, 0.75)
+        self.set_lead_screw_position(self.gravel_depth, self.dig_spd_lsc)
 
         # --- COLLECT GRAVEL --- #
 
         # Slow down conveyor
-        self.set_conveyor_velocity(0.02)
+        self.set_conveyor_velocity(self.dig_spd_cv2_2)
 
         # Command lead screw to maximum depth
-        self.set_lead_screw_position(self.max_depth, 0.75)
+        self.set_lead_screw_position(self.max_depth, self.dig_spd_lsc)
 
         # --- RETRACT DIGGING MECHANISM --- #
 
-        # Conveyor and bucket chain off
+        # Conveyor off, slow down buckets
         self.set_conveyor_velocity(0.0)
-        self.set_bucket_chain_velocity(0.0)
+        self.set_bucket_chain_velocity(0.25)
 
         # Retract lead screw
-        self.set_lead_screw_position(self.lsc_home_pos, 0.75)
+        self.set_lead_screw_position(self.lsc_home_pos, 1.0)
+
+        # Buckets off
+        self.set_bucket_chain_velocity(0.0)
 
         # Command the hinge to driving position
         self.set_hinge_position(1.0)
@@ -377,7 +386,7 @@ if __name__ == "__main__":
     dig_manager = DigManager()
 
     # Parameter to determine control mode
-    control_mode = rospy.get_param("digging_control_mode", "pct_out")
+    control_mode = rospy.get_param("digging_control_mode", "vel_pos")
     dig_manager.update_control_mode(control_mode)
 
     # Attach a subscriber to the dig command topic
@@ -391,6 +400,12 @@ if __name__ == "__main__":
 
     # Define loop rate - should be quite fast
     loop_rate = rospy.Rate(30)
+
+    dig_manager.set_bucket_chain_velocity(0.0)
+    dig_manager.set_lead_screw_velocity(0.0)
+    dig_manager.set_conveyor_velocity(0.02)
+    dig_manager.set_hinge_position(0.0)
+
 
     # Publish updates at loop rate
     while not rospy.is_shutdown():
