@@ -30,6 +30,9 @@ talons:
   lead_screw_motor:
     id: 4
     inverted: False
+    P: 0.15
+    I: 0.001
+    D: 10.0
   bucket_motor:
     id: 2
     inverted: False
