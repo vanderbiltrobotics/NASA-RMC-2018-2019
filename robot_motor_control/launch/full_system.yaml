@@ -48,3 +48,6 @@ talons:
   conveyor_motor:
     id: 7
     inverted: False
+    P: 2.0
+    I: 0.02
+    D: 300.0
