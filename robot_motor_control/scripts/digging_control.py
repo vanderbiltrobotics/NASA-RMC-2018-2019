@@ -272,6 +272,7 @@ class DigManager:
 
     # Zero the lead screw position by running it to the backwards limit switch
     def dig_op_zero_lsc(self):
+        self.set_lead_screw_velocity(0.5)
 
         # Make sure everything but the hinge is off
         self.set_lead_screw_velocity(0.0)
@@ -400,5 +401,3 @@ if __name__ == "__main__":
             dig_manager.publish_vel_pos()
 
         loop_rate.sleep()
-
-
