@@ -178,162 +178,51 @@ class DigManager:
         self.update_pct_output()
 
     def dig_op_zero_lsc(self):
-
-
+        self.set_lead_screw_velocity(0.5)
 
     # Raise hinge angle (make more vertical)
     def dig_op_raise_hinge(self):
+        self.set_hinge_position(self.max_pos_hng)
 
-        ##TODO switch to hinge_to_dig_position()
-        # hinge_to_dig_position()
-
-        # Run hinge motor until correect upright angle achieved
-        start_time = rospy.Time.now()
-
-        # Turn hinge motor on
-        self.update_pct_output(
-            hng=0.2
-        )
-
-        # Define loop rate
-        loop_rate = rospy.Rate(10)
-
-        # Spin motors for the specified duration
-        while rospy.Time.now() - start_time < 3.0:
-            loop_rate.sleep()
-
-        # Turn motors off
-        self.update_pct_output()
 
     # Lower bucket chain and dig - not collecting material yet
     def dig_op_dig(self):
 
-        # Run bucket chain motor and lead screw motor
-        start_time = rospy.Time.now()
+        # Start collecting
+        # TODO find good velocity values
+        self.set_bucket_chain_velocity(0.5)
+        self.set_conveyor_velocity(0.1)
 
-        # Define loop rate
-        loop_rate = rospy.Rate(10)
+        # Set lead screw position into correct place
+        # TODO change position and velocity values
+        self.set_lead_screw_position(0.5, 0.5)
 
-        # --- LOWER BUCKET CHAIN TO GRAVEL DEPTH --- #
-        # Use set_bucket_chain_velocity()
-
-        # Turn bucket chain motor, lead screw motor, conveyor motors on
-        self.update_pct_output(
-            lsc=0.2,
-            bkt=0.2,
-            cnv=0.2
-        )
-
-        # Wait until gravel depth reached
-        while rospy.Time.now() - start_time < 3.0:
-            loop_rate.sleep()
-
-        # --- COLLECT MATERIAL --- #
-
-        collection_steps = 10
-        pulse_conveyor_time = 1.0
-        pulse_collect_time = 2.0
-
-        # Advance conveyor in 10 steps
-        for i in range(collection_steps):
-
-            # Turn conveyor on
-            self.update_pct_output(
-                lsc=0.1,
-                bkt=0.2,
-                cnv=0.2
-            )
-
-            # Wait for specified pulse duration
-            pulse_start = rospy.Time.now()
-
-            while rospy.Time.now() - pulse_start < pulse_conveyor_time:
-                loop_rate.sleep()
-
-            # Turn conveyor off
-            self.update_pct_output(
-                lsc=0.1,
-                bkt=0.2
-            )
-
-            # Collect material for specified collect duration
-            pulse_start = rospy.Time.now()
-
-            while rospy.Time.now() - pulse_start < pulse_collect_time:
-                loop_rate.sleep()
-
-            # Turn motors off
-            self.update_pct_output()
-
-        # Turn motors off
-        self.update_pct_output()
 
     # Raise bucket chain, don't dig
     def dig_op_raise_bucket_chain(self):
+        # CONVEYOR AND BUCKET CHAIN WILL BE MOTIONLESS
 
-        # Run bucket chain motor and lead screw motor
-        start_time = rospy.Time.now()
+        # Stop bucket chain
+        self.set_bucket_chain_velocity(0)
+        self.set_conveyor_velocity(0)
 
-        # Define loop rate
-        loop_rate = rospy.Rate(10)
+        # Raise lead screw
+        # TODO Find good position and speed value
+        self.set_lead_screw_position(0, -0.5)
 
-        # --- LOWER BUCKET CHAIN TO GRAVEL DEPTH --- #
-        # Use set_bucket_chain_velocity
-
-        # Retract bucket chain by running lead screw motor backwards
-        self.update_pct_output(
-            lsc=-0.2
-        )
-
-        # Wait until we've reached retracted position
-        while rospy.Time.now() - start_time < 3.0:
-            loop_rate.sleep()
-
-        # Turn motors off
-        self.update_pct_output()
 
     # Lower hinge angle (make less vertical)
     def dig_op_lower_hinge(self):
+        self.set_hinge_position(self.min_pos_hng)
 
-        # Run hinge motor until correect upright angle achieved
-        start_time = rospy.Time.now()
-
-        # Turn hinge motor on
-        self.update_pct_output(
-            hng=-0.2
-        )
-
-        # Define loop rate
-        loop_rate = rospy.Rate(10)
-
-        # Spin motors for the specified duration
-        while rospy.Time.now() - start_time < 3.0:
-            loop_rate.sleep()
-
-        # Turn motors off
-        self.update_pct_output()
 
     # Depositing material - conveyor only
     def dig_op_deposit_material(self):
 
-        # Run conveyor for 5 seconds to empty all material
-        start_time = rospy.Time.now()
+        # TODO Make sure velocity is a good one
+        self.set_conveyor_velocity(0.5)
 
-        # Turn motors on
-        self.update_pct_output(
-            cnv=0.2
-        )
 
-        # Define loop rate
-        loop_rate = rospy.Rate(10)
-
-        # Spin motors for the specified duration
-        while rospy.Time.now() - start_time < 5.0:
-
-            loop_rate.sleep()
-
-        # Turn motors off
-        self.update_pct_output()
 
 
 
@@ -370,5 +259,3 @@ if __name__ == "__main__":
             pass
 
         loop_rate.sleep()
-
-
