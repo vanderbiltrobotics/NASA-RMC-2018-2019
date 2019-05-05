@@ -44,10 +44,10 @@ class TeleopControl:
         # Initialize drive speed publishers
         self.publishers = {
             "pub_drive_cmd": rospy.Publisher('drive_cmd', Twist, queue_size=0),
-            "pub_hng": rospy.Publisher("dig_motor_speeds/hinge", Float64, queue_size=0),
-            "pub_lsc": rospy.Publisher("dig_motor_speeds/lead_screw", Float64, queue_size=0),
-            "pub_bkt": rospy.Publisher("dig_motor_speeds/bucket_chain", Float64, queue_size=0),
-            "pub_cnv": rospy.Publisher("dig_motor_speeds/conveyor", Float64, queue_size=0),
+            "pub_hng": rospy.Publisher("dig_motor_pct_out/hinge", Float64, queue_size=0),
+            "pub_lsc": rospy.Publisher("dig_motor_pct_out/lead_screw", Float64, queue_size=0),
+            "pub_bkt": rospy.Publisher("dig_motor_pct_out/bucket_chain", Float64, queue_size=0),
+            "pub_cnv": rospy.Publisher("dig_motor_pct_out/conveyor", Float64, queue_size=0),
         }
 
         self.state = {

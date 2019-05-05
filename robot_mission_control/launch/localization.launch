@@ -23,7 +23,7 @@
     <param name="pp_robot_frame_id" value="robot_center"/>
     <param name="pp_aruco_frame_id" value="aruco_board_origin"/>
     <node machine="jetson" name="aruco" pkg="robot_slam" type="aruco_localization.py"/>
-    <node machine="jetson" name="aruco_camera_centering" pkg="robot_slam" type="aruco_camera_centering.py" />
+    <node name="aruco_camera_centering" pkg="robot_slam" type="aruco_camera_centering.py" />
 
     <!-- EKF for improved robot pose estimation -->
     <param name="unfiltered_pose_topic" value="aruco/pose_raw"/>

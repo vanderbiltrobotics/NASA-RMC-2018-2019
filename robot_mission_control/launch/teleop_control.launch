@@ -1,10 +1,11 @@
 <launch>
-    <node pkg="joy" type="joy_node" name="joystick">
-        <param name="dev" value="/dev/input/js0"/>
-    </node>
 
-    <!-- Teleop control node - reads joy command, publishes Twist message -->
-    <node name="teleop_control" pkg="robot_mission_control" type="teleop_control.py"/>
+    <!-- Declare raspberry pi and jetson as a machines to run nodes on-->
+    <machine name="jetson" address="192.168.0.103" user="vur" password="theswapbot" env-loader="~/catkin_ws/devel_isolated/robot_ros_env.sh"/>
+    <machine name="rpi" address="192.168.0.105" user="vur" password="theswapbot" env-loader="~/catkin_ws/devel/robot_ros_env.sh"/>
+
+
+    <!-- JETSON NODES -->
 
     <!-- Drive motor control node - translates twist message into individual motor speeds -->
     <param name="wheel_separation" type="double" value="0.305"/>
@@ -14,28 +15,33 @@
     <param name="max_out_lin_vel" type="double" value="1.0"/>
     <param name="max_out_ang_vel" type="double" value="1.0"/>
     <param name="output_mode" type="string" value="vel"/>
-    <param name="queue_size" type="int" value="15"/>
+    <param name="queue_size" type="int" value="30"/>
     <node name="drive_speed_conversion" pkg="robot_navigation" type="drive_speed_conversion.py"/>
 
-    <!--&lt;!&ndash; Dig motor control node &ndash;&gt;-->
-    <!--<node name="digging_control" pkg="robot_motor_control" type="digging_control.py"/>-->
+    <!-- Dig motor control node -->
+    <param name="digging_control_mode" value="pct_out" />
+    <node name="digging_control" pkg="robot_motor_control" type="digging_control.py"/>
 
     <!-- Node to publish concise summary of all motor speeds -->
     <node name="motor_speed_summary_pub" pkg="robot_motor_control" type="motor_speed_summary.py"/>
 
-    <!-- Update node - reads mission control messages and updates them at a slower rate -->
-    <!--<param name="update_rate" type="int" value="1"/>-->
-    <!--<node name="update_publisher" pkg="robot_misc_tools" type="update_publisher.py"/>-->
 
-
-    <!-- Declare raspberry pi as a machine to run nodes on-->
-    <machine name="rpi" address="192.168.0.105" user="vur" password="theswapbot"
-             env-loader="~/catkin_ws/devel/robot_ros_env.sh"/>
+    <!-- RPI NODES -->
 
     <!-- Motor_control node - runs on raspberry pi -->
-    <rosparam command="load" file="$(find robot_motor_control)/launch/full_system.yaml"/>
-    <node machine="rpi" pkg="robot_motor_control" type="motor_control_node" name="motor_control" respawn="false"/>
-    <!--<node pkg="robot_motor_control" type="motor_control_node" name="motor_control" respawn="false"/>-->
+    <!--<rosparam command="load" file="$(find robot_motor_control)/launch/full_system.yaml"/>-->
+    <!--<node machine="rpi" pkg="robot_motor_control" type="motor_control_node" name="motor_control" respawn="false"/>-->
+
+
+    <!-- LAPTOP NODES -->
+
+    <!-- Joystick control node -->
+    <node pkg="joy" type="joy_node" name="joystick">
+        <param name="dev" value="/dev/input/js0"/>
+    </node>
+
+    <!-- Teleop control node - reads joy command, publishes Twist message -->
+    <node name="teleop_control" pkg="robot_mission_control" type="teleop_control.py"/>
 
 
 </launch>
