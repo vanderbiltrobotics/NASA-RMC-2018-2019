@@ -24,6 +24,7 @@ namespace robot_motor_control {
             revPub(nh.advertise<std_msgs::Bool>("reverse_limit", 1)),
             setPercentSub(nh.subscribe("set_percent_output", 1, &TalonNode::setPercentOutput, this)),
             setVelSub(nh.subscribe("set_velocity", 1, &TalonNode::setVelocity, this)),
+            setPosSub(nh.subscribe("set_position", 1, &TalonNode::setPosition, this)),
             lastUpdate(ros::Time::now()), _controlMode(ControlMode::PercentOutput), _output(0.0), disabled(false),
             configured(false), not_configured_warned(false){
         server.updateConfig(_config);
@@ -41,6 +42,13 @@ namespace robot_motor_control {
     void TalonNode::setVelocity(std_msgs::Float64 output) {
         boost::mutex::scoped_lock scoped_lock(mutex);
         this->_controlMode = ControlMode::Velocity;
+        this->_output = output.data;
+        this->lastUpdate = ros::Time::now();
+    }
+
+    void TalonNode::setPosition(std_msgs::Float64 output) {
+        boost::mutex::scoped_lock scoped_lock(mutex);
+        this->_controlMode = ControlMode::Position;
         this->_output = output.data;
         this->lastUpdate = ros::Time::now();
     }
