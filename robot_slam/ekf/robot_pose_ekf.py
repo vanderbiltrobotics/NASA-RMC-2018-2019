@@ -39,7 +39,7 @@ class ArucoExtendedKalmanFilter:
         '''
 
         # Define the measurement noise covariance matrix
-        self.arucoEKF.R = np.eye(7) * np.array([0.05, 0.05, 0.05, 0.20, 0.20, 0.20, 0.20])
+        self.arucoEKF.R = np.eye(7) * np.array([0.05, 0.05, 0.05, 0.01, 0.01, 0.01, 0.01])
 
         # Define the process noise covariance matrix
         #arucoEKF.Q = 
