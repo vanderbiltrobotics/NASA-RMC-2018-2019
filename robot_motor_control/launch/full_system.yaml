@@ -33,7 +33,7 @@ talons:
     I: 0.0015
     D: 0.0
   lead_screw_motor:
-    id: 4
+    id: 8
     inverted: False
     invert_sensor: True
     P: 0.15
