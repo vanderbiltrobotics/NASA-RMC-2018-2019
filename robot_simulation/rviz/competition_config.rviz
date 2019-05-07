@@ -4,7 +4,9 @@ Panels:
     Name: Displays
     Property Tree Widget:
       Expanded:
-        - /Global Options1
+        - /TF1
+        - /TF1/Frames1
+        - /Map1
       Splitter Ratio: 0.5
     Tree Height: 719
   - Class: rviz/Selection
@@ -109,18 +111,20 @@ Visualization Manager:
       Enabled: true
       Frame Timeout: 15
       Frames:
-        All Enabled: true
+        All Enabled: false
         aruco_board_origin:
           Value: true
         camera_link:
-          Value: true
+          Value: false
         camera_mount_base:
-          Value: true
+          Value: false
         kinect_base:
-          Value: true
+          Value: false
         kinect_mount_base:
-          Value: true
+          Value: false
         localization_camera:
+          Value: true
+        localization_camera_raw:
           Value: true
         robot_center:
           Value: true
@@ -131,7 +135,7 @@ Visualization Manager:
         robot_frame_FL:
           Value: true
         robot_frame_FLJ:
-          Value: true
+          Value: false
         robot_frame_FR:
           Value: true
         world:
@@ -159,6 +163,8 @@ Visualization Manager:
                           {}
                   robot_frame_FLJ:
                     {}
+            localization_camera_raw:
+              {}
       Update Interval: 0
       Value: true
     - Alpha: 0.300000012
@@ -196,25 +202,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 9.08534718
+      Distance: 7.13752699
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.0599999987
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 1.43442917
-        Y: 3.74070072
-        Z: -2.23523951
+        X: 3.04000711
+        Y: 1.64772689
+        Z: 0.869927049
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.0500000007
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.00999999978
-      Pitch: 1.35479546
+      Pitch: 0.934795737
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 6.2804203
+      Yaw: 4.77041388
     Saved: ~
 Window Geometry:
   Displays:

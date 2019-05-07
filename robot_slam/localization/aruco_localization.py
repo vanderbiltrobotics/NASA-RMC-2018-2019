@@ -23,6 +23,8 @@ import cv2
 import numpy as np
 import yaml
 
+import math
+
 # Camera parameters
 DEFAULT_CALIB_FILE = 'camera_a.yaml'
 CALIBRATION_FILE_DIR = rospkg.RosPack().get_path("robot_sensors") + '/cameras/camera_calibration/calibration_data/'
@@ -156,6 +158,9 @@ class ImageHandler:
         # CV bridge object for converting ROS images to opencv
         self.bridge = CvBridge()
 
+        self.prev_rvec = None
+        self.prev_tvec = None
+
 
     # Callback for received image frames
     def image_callback(self, data):
@@ -179,15 +184,18 @@ class ImageHandler:
         corners, ids, rejectedImgPoints = aruco.detectMarkers(cv_image, ARUCO_DICT, parameters=ARUCO_PARAM)
 
         # Refine for improved accuracy
-        aruco.refineDetectedMarkers(cv_image, WEST_2x1_BOARD, corners, ids, rejectedImgPoints, self.cmatx, self.dist)
+        aruco.refineDetectedMarkers(cv_image, SOUTH_2x1_BOARD, corners, ids, rejectedImgPoints, self.cmatx, self.dist)
 
         # If markers found, estimate pose
         if ids is not None:
 
             aruco.drawDetectedMarkers(cv_image, corners, ids)
 
+            if self.prev_rvec is None:
+                _, self.prev_rvec, self.prev_tvec = aruco.estimatePoseBoard(corners, ids, SOUTH_2x1_BOARD, self.cmatx, self.dist)
+
             # Compute pose estimate based on board corner positions
-            retval, rvec, tvec = aruco.estimatePoseBoard(corners, ids, WEST_2x1_BOARD, self.cmatx, self.dist)
+            retval, rvec, tvec = aruco.estimatePoseBoard(corners, ids, SOUTH_2x1_BOARD, self.cmatx, self.dist, rvec=self.prev_rvec, tvec=self.prev_tvec, useExtrinsicGuess=True)
 
             # If succesful, convert rvec from rpy to quaternion, fill pose message
             if retval != 0:
@@ -195,21 +203,24 @@ class ImageHandler:
                 # Set param to true
                 self.first_marker_detected = True
 
+                self.prev_tvec = tvec
+                self.prev_rvec = rvec
+
                 # - IMPORTANT - "quaternion_from_euler" is STUPID and changes the values of rvec - if you want to
                 # use rvec after calling this function, you need to make a copy and use the copy
                 copy = np.copy(rvec)
 
                 # Convert the 'rvec' from rpy to a quaternion
-                quat = tf.transformations.quaternion_from_euler(rvec[0], rvec[1], rvec[2])
+                quat = tf.transformations.quaternion_from_euler(rvec[1], rvec[0], rvec[2])
 
                 # Store pose and quaternion information of Aruco Board
                 pose_msg.position.x = tvec[2]
-                pose_msg.position.y = -tvec[0]
+                pose_msg.position.y = tvec[0]
                 pose_msg.position.z = tvec[1]
-                pose_msg.orientation.x = quat[0]
-                pose_msg.orientation.y = quat[1]
-                pose_msg.orientation.z = quat[2]
-                pose_msg.orientation.w = quat[3]
+                pose_msg.orientation.x = 0.0 #quat[0]
+                pose_msg.orientation.y = 0.0 #quat[1]
+                pose_msg.orientation.z = 0.0 #quat[2]
+                pose_msg.orientation.w = 1.0 #quat[3]
 
                 # Calculate the average x distance between the corners
                 min = corners[0][0, 0, 0]
@@ -224,7 +235,6 @@ class ImageHandler:
                 # Publish pose estimate
                 self.pose_pub.publish(pose_msg)
                 self.avg_of_corners.publish((min + max) / 2.0)
-
 
             # Update boolean message
             bool_msg.data = retval
@@ -290,8 +300,8 @@ class ImageHandler:
             self.active_board_pose = south_2x1_pose
 
         # Publish the pose of the active board
-        self.active_board = WEST_2x1_BOARD
-        self.aruco_pos_pub.publish(west_2x1_pose)
+        self.active_board = SOUTH_2x1_BOARD
+        self.aruco_pos_pub.publish(south_2x1_pose)
 
 
 if __name__ == "__main__":

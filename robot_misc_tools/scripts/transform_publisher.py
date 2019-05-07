@@ -5,9 +5,14 @@ import rospy
 import tf2_ros
 from geometry_msgs.msg import Pose
 
+from tf import transformations as tft
+from tf import TransformerROS
+
 # Import other required packages
 import json
 import sys
+
+import numpy as np
 
 # Paths to transform file directories
 PATH_TO_DIR_STATIC = sys.path[0] + "/tf_configs_static/"
@@ -52,7 +57,7 @@ def get_transform_msgs(transforms):
 class PoseToTF():
 
     # Constructor
-    def __init__(self, pose_topic, child_id, frame_id):
+    def __init__(self, pose_topic, child_id, frame_id, invert):
 
         # Subscriber to pose topic
         self.pose_sub = rospy.Subscriber(pose_topic, Pose, self.tf_from_pose)
@@ -64,6 +69,9 @@ class PoseToTF():
         self.tf_msg = tf2_ros.TransformStamped()
         self.tf_msg.header.frame_id = frame_id
         self.tf_msg.child_frame_id = child_id
+
+        # Does this transform need to be inverted
+        self.invert = invert
 
     # Callback function for pose messages. Converts to tf msg and publishes
     def tf_from_pose(self, pose_msg):
@@ -82,8 +90,47 @@ class PoseToTF():
         self.tf_msg.transform.rotation.z = pose_msg.orientation.z
         self.tf_msg.transform.rotation.w = pose_msg.orientation.w
 
+
         if sum ([self.tf_msg.transform.rotation.x, self.tf_msg.transform.rotation.y,
                 self.tf_msg.transform.rotation.z, self.tf_msg.transform.rotation.w]) != 0.0:
+
+            if self.invert == "True":
+
+                # Create transformerROS and add our transform
+                transformer = TransformerROS()
+                transformer.setTransform(self.tf_msg)
+
+                # Lookup the transform
+                (trans, rot) = transformer.lookupTransform(self.tf_msg.header.frame_id, self.tf_msg.child_frame_id, rospy.Time(0))
+
+                # Create transform object
+                transform = tft.concatenate_matrices(tft.translation_matrix(trans), tft.quaternion_matrix(rot))
+
+                # Invert
+                inverse_tf = tft.inverse_matrix(transform)
+
+                # Get translation, rotation vectors back out
+                translation = tft.translation_from_matrix(inverse_tf)
+                quaternion = tft.quaternion_from_matrix(inverse_tf)
+
+                # Get RPY
+                rpy = tft.euler_from_quaternion(quaternion)
+                rpy_new = [rpy[0], rpy[1], -rpy[2]]
+
+                # Back to quaternion
+                quaternion = tft.quaternion_from_euler(rpy_new[0], rpy_new[1], rpy_new[2])
+
+                # Update translation
+                self.tf_msg.transform.translation.x = translation[0]
+                self.tf_msg.transform.translation.y = -translation[1]
+                self.tf_msg.transform.translation.z = translation[2]
+
+                # Update rotation
+                self.tf_msg.transform.rotation.x = quaternion[0]
+                self.tf_msg.transform.rotation.y = quaternion[1]
+                self.tf_msg.transform.rotation.z = quaternion[2]
+                self.tf_msg.transform.rotation.w = quaternion[3]
+
 
             # Publish transform
             self.broadcaster.sendTransform(self.tf_msg)
@@ -123,9 +170,10 @@ if __name__ == "__main__":
         frame_id = transform["frame_id"]
         child_id = transform["child_id"]
         pose_topic = transform["pose_topic"]
+        invert = transform["invert"]
 
         # Create a new PoseToTF object
-        PoseToTF(pose_topic, child_id, frame_id)
+        PoseToTF(pose_topic, child_id, frame_id, invert)
 
     # Spin indefinitely
     rospy.spin()

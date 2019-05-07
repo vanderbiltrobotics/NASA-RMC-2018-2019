@@ -3,17 +3,26 @@
         {
             "frame_id" : "world",
             "child_id" : "aruco_board_origin",
-            "pose_topic" : "aruco/active_board_position"
+            "pose_topic" : "aruco/active_board_pose",
+            "invert": "False"
         },
         {
             "frame_id" : "aruco_board_origin",
             "child_id" : "localization_camera",
-            "pose_topic" : "ekf/pose_filtered"
+            "pose_topic" : "ekf/pose_filtered",
+            "invert": "True"
+        },
+        {
+            "frame_id" : "aruco_board_origin",
+            "child_id" : "localization_camera_raw",
+            "pose_topic" : "aruco/pose_raw",
+            "invert": "False"
         },
         {
             "frame_id" : "localization_camera",
             "child_id" : "camera_mount_base",
-            "pose_topic" : "camera_mount_pose"
+            "pose_topic" : "camera_mount_pose",
+            "invert": "False"
         }
     ]
 }

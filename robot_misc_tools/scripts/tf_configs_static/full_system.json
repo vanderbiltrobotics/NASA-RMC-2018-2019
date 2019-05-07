@@ -14,8 +14,8 @@
         {
             "frame_id" : "robot_frame_BL",
             "child_id" : "robot_center",
-            "trans_x" : 0,
-            "trans_y" : 0,
+            "trans_x" : 0.4225,
+            "trans_y" : -0.225,
             "trans_z" : 0,
             "rot_x" : 0,
             "rot_y" : 0,
