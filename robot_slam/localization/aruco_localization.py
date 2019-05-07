@@ -156,6 +156,7 @@ class ImageHandler:
         # CV bridge object for converting ROS images to opencv
         self.bridge = CvBridge()
 
+
     # Callback for received image frames
     def image_callback(self, data):
 
@@ -177,22 +178,26 @@ class ImageHandler:
         # Find corners and IDs of aruco markers
         corners, ids, rejectedImgPoints = aruco.detectMarkers(cv_image, ARUCO_DICT, parameters=ARUCO_PARAM)
 
-        aruco.drawDetectedMarkers(cv_image, corners)
-
         # Refine for improved accuracy
-        # aruco.refineDetectedMarkers(cv_image, self.active_board, corners, ids, rejectedImgPoints, self.cmatx, self.dist)
+        aruco.refineDetectedMarkers(cv_image, WEST_2x1_BOARD, corners, ids, rejectedImgPoints, self.cmatx, self.dist)
 
         # If markers found, estimate pose
         if ids is not None:
 
+            aruco.drawDetectedMarkers(cv_image, corners, ids)
+
             # Compute pose estimate based on board corner positions
-            retval, rvec, tvec = aruco.estimatePoseBoard(corners, ids, self.active_board, self.cmatx, self.dist)
+            retval, rvec, tvec = aruco.estimatePoseBoard(corners, ids, WEST_2x1_BOARD, self.cmatx, self.dist)
 
             # If succesful, convert rvec from rpy to quaternion, fill pose message
-            if retval:
+            if retval != 0:
 
                 # Set param to true
                 self.first_marker_detected = True
+
+                # - IMPORTANT - "quaternion_from_euler" is STUPID and changes the values of rvec - if you want to
+                # use rvec after calling this function, you need to make a copy and use the copy
+                copy = np.copy(rvec)
 
                 # Convert the 'rvec' from rpy to a quaternion
                 quat = tf.transformations.quaternion_from_euler(rvec[0], rvec[1], rvec[2])
@@ -206,7 +211,7 @@ class ImageHandler:
                 pose_msg.orientation.z = quat[2]
                 pose_msg.orientation.w = quat[3]
 
-                # Calculate the average x distance between the corners 
+                # Calculate the average x distance between the corners
                 min = corners[0][0, 0, 0]
                 max = corners[0][0, 0, 0]
 
@@ -220,7 +225,6 @@ class ImageHandler:
                 self.pose_pub.publish(pose_msg)
                 self.avg_of_corners.publish((min + max) / 2.0)
 
-                aruco.drawAxis(cv_image, self.cmatx, self.dist, rvec, tvec, 0.1)
 
             # Update boolean message
             bool_msg.data = retval
@@ -286,8 +290,8 @@ class ImageHandler:
             self.active_board_pose = south_2x1_pose
 
         # Publish the pose of the active board
-        self.active_board = SOUTH_2x1_BOARD
-        self.aruco_pos_pub.publish(south_2x1_pose)
+        self.active_board = WEST_2x1_BOARD
+        self.aruco_pos_pub.publish(west_2x1_pose)
 
 
 if __name__ == "__main__":
