@@ -17,22 +17,30 @@ int main(int argc, char **argv)
 	
 	AHRS com = AHRS("/dev/ttyACM0");
 
+	msg.header.seq = 0;
 	msg.header.stamp = ros::Time::now();
+	msg.header.frame_id = "0";
 
-	msg.angular_velocity.x = AHRSPosUpdate.vel_x; 
-	msg.angular_velocity.y = AHRSPosUpdate.vel_y;
-	msg.angular_velocity.z = AHRSPosUpdate.vel_z;
-	msg.angular_velocity_covariance = {-1, 0, 0, 0, 0, 0, 0, 0, 0}; 
+	msg.angular_velocity.x = com.GetRawGyroX(); 
+	msg.angular_velocity.y = com.GetRawGyroY();
+	msg.angular_velocity.z = com.GetRawGyroZ();
+	msg.angular_velocity_covariance = {-1, 0, 0, 
+					    0, 0, 0, 
+					    0, 0, 0}; 
 
-	msg.linear_acceleration.x = AHRSUpdateBase.linear_accel_x;
-	msg.linear_acceleration.y = AHRSUpdateBase.linear_accel_y;
-	msg.linear_acceleration.z = AHRSUpdateBase.linear_accel_z;
-	msg.linear_acceleration_covariance = {-1, 0, 0, 0, 0, 0, 0, 0, 0};
+	msg.linear_acceleration.x = com.GetRawAccelX();
+	msg.linear_acceleration.y = com.GetRawAccelY();
+	msg.linear_acceleration.z = com.GetRawAccelZ();
+	msg.linear_acceleration_covariance = {-1, 0, 0, 
+					       0, 0, 0, 
+					       0, 0, 0};
 
-	msg.orientation.x = AHRSUpdateBase.quat_x;
-	msg.orientation.y = AHRSUpdateBase.quat_y;
-	msg.orientation.z = AHRSUpdateBase.quat_z
-	msg.orientation_covariance = {-1, 0, 0, 0, 0, 0, 0, 0, 0};
+	msg.orientation.x = com.GetQuaternionX();
+	msg.orientation.y = com.GetQuaternionY();
+	msg.orientation.z = com.GetQuaternionZ();
+	msg.orientation_covariance = {-1,  0,  0, 
+				       0, -1,  0, 
+				       0,  0, -1};
 
 	ROS_INFO("Angular Velocity: 	(%s, %s, %s)\n
 		  Linear Acceleration:  (%s, %s, %s)\n

@@ -4,7 +4,9 @@
 
 void callback(const std_msgs::String::ConstPtr& msg)
 {
-    ROS_INFO("heard [%s]", msg->data.c_str());
+    ROS_INFO("heard [%s %s %s]", msg->angular_velocity.c_str()
+			       , msg->linear_acceleration.c_str()
+			       , msg->orientation.c_str());
 }
 
 int main(int argc, char **argv)
