@@ -41,7 +41,7 @@ class ArucoExtendedKalmanFilter:
         '''
 
         # Define the measurement noise covariance matrix
-        self.arucoEKF.R = np.eye(6) * np.array([0.05, 0.05, 0.05, 0.1, 0.1, 0.1])
+        self.arucoEKF.R = np.eye(6) * np.array([0.05, 0.05, 0.1, 0.1, 0.1, 0.1])
 
         # Define the process noise covariance matrix
         #arucoEKF.Q =
@@ -68,7 +68,7 @@ class ArucoExtendedKalmanFilter:
         angle = acos(dp) * 2
 
         self.last_orientation = new_orientation
-        return angle > pi / 20.0
+        return angle > (pi / 20.0)
 
 
 
@@ -99,7 +99,7 @@ class ArucoExtendedKalmanFilter:
         z[5, 0] = rpy[2]
 
         # Check if angle change exceeds threshold
-        bad_value = self.check_distance(quaternion)
+        bad_value = False # lf.check_distance(quaternion)
 
         if self.arucoDetected and not bad_value:
             self.arucoEKF.predict_update(z, self.HJacobian, self.hx)

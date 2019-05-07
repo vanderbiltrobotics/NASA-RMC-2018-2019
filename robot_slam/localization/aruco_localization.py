@@ -206,21 +206,26 @@ class ImageHandler:
                 self.prev_tvec = tvec
                 self.prev_rvec = rvec
 
-                # - IMPORTANT - "quaternion_from_euler" is STUPID and changes the values of rvec - if you want to
-                # use rvec after calling this function, you need to make a copy and use the copy
-                copy = np.copy(rvec)
+
+                # Compute pose of Camera relative to world
+
+                dst, _ = cv2.Rodrigues(rvec)
+                R = dst.T
+                tvec = np.dot(-R, tvec)
+                rvec, _ = cv2.Rodrigues(R)
+                rospy.loginfo(rvec.shape)
 
                 # Convert the 'rvec' from rpy to a quaternion
-                quat = tf.transformations.quaternion_from_euler(rvec[1], rvec[0], rvec[2])
+                quat = tf.transformations.quaternion_from_euler(rvec[1, 0], rvec[0, 0], -rvec[2, 0])
 
                 # Store pose and quaternion information of Aruco Board
-                pose_msg.position.x = tvec[2]
-                pose_msg.position.y = tvec[0]
-                pose_msg.position.z = tvec[1]
-                pose_msg.orientation.x = 0.0 #quat[0]
-                pose_msg.orientation.y = 0.0 #quat[1]
-                pose_msg.orientation.z = 0.0 #quat[2]
-                pose_msg.orientation.w = 1.0 #quat[3]
+                pose_msg.position.x = tvec[2, 0]
+                pose_msg.position.y = tvec[0, 0]
+                pose_msg.position.z = tvec[1, 0]
+                pose_msg.orientation.x = quat[0]
+                pose_msg.orientation.y = quat[1]
+                pose_msg.orientation.z = quat[2]
+                pose_msg.orientation.w = quat[3]
 
                 # Calculate the average x distance between the corners
                 min = corners[0][0, 0, 0]
