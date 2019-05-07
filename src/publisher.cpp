@@ -1,5 +1,5 @@
 #include "ros/ros.h"
-#include "./navXTimeSync/AHRS.h"
+#include "navXTimeSync/AHRS.h"
 #include "sensor_msgs/Imu.h"
 
 int main(int argc, char **argv)
@@ -10,7 +10,6 @@ int main(int argc, char **argv)
     ros::Publisher pub = n.advertise<std_msgs::String>("gyro", 1000);
     ros::Rate loop_rate(10);
    
-    int count(0);
     while (ros::ok())
     {
 	sensor_msgs::Imu msg;	
@@ -54,7 +53,6 @@ int main(int argc, char **argv)
 	ros.spinOnce();
 
 	loop_rate.sleep();
-	++count;
     }
 
     return 0;
