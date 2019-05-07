@@ -81,6 +81,8 @@
 
         <!-- node name="DIG CONTROLLER" pkg="DIG CONTROLLER" type="DIG CONTROLLER" / -->
 
+        <!--Rosbag data logging -->
+        <node pkg="rosbag" type="record" name="cmds" args="-a full_robot_data"/>
 
     </group>
 
