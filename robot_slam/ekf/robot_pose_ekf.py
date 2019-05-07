@@ -17,7 +17,9 @@ from std_msgs.msg import Bool
 # Import other required packages
 from filterpy.kalman import EKF
 import numpy as np
-from math import sqrt
+from math import acos, pi
+
+from tf.transformations import euler_from_quaternion, quaternion_from_euler
 
 
 class ArucoExtendedKalmanFilter:
@@ -30,7 +32,7 @@ class ArucoExtendedKalmanFilter:
         # Second arugment is dimension of the measurement input Z
         # For AruCo, measurement input is (x,y,theta)
 
-        self.arucoEKF = EKF.ExtendedKalmanFilter(7,7)
+        self.arucoEKF = EKF.ExtendedKalmanFilter(6,6)
 
         '''
         EKF.x initialized to zeros by constructor
@@ -39,78 +41,107 @@ class ArucoExtendedKalmanFilter:
         '''
 
         # Define the measurement noise covariance matrix
-        self.arucoEKF.R = np.eye(7) * np.array([0.05, 0.05, 0.05, 0.01, 0.01, 0.01, 0.01])
+        self.arucoEKF.R = np.eye(6) * np.array([0.05, 0.05, 0.05, 0.1, 0.1, 0.1])
 
         # Define the process noise covariance matrix
-        #arucoEKF.Q = 
-
-        # Consecutively increasing ID for header in pose with covariance stamped
-        self.seqID = 0
+        #arucoEKF.Q =
 
         self.acuroDetected = False
+        self.first_pass = True
+
+        self.last_orientation = None
 
 
     def arucoDetected(self, msg):
         self.arucoDetected = msg.data
 
 
-    def update(self,pose):
-        #Convert Pose object into a 7x1 numpy array to pass to 
-        z = np.concatenate((
-            [pose.position.x], 
-            [pose.position.y], 
-            [pose.position.z], 
-            [pose.orientation.x], 
-            [pose.orientation.y], 
-            [pose.orientation.z],
-            [pose.orientation.w]
-        )).reshape((7,1))
+    def check_distance(self, new_orientation):
 
-        if self.arucoDetected:
+        # If this is the first time, not a bad value
+        if self.last_orientation is None:
+            self.last_orientation = new_orientation
+            return False
+
+        # Otherwise, get angle between new and old orientation
+        dp = np.dot(np.array(self.last_orientation), np.array(new_orientation))
+        angle = acos(dp) * 2
+
+        self.last_orientation = new_orientation
+        return angle > pi / 20.0
+
+
+
+    def update(self,pose):
+
+        # Array to store new info in
+        z = np.zeros(shape=(6, 1))
+
+        # Get translation information
+        z[0, 0] = pose.position.x
+        z[1, 0] = pose.position.y
+        z[2, 0] = pose.position.z
+
+        # Get quaternion
+        quaternion = [
+            pose.orientation.x,
+            pose.orientation.y,
+            pose.orientation.z,
+            pose.orientation.w
+        ]
+
+        # Get convert pose from quaternion to euler
+        rpy = euler_from_quaternion(quaternion)
+
+        # Add rpy to z
+        z[3, 0] = rpy[0]
+        z[4, 0] = rpy[1]
+        z[5, 0] = rpy[2]
+
+        # Check if angle change exceeds threshold
+        bad_value = self.check_distance(quaternion)
+
+        if self.arucoDetected and not bad_value:
             self.arucoEKF.predict_update(z, self.HJacobian, self.hx)
 
 
     def getPose(self):
+
+        # Create pose message
         pose = Pose()
+
+        # Fill position values
         pose.position.x = self.arucoEKF.x[0][0]
         pose.position.y = self.arucoEKF.x[1][0]
         pose.position.z = self.arucoEKF.x[2][0]
-        new_x = self.arucoEKF.x[3][0]
-        new_y = self.arucoEKF.x[4][0]
-        new_z = self.arucoEKF.x[5][0]
-        new_w = self.arucoEKF.x[6][0]
 
-        # Normalize quaternion
-        mag = sqrt(new_x**2 + new_y**2 + new_z**2 + new_w**2)
+        # Convert rpy to quaternion
+        quaternion = quaternion_from_euler(
+            self.arucoEKF.x[3][0],
+            self.arucoEKF.x[4][0],
+            self.arucoEKF.x[5][0]
+        )
 
-        if mag == 0:
-            mag = 1.0
-
-        pose.orientation.x = new_x / mag
-        pose.orientation.y = new_y / mag
-        pose.orientation.z = new_z / mag
-        pose.orientation.w = new_w / mag
+        # Add quaternion to message
+        pose.orientation.x = quaternion[0]
+        pose.orientation.y = quaternion[1]
+        pose.orientation.z = quaternion[2]
+        pose.orientation.w = quaternion[3]
 
         return pose
 
     def getPoseCovStamped(self):
+
         poseCovStamped = PoseWithCovarianceStamped()
-        
-        poseCovStamped.header.seq = self.seqID
-        poseCovStamped.header.stamp = rospy.Time.now()
-        poseCovStamped.header.frame_id = str(self.seqID)
-        self.seqID += 1 
-        
+        poseCovStamped.header.frame_id = str("world")
         poseCovStamped.pose.pose = self.getPose()
-        poseCovStamped.pose.covariance = np.reshape(np.eye(6)*5, (36,)).tolist()
-       
         return poseCovStamped
 
 
     # Define the Jacobian matrix for measurement update
     # Robot movement in each direction is independent of the other two directions
     def HJacobian(self, x):
-        return np.eye(7) 
+        return np.eye(6)
 
     # Define callback function to calculate the expected sensor measurement
     # mean state vector is a distance; ArUco pose estimation algorithm measures distance
