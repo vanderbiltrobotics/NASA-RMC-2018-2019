@@ -114,7 +114,7 @@ ADD_LIBRARY(CTRE_PhoenixPlatformLinuxSocketCan STATIC IMPORTED)
 ADD_LIBRARY(CTRE_PhoenixCanutils STATIC IMPORTED)
 
 ## Import appropriate libraries for architecture
-if(${arch} STREQUAL "x86_64" OR ${arch} STREQUAL "armv7l")
+if(${arch} STREQUAL "x86_64" OR ${arch} STREQUAL "armv7l" OR ${arch} STREQUAL "aarch64")
     SET_TARGET_PROPERTIES(CTRE_Phoenix PROPERTIES
             IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/lib/${arch}/libCTRE_Phoenix.a)
     SET_TARGET_PROPERTIES(CTRE_PhoenixCCI PROPERTIES
