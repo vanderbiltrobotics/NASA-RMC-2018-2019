@@ -1,0 +1,21 @@
+<launch>
+    
+    <!-- Parameters to define Aruco Board length & separation values -->
+    <param name="board_x_markers" type="int" value="5"/>
+    <param name="board_y_markers" type="int" value="7"/>
+    <param name="board_marker_length" type="double" value=".029"/>
+    <param name="board_marker_separation" type="double" value=".006"/>
+
+    <!-- parameters for image_publisher node -->
+    <param name="device_id" value="0"/>
+    <param name="calibration_file" value="camera_a.yaml"/>
+    <param name="publish_rate" value="20"/>
+    <param name="image_width" value="640"/>
+    <param name="image_height" value="480"/>
+
+    <!-- Run all the nodes required for the ekf test -->
+    <node name="image_publisher" pkg="robot_sensors" type="image_publisher.py"/> 
+    <node name="aruco" pkg="robot_slam" type="aruco_localization.py"/>
+    <node name="aruco_camera" pkg="robot_slam" type="aruco_camera_centering.py"/>
+
+</launch>

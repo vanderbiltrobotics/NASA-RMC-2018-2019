@@ -1,0 +1,9 @@
+{
+    "transforms" : [
+        {
+            "frame_id" : "aruco_board_origin",
+            "child_id" : "aruco_camera",
+            "pose_topic" : "ekf/pose_filtered"
+        }
+    ]
+}

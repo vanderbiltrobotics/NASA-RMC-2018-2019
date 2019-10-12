@@ -1,0 +1,44 @@
+<launch>
+
+    <!--<machine name="jetson" address="192.168.0.103" user="vur" password="theswapbot" env-loader="~/catkin_ws/devel_isolated/robot_ros_env.sh"/>-->
+    <!--<machine name="rpi" address="192.168.0.105" user="vur" password="theswapbot" env-loader="~/catkin_ws/devel/robot_ros_env.sh"/>-->
+
+    <!-- JETSON NODES -->
+
+    <!--Transform publisher -->
+    <param name="tf_file_static" value="full_system.json"/>
+    <param name="tf_file_dynamic" value="full_system.json"/>
+    <node name="transform_publisher" pkg="robot_misc_tools" type="transform_publisher.py"/>
+
+    <!-- Image publisher -->
+    <param name="device_id" value="1"/>
+    <param name="calibration_file" value="camera_b.yaml"/>
+    <param name="publish_rate" value="10"/>
+    <param name="image_width" value="640"/>
+    <param name="image_height" value="480"/>
+    <node name="image_publisher" pkg="robot_sensors" type="image_publisher.py"/>
+
+    <!-- ArUco localization -->
+    <param name="pp_world_frame_id" value="world"/>
+    <param name="pp_robot_frame_id" value="robot_center"/>
+    <param name="pp_aruco_frame_id" value="aruco_board_origin"/>
+    <node name="aruco" pkg="robot_slam" type="aruco_localization.py"/>
+    <node name="aruco_camera_centering" pkg="robot_slam" type="aruco_camera_centering.py" />
+
+    <!-- EKF for improved robot pose estimation -->
+    <param name="unfiltered_pose_topic" value="aruco/pose_raw"/>
+    <node name="robot_pose_ekf" pkg="robot_slam" type="robot_pose_ekf.py"/>
+
+    <!-- RASPBERRY PI NODES -->
+
+    <!-- Camera mount servo control node -->
+    <!--<node machine="rpi" name="camera_motor_control" pkg="robot_motor_control" type="camera_motor_control.py"/>-->
+
+    <!-- LAPTOP NODES -->
+
+    <!-- Field Visualization -->
+    <node name="field_visualization" pkg="robot_simulation" type="field_visualization.py"/>
+    <node type="rviz" name="rviz" pkg="rviz" args="-d $(find robot_simulation)/rviz/competition_config.rviz"/>
+
+
+</launch>

@@ -19,6 +19,8 @@ from std_msgs.msg import Float64
 # Import other required packages
 from collections import deque
 
+from math import pi
+
 
 class DriveController:
 
@@ -36,6 +38,12 @@ class DriveController:
         self.out_format = out_format
         self.max_queue_size = queue_size
 
+        # Store float message for each motor speed
+        self.speed_bl = Float64()
+        self.speed_br = Float64()
+        self.speed_fl = Float64()
+        self.speed_fr = Float64()
+
         # Initialize queue list
         self.lin_queue = deque([0] * queue_size)
         self.ang_queue = deque([0] * queue_size)
@@ -49,6 +57,9 @@ class DriveController:
 
         # Initialize subscriber
         self.cmd_sub = rospy.Subscriber('drive_cmd', Twist, self.process_drive_cmd)
+
+        # Value to check if command was received this time through the cycle
+        self.received_command = False
 
     # Remap linear velocity from input range to output range
     def remap_lin_vel(self, vel):
@@ -102,6 +113,9 @@ class DriveController:
     # Callback function for new drive commands
     def process_drive_cmd(self, data):
 
+        # Indicate that we received a command
+        self.received_command = True
+
         # Extract the relevant values from the incoming message
         linear, angular = self.avg_queue_vel(data)
 
@@ -109,13 +123,16 @@ class DriveController:
         linear = self.remap_lin_vel(linear)
         angular = self.remap_ang_vel(angular)
 
+        # Value to scale units to what talons are expecting
+        scale = 2048.0 / (10.0 * pi)
+
         # Compute linear and angular velocity components
-        linear_component = linear / self.wheel_radius
-        angular_component = (angular * self.wheel_separation) / self.wheel_radius
+        linear_component = (linear / self.wheel_radius) * scale
+        angular_component = ((angular * self.wheel_separation) / self.wheel_radius) * scale
 
         # Compute speed for left and right motor (for ang. vel., clockwise = negative, cc = positive)
-        right_speeds = linear_component - angular_component
-        left_speeds = linear_component + angular_component
+        right_speeds = linear_component + angular_component
+        left_speeds = linear_component - angular_component
 
         # If out_format = pwm, convert velocities back to pwm
         if self.out_format == "pwm":
@@ -134,10 +151,18 @@ class DriveController:
         motor_speed_br.data = right_speeds
 
         # Publish messages
-        self.speed_pub_fl.publish(motor_speed_fl)
-        self.speed_pub_bl.publish(motor_speed_bl)
-        self.speed_pub_fr.publish(motor_speed_fr)
-        self.speed_pub_br.publish(motor_speed_br)
+        self.speed_bl = motor_speed_bl
+        self.speed_br = motor_speed_br
+        self.speed_fl = motor_speed_fl
+        self.speed_fr = motor_speed_fr
+
+
+    def publish_speeds(self):
+
+        self.speed_pub_fl.publish(self.speed_fl)
+        self.speed_pub_bl.publish(self.speed_bl)
+        self.speed_pub_fr.publish(self.speed_fr)
+        self.speed_pub_br.publish(self.speed_br)
 
 
 # Run the node
@@ -163,7 +188,19 @@ if __name__ == '__main__':
     # Ready to go
     rospy.loginfo("Drive Motor Controller initialized...")
 
-    # Loop continuously
-    rate = rospy.Rate(2)
+    # Define loop rate - should be quite fast
+    loop_rate = rospy.Rate(30)
+
+    # Publish updates at loop rate
     while not rospy.is_shutdown():
-        pass
+
+        # Check if we received a command
+        if not controller.received_command:
+            controller.process_drive_cmd(Twist())
+
+        # Reset received_command tracker
+        controller.received_command = False
+
+        # Pulish message and sleep
+        controller.publish_speeds()
+        loop_rate.sleep()

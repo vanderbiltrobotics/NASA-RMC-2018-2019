@@ -1,10 +1,11 @@
-
+#!/usr/bin/env python
 
 # Import ROS packages
 import rospy
-from geometry_msgs.msg import Twist, Pose, PointStamped
+from geometry_msgs.msg import Twist, PointStamped
 from nav_msgs.msg import Path
 from tf.transformations import euler_from_quaternion
+import tf2_ros
 
 # Import other required packages
 import numpy as np
@@ -13,7 +14,7 @@ from math import sin, cos, pi
 
 class PurePursuit:
 
-    def __init__(self, max_lin_vel, max_lookahead):
+    def __init__(self, max_lin_vel, max_lookahead, world_frame_id, robot_frame_id):
 
         # Set initial linear velocity and lookahead distance
         self.lin_vel = max_lin_vel
@@ -23,15 +24,22 @@ class PurePursuit:
         # Initialize path
         self.path = None
         self.path_len = 0
-        self.goal_tolerance = 0.03
+        self.goal_tolerance = 0.05
 
         # Create subscribers to pose, path topics
-        self.pose_sub = rospy.Subscriber("cur_pose", Pose, self.compute_new_twist)
         self.path_sub = rospy.Subscriber("cur_path", Path, self.update_path)
 
+        # Create transform listener for retrieving pose information
+        self.tf_buffer = tf2_ros.Buffer()
+        self.tf_listener = tf2_ros.TransformListener(self.tf_buffer)
+
+        # Frames to use to get position update
+        self.world_frame_id = world_frame_id
+        self.robot_frame_id = robot_frame_id
+
         # Create publisher to twist topic
-        self.twist_pub = rospy.Publisher("cmd_vel", Twist, queue_size=0)
-        self.goal_pub = rospy.Publisher("goal_pose", PointStamped, queue_size=0)
+        self.twist_pub = rospy.Publisher("drive_cmd", Twist, queue_size=0)
+        self.goal_pub = rospy.Publisher("pp_target_point", PointStamped, queue_size=0)
 
     # Callback function for Path topic
     def update_path(self, new_path):
@@ -70,18 +78,21 @@ class PurePursuit:
         return self.lin_vel * self.lin_vel_dir * curvature
 
     # main function
-    def compute_new_twist(self, new_pose):
+    def compute_new_twist(self):
 
         # Only move if we have a path to follow
-        if self.path_len > 0:
+        if self.path_len > 0 and not rospy.set_param("goal_reached", False):
+
+            # Get latest pose from transform tree
+            new_pose = self.tf_buffer.lookup_transform(self.world_frame_id, self.robot_frame_id, rospy.Time())
 
             # Extract information from pose message
-            position = np.array([new_pose.position.x, new_pose.position.y])
+            position = np.array([new_pose.transform.translation.x, new_pose.transform.translation.y])
             quat = (
-                new_pose.orientation.x,
-                new_pose.orientation.y,
-                new_pose.orientation.z,
-                new_pose.orientation.w
+                new_pose.transform.rotation.x,
+                new_pose.transform.rotation.y,
+                new_pose.transform.rotation.z,
+                new_pose.transform.rotation.w
             )
             rpy = euler_from_quaternion(quat)
             theta = rpy[2]
@@ -117,7 +128,11 @@ class PurePursuit:
 
             # If close enough to final point, path is finished
             if np.linalg.norm(position - self.path[-1]) < self.goal_tolerance:
-                print "Reached the end of the path"
+
+                # Notify HLP that goal has been reached
+                rospy.set_param("goal_reached", True)
+
+                # Remove current path and wait for new one
                 self.path = None
                 self.path_len = 0
 
@@ -131,13 +146,27 @@ if __name__ == "__main__":
     # Initialize ROS node
     rospy.init_node("pure_pursuit")
 
+    #
+    rospy.sleep(3.0)
+
     # Read parameters off server
-    lin_vel = rospy.get_param("pp_base_lin_vel", default=0.5)
-    max_lookahead = rospy.get_param("pp_max_lookahead", default=0.05)
+    lin_vel = rospy.get_param("pp_base_lin_vel", default=0.1)
+    max_lookahead = rospy.get_param("pp_max_lookahead", default=1.0)
+    world_frame_id = rospy.get_param("pp_world_frame_id", "world")
+    robot_frame_id = rospy.get_param("pp_robot_frame_id", "robot_center")
 
     # Create pure pursuit object
-    pp = PurePursuit(lin_vel, max_lookahead)
+    pp = PurePursuit(lin_vel, max_lookahead, world_frame_id, robot_frame_id)
 
     # Spin indefinitely
-    rospy.spin()
+
+    loop_rate = rospy.Rate(10)
+
+    while not rospy.is_shutdown():
+
+        # Compute new twist
+        pp.compute_new_twist()
+
+        # Sleep at loop rate
+        loop_rate.sleep()
 

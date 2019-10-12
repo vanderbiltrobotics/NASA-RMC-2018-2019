@@ -1,5 +1,5 @@
-#include "ros/ros.h"
 #include "geometry_msgs/Twist.h"
+#include "ros/ros.h"
 #include "std_msgs/Float64.h"
 
 static double leftMotorOutput = 0.0;
@@ -29,7 +29,8 @@ void cmdCallback(const geometry_msgs::Twist::ConstPtr& msg)
     ROS_INFO("Move=%f Rotate=%f", moveValue, rotateValue);
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv)
+{
     ros::init(argc, argv, "motor_controller");
     ros::NodeHandle nh;
     ros::Subscriber sub = nh.subscribe("cmd_vel", 1, cmdCallback);
@@ -40,7 +41,7 @@ int main(int argc, char **argv) {
     ros::Publisher br = nh.advertise<std_msgs::Float64>("/back_right/set_percent_output", 1);
 
     ros::Rate loop_rate(50);
-    while(ros::ok()){
+    while (ros::ok()) {
         std_msgs::Float64Ptr left(new std_msgs::Float64);
         left->data = leftMotorOutput;
         fl.publish(left);

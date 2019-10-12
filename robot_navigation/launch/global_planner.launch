@@ -1,0 +1,10 @@
+<launch>
+    <!-- Global Planner node - does path planning .... WORK IN PROGRESS-->
+    <param name='use_grid_path' type='bool' value='False'>
+    <param name='use_quadratic' type='bool' value='False'>
+    <param name='use_dijkstra' type='bool' value='False'>
+    <param name='old_navfn_behavior' type='bool' value='False'>
+    <param name='use_grid_path' type='bool' value='False'>
+    <param name='orientation_mode' type='int' value='0'>
+    <node name='global_planner' pkg='global_planner' type='global_planner'>
+</launch>

@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(robot_motor_control)
 
 ## Detect system architecture and save it to $arch
-EXECUTE_PROCESS( COMMAND uname -m COMMAND tr -d '\n' OUTPUT_VARIABLE arch )
+EXECUTE_PROCESS(COMMAND uname -m COMMAND tr -d '\n' OUTPUT_VARIABLE arch)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 add_compile_options(-std=c++17)
@@ -16,7 +16,7 @@ find_package(catkin REQUIRED
         geometry_msgs
         dynamic_reconfigure
         roslaunch
-)
+        )
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -114,74 +114,76 @@ ADD_LIBRARY(CTRE_PhoenixPlatformLinuxSocketCan STATIC IMPORTED)
 ADD_LIBRARY(CTRE_PhoenixCanutils STATIC IMPORTED)
 
 ## Import appropriate libraries for architecture
-if(${arch} STREQUAL "x86_64")
+if (${arch} STREQUAL "x86_64" OR ${arch} STREQUAL "armv7l" OR ${arch} STREQUAL "aarch64")
     SET_TARGET_PROPERTIES(CTRE_Phoenix PROPERTIES
-            IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/lib/x86-64/libCTRE_Phoenix.a)
+            IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/lib/${arch}/libCTRE_Phoenix.a)
     SET_TARGET_PROPERTIES(CTRE_PhoenixCCI PROPERTIES
-            IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/lib/x86-64/libCTRE_PhoenixCCI.a)
+            IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/lib/${arch}/libCTRE_PhoenixCCI.a)
     SET_TARGET_PROPERTIES(CTRE_PhoenixPlatformLinuxSocketCan PROPERTIES
-            IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/lib/x86-64/libCTRE_PhoenixPlatformLinuxSocketCan.a)
+            IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/lib/${arch}/libCTRE_PhoenixPlatformLinuxSocketCan.a)
     SET_TARGET_PROPERTIES(CTRE_PhoenixCanutils PROPERTIES
-            IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/lib/x86-64/libCTRE_PhoenixCanutils.a)
-elseif(${arch} STREQUAL "armv7l")
-    SET_TARGET_PROPERTIES(CTRE_Phoenix PROPERTIES
-            IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/lib/raspberry/libCTRE_Phoenix.a)
-    SET_TARGET_PROPERTIES(CTRE_PhoenixCCI PROPERTIES
-            IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/lib/raspberry/libCTRE_PhoenixCCI.a)
-    SET_TARGET_PROPERTIES(CTRE_PhoenixPlatformLinuxSocketCan PROPERTIES
-            IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/lib/raspberry/libCTRE_PhoenixPlatformLinuxSocketCan.a)
-    SET_TARGET_PROPERTIES(CTRE_PhoenixCanutils PROPERTIES
-            IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/lib/raspberry/libCTRE_PhoenixCanutils.a)
-else()
-    message( FATAL_ERROR "Unrecognized architecture: ${arch}" )
-endif()
+            IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/lib/${arch}/libCTRE_PhoenixCanutils.a)
+else ()
+    message(FATAL_ERROR "Unrecognized architecture: ${arch}")
+endif ()
 
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/phoenix_node.cpp)
 #add_executable(phoenix_node ${PROJECT_SOURCE_DIR}/example.cpp)
-add_executable(motor_control_cmd_example ${PROJECT_SOURCE_DIR}/src/CmdExmaple.cpp)
-add_dependencies(motor_control_cmd_example ${PROJECT_NAME}_gencfg ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_executable(robot_motor_control_cmd_example ${PROJECT_SOURCE_DIR}/src/CmdExmaple.cpp)
+add_dependencies(robot_motor_control_cmd_example ${PROJECT_NAME}_gencfg ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
-add_executable(motor_control_node
+add_executable(robot_motor_control_node
         ${PROJECT_SOURCE_DIR}/src/TalonNode.cpp
         ${PROJECT_SOURCE_DIR}/src/MotorControl.cpp
-)
-add_dependencies(motor_control_node ${PROJECT_NAME}_gencfg ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+        )
+add_dependencies(robot_motor_control_node ${PROJECT_NAME}_gencfg ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
 #add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(motor_control_cmd_example
-    ${catkin_LIBRARIES}
-    Threads::Threads
-    CTRE_Phoenix CTRE_PhoenixCCI CTRE_PhoenixPlatformLinuxSocketCan CTRE_PhoenixCanutils
-)
-target_link_libraries(motor_control_node
-    ${catkin_LIBRARIES}
-    Threads::Threads
-    CTRE_Phoenix CTRE_PhoenixCCI CTRE_PhoenixPlatformLinuxSocketCan CTRE_PhoenixCanutils
-)
+target_link_libraries(robot_motor_control_cmd_example
+        ${catkin_LIBRARIES}
+        Threads::Threads
+        CTRE_Phoenix CTRE_PhoenixCCI CTRE_PhoenixPlatformLinuxSocketCan CTRE_PhoenixCanutils
+        )
+target_link_libraries(robot_motor_control_node
+        ${catkin_LIBRARIES}
+        Threads::Threads
+        CTRE_Phoenix CTRE_PhoenixCCI CTRE_PhoenixPlatformLinuxSocketCan CTRE_PhoenixCanutils
+        )
 
 #############
 ## Install ##
 #############
 
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/${arch}/*
-    DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-)
-
+## Install runtime libraries
+install(FILES
+        ${CMAKE_CURRENT_SOURCE_DIR}/lib/${arch}/libCTRE_Phoenix.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/lib/${arch}/libCTRE_PhoenixCanutils.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/lib/${arch}/libCTRE_PhoenixCCI.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/lib/${arch}/libCTRE_PhoenixPlatformLinuxSocketCan.a
+        DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        )
+## Install node executables
+install(TARGETS robot_motor_control_node robot_motor_control_cmd_example
+        ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+        )
 ## Mark cpp header files for installation
 install(DIRECTORY include/
-    DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
-    FILES_MATCHING PATTERN "*.h"
-    PATTERN ".svn" EXCLUDE
-)
+        DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+        FILES_MATCHING PATTERN "*.h"
+        PATTERN ".svn" EXCLUDE
+        )
 ## Mark launch files for installation
 install(DIRECTORY launch/
-    DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
-    PATTERN ".svn" EXCLUDE
-)
+        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
+        PATTERN ".svn" EXCLUDE
+        )

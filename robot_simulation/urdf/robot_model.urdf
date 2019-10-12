@@ -1,0 +1,17 @@
+<robot name="test_robot">
+
+  <material name="blue">
+    <color rgba="0 0 0.5 1"/>
+  </material>
+
+  <link name="robot_frame">
+    <visual>
+
+      <geometry>
+        <mesh filename="package://robot_simulation/cad/full_robot.stl"  scale="0.01 0.01 0.01"/>
+      </geometry>
+      <origin rpy="1.57075 0.0 0.0" xyz="0.0 0.0 0.5"/>
+      <material name="blue"/>
+    </visual>
+  </link>
+</robot>
