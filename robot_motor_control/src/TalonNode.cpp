@@ -104,7 +104,7 @@ void TalonNode::configure()
     c.slot0 = slot;
     c.voltageCompSaturation = _config.peak_voltage;
     c.continuousCurrentLimit = _config.cont_current;
-    c.peakCurrentLimit = _config.peak_current;
+    c.peakCurrentLimit = _config.cont_current;
     c.peakCurrentDuration = _config.peak_current_dur;
     c.pulseWidthPeriod_EdgesPerRot = 4096;
     ErrorCode error = talon.ConfigAllSettings(c, 10);
@@ -124,6 +124,7 @@ void TalonNode::configure()
             talon.ConfigSelectedFeedbackSensor(FeedbackDevice::CTRE_MagEncoder_Relative);
         }
 
+        talon.EnableCurrentLimit(true);
         talon.SetSensorPhase(_config.invert_sensor);
         talon.SelectProfileSlot(0, 0);
         talon.SetInverted(_config.inverted);
@@ -213,12 +214,12 @@ void TalonNode::configureStatusPeriod()
     talon.SetStatusFramePeriod(StatusFrameEnhanced::Status_1_General, 20);
     talon.SetStatusFramePeriod(StatusFrameEnhanced::Status_2_Feedback0, 20);
     talon.SetStatusFramePeriod(StatusFrameEnhanced::Status_3_Quadrature, 20);
-    talon.SetStatusFramePeriod(StatusFrameEnhanced::Status_4_AinTempVbat, 250);
-    talon.SetStatusFramePeriod(StatusFrameEnhanced::Status_8_PulseWidth, 250);
-    talon.SetStatusFramePeriod(StatusFrameEnhanced::Status_12_Feedback1, 250);
-    talon.SetStatusFramePeriod(StatusFrameEnhanced::Status_13_Base_PIDF0, 250);
-    talon.SetStatusFramePeriod(StatusFrameEnhanced::Status_14_Turn_PIDF1, 250);
-    talon.SetStatusFramePeriod(StatusFrameEnhanced::Status_15_FirmareApiStatus, 250);
+    talon.SetStatusFramePeriod(StatusFrameEnhanced::Status_4_AinTempVbat, 50);
+    talon.SetStatusFramePeriod(StatusFrameEnhanced::Status_8_PulseWidth, 100);
+    talon.SetStatusFramePeriod(StatusFrameEnhanced::Status_12_Feedback1, 20);
+    talon.SetStatusFramePeriod(StatusFrameEnhanced::Status_13_Base_PIDF0, 20);
+    talon.SetStatusFramePeriod(StatusFrameEnhanced::Status_14_Turn_PIDF1, 20);
+    talon.SetStatusFramePeriod(StatusFrameEnhanced::Status_15_FirmareApiStatus, 100);
 }
 
 } // namespace robot_motor_control
