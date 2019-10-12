@@ -1,25 +1,25 @@
 <?xml version="1.0"?>
 <package format="2">
 
-  <!-- basic data -->
-  <name>robot_motor_control</name>
-  <version>1.0.0</version>
-  <description>The robot_motor_control package</description>
+    <!-- basic data -->
+    <name>robot_motor_control</name>
+    <version>1.0.0</version>
+    <description>The robot_motor_control package</description>
 
-  <!-- maintainers -->
-  <maintainer email="vanderbiltrobotics@gmail.com">Vanderbilt Robotics</maintainer>
+    <!-- maintainers -->
+    <maintainer email="vanderbiltrobotics@gmail.com">Vanderbilt Robotics</maintainer>
 
-  <!-- license information -->
-  <license>MIT</license>
+    <!-- license information -->
+    <license>MIT</license>
 
-  <!-- urls -->
-  <url type="website">https://github.com/vanderbiltrobotics/NASA-RMC-2018-2019</url>
+    <!-- urls -->
+    <url type="website">https://github.com/vanderbiltrobotics/NASA-RMC-2018-2019</url>
 
-  <!-- dependencies -->
-  <buildtool_depend>catkin</buildtool_depend>
-  <depend>roscpp</depend>
-  <depend>geometry_msgs</depend>
-  <depend>dynamic_reconfigure</depend>
-  <depend>roslaunch</depend>
+    <!-- dependencies -->
+    <buildtool_depend>catkin</buildtool_depend>
+    <depend>roscpp</depend>
+    <depend>geometry_msgs</depend>
+    <depend>dynamic_reconfigure</depend>
+    <depend>roslaunch</depend>
 
 </package>
