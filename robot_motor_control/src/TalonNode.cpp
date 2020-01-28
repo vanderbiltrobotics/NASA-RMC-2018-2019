@@ -130,6 +130,12 @@ void TalonNode::configure()
         talon.SetInverted(_config.inverted);
         talon.EnableVoltageCompensation(true);
 
+        if (_config.brake_mode) {
+            talon.SetNeutralMode(NeutralMode::Brake);
+        } else {
+            talon.SetNeutralMode(NeutralMode::Coast);
+        }
+
         ROS_INFO("Reconfigured Talon: %s with %d %f %f %f", _name.c_str(), talon.GetDeviceID(), _config.P, _config.I,
             _config.D);
         this->configured = true;
