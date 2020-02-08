@@ -22,11 +22,15 @@ class OdometryPub:
 
     def posewithcov(self, PoseWithCov):
         self.data = PoseWithCov.pose
-        self.data.orientation.x = 0
-        self.data.orientation.z = 0
-        self.data.orientation.w = 0.7071068
-        self.data.orientation.y = 0.7071068
+        self.data.pose.position.x /= 10e9
+        self.data.pose.position.y /= 10e9
+        self.data.pose.position.z /= 10e9
+        self.data.pose.orientation.x = 0
+        self.data.pose.orientation.z = 0
+        self.data.pose.orientation.w = 0.7071068
+        self.data.pose.orientation.y = 0.7071068
         self.header = PoseWithCov.header
+        self.header.stamp = rospy.Time.now()
 
 if __name__ == '__main__':
     # Initialize ROS node

@@ -68,7 +68,7 @@
         },
         {
             "frame_id" : "kinect_mount_base",
-            "child_id" : "kinect_base",
+            "child_id" : "base_link",
             "trans_x" : 0,
             "trans_y" : 0,
             "trans_z" : 0,
@@ -78,7 +78,7 @@
             "rot_w" : 1
         },
         {
-            "frame_id" : "kinect_base",
+            "frame_id" : "base_link",
             "child_id" : "camera_link",
             "trans_x" : 0,
             "trans_y" : 0,
